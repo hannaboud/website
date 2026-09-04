@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hanna Boudara</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --slate-900: #2c4145;
+    --slate-600: #5c7378;
+    --slate-300: #bcccce;
+    --fog: #eaf0f0;
+    --paper: #f5f8f8;
+    --sky: #6fb3ae;
+    --sky-deep: #2f7d84;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--slate-900);
+    font-family: 'IBM Plex Sans', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 32px;
+    overflow-x: hidden;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .stage { animation: rise 0.9s ease-out both; }
+    .accent-line { animation: draw 1.3s ease-out 0.15s both; }
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes draw {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(680px 420px at 82% 8%, rgba(111, 179, 174, 0.35), transparent 60%),
+      radial-gradient(600px 500px at -5% 100%, rgba(188, 204, 206, 0.32), transparent 55%);
+  }
+
+  .stage {
+    max-width: 560px;
+    width: 100%;
+    text-align: left;
+  }
+
+  .eyebrow {
+    font-size: 0.95rem;
+    color: var(--slate-600);
+    margin: 0 0 20px;
+  }
+
+  .accent-line {
+    height: 3px;
+    width: 64px;
+    background: linear-gradient(90deg, var(--sky-deep), var(--sky));
+    border-radius: 2px;
+    margin: 0 0 28px;
+    transform-origin: left;
+  }
+
+  h1 {
+    font-family: 'Source Serif 4', serif;
+    font-weight: 600;
+    font-size: clamp(2.4rem, 6vw, 3.4rem);
+    line-height: 1.08;
+    margin: 0 0 14px;
+    color: var(--slate-900);
+  }
+
+  .tagline {
+    font-size: 1.1rem;
+    color: var(--slate-600);
+    line-height: 1.6;
+    margin: 0 0 40px;
+    max-width: 46ch;
+  }
+
+  .status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.95rem;
+    color: var(--slate-600);
+    margin: 0 0 44px;
+    padding: 14px 18px;
+    background: var(--fog);
+    border-radius: 10px;
+    border: 1px solid var(--slate-300);
+    width: fit-content;
+  }
+
+  .status .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--sky-deep);
+    flex-shrink: 0;
+  }
+
+  .contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .contact a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    font-size: 0.98rem;
+    padding: 12px 20px;
+    border-radius: 8px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .contact a:focus-visible {
+    outline: 2px solid var(--sky-deep);
+    outline-offset: 3px;
+  }
+
+  .contact .primary {
+    background: var(--slate-900);
+    color: var(--paper);
+  }
+
+  .contact .primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(35, 40, 48, 0.22);
+  }
+
+  .contact .secondary {
+    background: transparent;
+    color: var(--slate-900);
+    border: 1px solid var(--slate-300);
+  }
+
+  .contact .secondary:hover {
+    border-color: var(--sky-deep);
+    color: var(--sky-deep);
+  }
+
+  footer {
+    margin-top: 56px;
+    font-size: 0.85rem;
+    color: var(--slate-600);
+  }
+
+  @media (max-width: 480px) {
+    .contact { flex-direction: column; }
+    .contact a { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+  <div class="backdrop"></div>
+  <main class="stage">
+    <p class="eyebrow">Hanna Boudara</p>
+    <h1>Something's in the works.</h1>
+    <p class="tagline">I'm a senior at Duke University, originally from Paris, France, working at the intersection of finance, AI, and technology. More than anything, I love connecting with new people, so while this site comes together, here's where to find me.</p>
+
+    <div class="status">
+      <span class="dot"></span>
+      <span>Page under construction</span>
+    </div>
+
+    <div class="contact">
+      <a class="primary" href="mailto:hanna.boudara@duke.edu">Email hanna.boudara@duke.edu</a>
+      <a class="secondary" href="https://www.linkedin.com/in/hannaboudara/" target="_blank" rel="noopener noreferrer">Connect on LinkedIn</a>
+    </div>
+
+    <footer>&copy; 2026 Hanna Boudara</footer>
+  </main>
+</body>
+</html>
