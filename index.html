@@ -7,17 +7,16 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#14171c;--ink-mid:#454b58;--ink-faint:#8a8f9e;
-  --paper:#ede8df;--white:#f5f1ea;--rule:#c8c2b4;--rule-dk:#8a8070;
-  --A:#1a3a6e;--Alt:#dce6f5;
-  --serif:'IBM Plex Serif',Georgia,serif;
-  --sans:'IBM Plex Sans',system-ui,sans-serif;
-  --mono:'IBM Plex Mono',monospace;
+--ink:#14171c;--ink-mid:#454b58;--ink-faint:#8a8f9e;
+--paper:#ede8df;--white:#f5f1ea;--rule:#c8c2b4;--rule-dk:#8a8070;
+--A:#1a3a6e;--Alt:#dce6f5;
+--serif:'IBM Plex Serif',Georgia,serif;
+--sans:'IBM Plex Sans',system-ui,sans-serif;
+--mono:'IBM Plex Mono',monospace;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:16px}
 body{font-family:var(--serif);background:var(--paper);color:var(--ink);line-height:1.72;-webkit-font-smoothing:antialiased;min-height:100vh}
-
 /* HEADER */
 header{background:var(--ink);color:var(--white)}
 .hi{max-width:1020px;margin:0 auto;padding:2.8rem 2rem 0}
@@ -25,49 +24,44 @@ header{background:var(--ink);color:var(--white)}
 .site-name{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:300;line-height:1.2;color:#eef0f5;margin-bottom:.5rem}
 .site-name em{font-style:italic;color:#a8bce0}
 .site-tagline{font-family:var(--sans);font-size:.84rem;color:#8a9ab8;margin-bottom:2.2rem}
-
 /* NAV */
 nav{max-width:1020px;margin:0 auto;display:flex;gap:0;scrollbar-width:none}
 .tb{font-family:var(--mono);font-size:.71rem;letter-spacing:.04em;color:#6a7a99;background:none;border:none;border-bottom:3px solid transparent;padding:.75rem 1.1rem;cursor:pointer;white-space:nowrap;transition:color .15s,border-color .15s}
 .tb:hover{color:#a8bce0}
 .tb.active{color:#dde5f5;border-bottom-color:#4a7fd4}
-
 /* MAIN */
 main{max-width:1020px;margin:0 auto;padding:3rem 2rem 7rem}
 .tp{display:none}
 .tp.active{display:block}
-
 /* TYPE */
 h2{font-size:1.5rem;font-weight:300;border-bottom:2px solid var(--ink);padding-bottom:.5rem;margin-bottom:1.6rem;line-height:1.2}
 h3{font-family:var(--sans);font-size:.98rem;font-weight:500;margin:2.4rem 0 .65rem}
 p{max-width:72ch;margin-bottom:.95rem;font-size:.96rem;color:var(--ink-mid)}
 p strong{color:var(--ink)}
-
 /* CONTACT LINKS */
 .contact-row{display:flex;gap:1rem;flex-wrap:wrap;margin:2rem 0}
 .contact-btn{
-  font-family:var(--mono);font-size:.75rem;letter-spacing:.04em;
-  padding:.5rem 1.1rem;border-radius:2px;text-decoration:none;
-  display:inline-flex;align-items:center;gap:.5rem;
-  transition:opacity .15s;
+font-family:var(--mono);font-size:.75rem;letter-spacing:.04em;
+padding:.5rem 1.1rem;border-radius:2px;text-decoration:none;
+display:inline-flex;align-items:center;gap:.5rem;
+transition:opacity .15s;
 }
 .contact-btn:hover{opacity:.8}
 .contact-btn.dark{background:var(--ink);color:var(--white)}
 .contact-btn.outline{background:transparent;color:var(--ink);border:1px solid var(--rule-dk)}
 .contact-btn svg{width:13px;height:13px;flex-shrink:0}
-
 /* PROJECT CARD */
 .project-card{
-  display:block;text-decoration:none;color:inherit;
-  border:1px solid var(--rule);background:var(--white);
-  padding:1.8rem 2rem;margin-bottom:1.2rem;
-  transition:border-color .15s,box-shadow .15s;
+display:block;text-decoration:none;color:inherit;
+border:1px solid var(--rule);background:var(--white);
+padding:1.8rem 2rem;margin-bottom:1.2rem;
+transition:border-color .15s,box-shadow .15s;
 }
 .project-card:hover{border-color:var(--rule-dk);box-shadow:0 2px 12px rgba(0,0,0,0.06)}
 .project-tag{
-  font-family:var(--mono);font-size:.66rem;letter-spacing:.08em;
-  text-transform:uppercase;color:var(--A);
-  display:inline-block;margin-bottom:.7rem;
+font-family:var(--mono);font-size:.66rem;letter-spacing:.08em;
+text-transform:uppercase;color:var(--A);
+display:inline-block;margin-bottom:.7rem;
 }
 .project-title{font-size:1.1rem;font-weight:400;color:var(--ink);margin-bottom:.5rem;line-height:1.3}
 .project-desc{font-size:.88rem;color:var(--ink-mid);line-height:1.65;max-width:60ch;margin-bottom:1rem}
@@ -76,80 +70,76 @@ p strong{color:var(--ink)}
 .project-link{font-family:var(--mono);font-size:.72rem;color:var(--A);display:flex;align-items:center;gap:.3rem}
 .project-link svg{width:12px;height:12px;transition:transform .15s}
 .project-card:hover .project-link svg{transform:translateX(3px)}
-
 /* MORE COMING */
 .more-soon{
-  font-family:var(--mono);font-size:.75rem;color:var(--ink-faint);
-  letter-spacing:.04em;padding:1.4rem 0;border-top:1px solid var(--rule);
-  margin-top:.5rem;
+font-family:var(--mono);font-size:.75rem;color:var(--ink-faint);
+letter-spacing:.04em;padding:1.4rem 0;border-top:1px solid var(--rule);
+margin-top:.5rem;
 }
-
 footer{border-top:1px solid var(--rule-dk);padding:1.8rem;text-align:center;font-family:var(--sans);font-size:.74rem;color:var(--ink-faint)}
 </style>
 </head>
 <body>
-
 <header>
-  <div class="hi">
-    <h1 class="site-name">Hanna Boudara</h1>
-    <p class="site-tagline">Senior at Duke University · Financial Engineering & Mathematics</p>
-  </div>
-  <nav>
-    <button class="tb active" data-tab="about">About</button>
-    <button class="tb" data-tab="projects">Projects & Writing</button>
-  </nav>
+<div class="hi">
+<h1 class="site-name">Hanna Boudara</h1>
+<p class="site-tagline">Senior at Duke University · Financial Engineering & Mathematics</p>
+</div>
+<nav>
+<button class="tb active" data-tab="about">About</button>
+<button class="tb" data-tab="projects">Projects & Writing</button>
+</nav>
 </header>
-
 <main>
-
-  <!-- ABOUT -->
-  <section id="about" class="tp active">
-    <h2>About</h2>
-    <p>I'm a senior at Duke University studying Financial Engineering and Mathematics. I'm drawn to the intersection of <strong>finance, technology, and digital assets.</strong></p>
-    
-
-    <h3>Get in touch</h3>
-    <div class="contact-row">
-      <a class="contact-btn dark" href="https://www.linkedin.com/in/hannaboudara/" target="_blank">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-        LinkedIn
-      </a>
-      <a class="contact-btn outline" href="mailto:hanna.boudara@duke.edu">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        hanna.boudara@duke.edu
-      </a>
-    </div>
-  </section>
-
-  <!-- PROJECTS -->
-  <section id="projects" class="tp">
-    <h2>Projects & Writing</h2>
-
-    <a class="project-card" href="/research.html">
-      <div class="project-tag">Working Paper · 2026</div>
-      <div class="project-title">Rare Earth Price Risk in U.S. Manufacturing</div>
-      <p class="project-desc">Do stock markets correctly price rare earth supply chain risk? We find that they don't — the standard equity-based index has a daily correlation of ρ = 0.02 with actual metal prices. Evidence from 29 S&P 500 manufacturers using GJR-GARCH filtered quantile-on-quantile regression.</p>
-      <div class="project-footer">
-        <span class="project-meta">Duke University · Financial Econometrics</span>
-        <span class="project-link">Read paper <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
-      </div>
-    </a>
-
-    <div class="more-soon">More coming soon.</div>
-  </section>
-
+<!-- ABOUT -->
+<section id="about" class="tp active">
+<h2>About</h2>
+<p>I'm a senior at Duke University studying Financial Engineering and Mathematics. I'm drawn to the intersection of <strong>finance, technology, and digital assets.</strong></p>
+<h3>Get in touch</h3>
+<div class="contact-row">
+<a class="contact-btn dark" href="https://www.linkedin.com/in/hannaboudara/" target="_blank">
+<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+LinkedIn
+</a>
+<a class="contact-btn outline" href="mailto:hanna.boudara@duke.edu">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+hanna.boudara@duke.edu
+</a>
+</div>
+</section>
+<!-- PROJECTS -->
+<section id="projects" class="tp">
+<h2>Projects & Writing</h2>
+<a class="project-card" href="/research.html">
+<div class="project-tag">Working Paper · 2026</div>
+<div class="project-title">Rare Earth Price Risk in U.S. Manufacturing</div>
+<p class="project-desc">Do stock markets correctly price rare earth supply chain risk? We find that they don't — the standard equity-based index has a daily correlation of ρ = 0.02 with actual metal prices. Evidence from 29 S&P 500 manufacturers using GJR-GARCH filtered quantile-on-quantile regression.</p>
+<div class="project-footer">
+<span class="project-meta">Duke University · Financial Econometrics</span>
+<span class="project-link">Read paper <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+</div>
+</a>
+<a class="project-card" href="/covered-call.html">
+<div class="project-tag">Coursework · 2026</div>
+<div class="project-title">AAPL Covered-Call Backtest</div>
+<p class="project-desc">A weekly covered-call strategy backtested on real LSEG tape: strike chosen by targeting a Black-Scholes delta that shifts with the implied-vol regime and pulls in further after a losing week. Full Reg T margin accounting and a 6,500+ point mid-vs-trade validation (R² = 0.999) justify the fill assumption.</p>
+<div class="project-footer">
+<span class="project-meta">Duke University · FinTech 535</span>
+<span class="project-link">View blotter <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+</div>
+</a>
+<div class="more-soon">More coming soon.</div>
+</section>
 </main>
-
 <footer>© 2026 Hanna Boudara</footer>
-
 <script>
 document.querySelectorAll('.tb').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('.tb').forEach(b=>b.classList.remove('active'));
-    document.querySelectorAll('.tp').forEach(p=>p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById(btn.dataset.tab).classList.add('active');
-  });
+btn.addEventListener('click',()=>{
+document.querySelectorAll('.tb').forEach(b=>b.classList.remove('active'));
+document.querySelectorAll('.tp').forEach(p=>p.classList.remove('active'));
+btn.classList.add('active');
+document.getElementById(btn.dataset.tab).classList.add('active');
+});
 });
 </script>
 </body>
