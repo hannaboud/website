@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data — Covered-Call Backtest — Hanna Boudara</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="covered-call-style.css">
+</head>
+<body>
+
+<header>
+  <div class="hi">
+    <div class="wp">FINTECH 535 · COVERED-CALL BACKTEST</div>
+    <h1 class="site-name">Data</h1>
+    <p class="site-tagline">Local LSEG lab · not graded</p>
+  </div>
+  <nav>
+    <a href="covered-call.html">Blotter</a>
+    <a href="covered-call-data.html" class="active">Data</a>
+    <a href="covered-call.html#writeup">Write-up</a>
+    <a href="/">← Hanna Boudara</a>
+  </nav>
+</header>
+
+<main>
+  <section>
+    <p>This page pulls real intraday tape from LSEG Workspace when run locally. On
+    GitHub Pages there is no Workspace session to connect to, so it stays disconnected —
+    the graded blotter is entirely static, baked into <code>covered-call-book.js</code>
+    ahead of time.</p>
+
+    <div class="disconnect-box">
+      <div class="glyph">— · —</div>
+      <h3>Data connection required</h3>
+      <p>Run <code>python3 build_site_data.py</code> locally with LSEG Workspace open and
+      logged in to pull fresh data. This page itself does not run Workspace on Pages.</p>
+    </div>
+  </section>
+</main>
+
+<footer>FINTECH 535 · Covered-call backtest · <a href="covered-call.html">Blotter</a> · <a href="/">Hanna Boudara</a></footer>
+
+</body>
+</html>

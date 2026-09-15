@@ -1,0 +1,83 @@
+/* Theme lifted directly from hannaboudara.com -- same tokens, same fonts */
+:root{
+  --ink:#14171c;--ink-mid:#454b58;--ink-faint:#8a8f9e;
+  --paper:#ede8df;--white:#f5f1ea;--rule:#c8c2b4;--rule-dk:#8a8070;
+  --A:#1a3a6e;--Alt:#dce6f5;
+  --good:#2d6a4f;--bad:#9a3b3b;--warn:#a6752c;
+  --serif:'IBM Plex Serif',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px}
+body{font-family:var(--serif);background:var(--paper);color:var(--ink);line-height:1.72;-webkit-font-smoothing:antialiased;min-height:100vh}
+
+/* HEADER */
+header{background:var(--ink);color:var(--white)}
+.hi{max-width:1020px;margin:0 auto;padding:2.8rem 2rem 0}
+.wp{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;color:#8a9ab8;margin-bottom:1.1rem}
+.site-name{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:300;line-height:1.2;color:#eef0f5;margin-bottom:.5rem}
+.site-name em{font-style:italic;color:#a8bce0}
+.site-tagline{font-family:var(--sans);font-size:.84rem;color:#8a9ab8;margin-bottom:2.2rem}
+
+/* NAV */
+nav{max-width:1020px;margin:0 auto;display:flex;gap:0;overflow-x:auto;scrollbar-width:none}
+nav a{font-family:var(--mono);font-size:.71rem;letter-spacing:.04em;color:#6a7a99;text-decoration:none;
+  border-bottom:3px solid transparent;padding:.75rem 1.1rem;white-space:nowrap;transition:color .15s,border-color .15s}
+nav a:hover{color:#a8bce0}
+nav a.active{color:#dde5f5;border-bottom-color:#4a7fd4}
+
+/* MAIN */
+main{max-width:1020px;margin:0 auto;padding:3rem 2rem 7rem}
+
+/* TYPE */
+h2{font-size:1.5rem;font-weight:300;border-bottom:2px solid var(--ink);padding-bottom:.5rem;margin-bottom:1.6rem;line-height:1.2}
+h3{font-family:var(--sans);font-size:.98rem;font-weight:500;margin:2.4rem 0 .65rem}
+p{max-width:72ch;margin-bottom:.95rem;font-size:.96rem;color:var(--ink-mid)}
+p strong{color:var(--ink)}
+section{margin-bottom:3.2rem}
+
+/* BADGE */
+.badge{display:inline-block;font-family:var(--mono);font-size:.68rem;letter-spacing:.06em;
+  color:var(--ink-faint);border:1px solid var(--rule);padding:.3rem .7rem;margin-bottom:1.2rem}
+
+/* CARD (matches project-card pattern) */
+.card{border:1px solid var(--rule);background:var(--white);padding:1.8rem 2rem;margin-bottom:1.2rem}
+.card-tag{font-family:var(--mono);font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--A);display:inline-block;margin-bottom:.7rem}
+
+/* STATS ROW */
+.stats-row{display:flex;gap:2.2rem;flex-wrap:wrap;margin:1.4rem 0 0}
+.stat{min-width:120px}
+.stat .num{font-family:var(--serif);font-weight:300;font-size:1.7rem;color:var(--ink)}
+.stat .lbl{font-family:var(--sans);font-size:.74rem;color:var(--ink-faint);margin-top:.15rem}
+
+/* CHART CONTAINER */
+.chart-wrap{background:var(--white);border:1px solid var(--rule);padding:1.4rem 1.6rem 1rem;margin-top:1rem}
+.chart-legend{display:flex;gap:1.4rem;flex-wrap:wrap;margin-bottom:.8rem;font-family:var(--mono);font-size:.72rem}
+.chart-legend span{display:inline-flex;align-items:center;gap:.4rem;color:var(--ink-mid)}
+.chart-legend i{width:12px;height:12px;display:inline-block;border-radius:1px}
+canvas{max-width:100%}
+
+/* TABLES */
+.table-wrap{overflow-x:auto;border:1px solid var(--rule);background:var(--white)}
+table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.76rem;white-space:nowrap}
+thead th{text-align:left;font-weight:500;color:var(--ink-faint);letter-spacing:.03em;
+  padding:.6rem .9rem;border-bottom:1px solid var(--rule-dk);position:sticky;top:0;background:var(--white)}
+tbody td{padding:.55rem .9rem;border-bottom:1px solid var(--rule);color:var(--ink-mid)}
+tbody tr:last-child td{border-bottom:none}
+.side-BUY,.side-SELL{color:var(--A)}
+.side-ASSIGN{color:var(--warn)}
+.side-EXPIRE{color:var(--ink-faint)}
+.side-SKIP{color:var(--ink-faint);font-style:italic}
+.neg{color:var(--bad)}
+
+/* FOOTER */
+footer{border-top:1px solid var(--rule-dk);padding:1.8rem;text-align:center;font-family:var(--sans);font-size:.74rem;color:var(--ink-faint)}
+footer a{color:var(--ink-faint)}
+
+/* DATA PAGE (disconnected state) */
+.disconnect-box{border:1px dashed var(--rule-dk);background:var(--white);padding:3rem 2rem;text-align:center;margin-top:1.5rem}
+.disconnect-box .glyph{font-family:var(--mono);font-size:1.6rem;color:var(--ink-faint);margin-bottom:1rem}
+.disconnect-box h3{margin-top:0}
+.disconnect-box p{margin:0 auto;color:var(--ink-faint)}
