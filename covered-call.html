@@ -19,6 +19,7 @@
   <nav>
     <a href="covered-call.html" class="active">Blotter</a>
     <a href="covered-call-data.html">Data</a>
+    <a href="#regime">Regime Analysis</a>
     <a href="#writeup">Write-up</a>
     <a href="/">← Hanna Boudara</a>
   </nav>
@@ -95,6 +96,197 @@
     </div>
   </section>
 
+  <section id="regime">
+    <h2>Market regime analysis</h2>
+    <p>The same strategy, run unchanged across <span id="regime-n">21</span> stocks over the
+    same 13-week window, to test whether it consistently helps or hurts depending on how the
+    underlying itself performed — rather than assuming one universal answer.</p>
+    <div class="stats-row" id="regime-stats"></div>
+    <div class="chart-wrap">
+      <canvas id="regimeChart" height="110"></canvas>
+    </div>
+
+    <h3>By buy-and-hold return bucket</h3>
+    <div class="table-wrap">
+      <table id="bucketTable">
+        <thead><tr>
+          <th>Buy-hold range</th><th>N stocks</th><th>Avg buy-hold</th>
+          <th>Avg strategy gap</th><th>Tickers</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <h3>Every stock tested</h3>
+    <div class="table-wrap">
+      <table id="multiStockTable">
+        <thead><tr>
+          <th>Ticker</th><th>Buy-hold</th><th>Strategy</th><th>Gap</th>
+          <th>Assigned</th><th>Expired</th><th>Skipped</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <h3>What this shows</h3>
+    <p id="regime-narrative"></p>
+  </section>
+
+  <section id="writeup">
+    <h2>Write-up</h2>
+
+    <h3>Why this stock</h3>
+    <p>AAPL was chosen for liquid weeklies and tight, well-quoted markets, which makes the
+    midpoint fill assumption easier to defend than it would be on a thin name.</p>
+
+    <h3>How the strike is chosen</h3>
+    <p>The strike is picked by targeting a Black-Scholes delta rather than a fixed dollar
+    distance from spot. The target itself is not constant: it slides between a calm-market
+    value and a high-vol value based on where current implied vol sits in its own recent
+    history, and it's pulled down further — capped at a floor so it can't go arbitrarily low —
+    after a week where the stock lost money. A lower target delta means a strike further
+    out of the money, i.e. more room before the position risks being capped again.</p>
+
+    <h3>Wait through expiry</h3>
+    <p>No rolls, no buy-to-close. A written call either expires worthless (shares and premium
+    both kept, next week's call written without re-buying) or is assigned (shares delivered
+    at the strike, position flat, restart the
+
+cat > covered-call.html << 'PYEOF'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AAPL Covered-Call Blotter — Hanna Boudara</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="covered-call-style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+</head>
+<body>
+
+<header>
+  <div class="hi">
+    <div class="wp">FINTECH 535 · COVERED-CALL BACKTEST</div>
+    <h1 class="site-name">AAPL Covered-Call <em>Blotter</em></h1>
+    <p class="site-tagline">Delta-targeted weeklies, vol- and loss-adjusted, wait through expiry</p>
+  </div>
+  <nav>
+    <a href="covered-call.html" class="active">Blotter</a>
+    <a href="covered-call-data.html">Data</a>
+    <a href="#regime">Regime Analysis</a>
+    <a href="#writeup">Write-up</a>
+    <a href="/">← Hanna Boudara</a>
+  </nav>
+</header>
+
+<main>
+
+  <section id="intro">
+    <span class="badge" id="sample-badge">Loading data…</span>
+    <p>Every Monday, if flat, buy 100 AAPL shares at the print and write one Friday-expiring
+    call. The strike is chosen by solving for the listed strike closest to a target delta —
+    the target itself shifts with the current implied-vol regime (further OTM when vol is
+    rich, closer to the money when it's calm) and pulls in further after a losing week, so a
+    stock drop gets more room to recover before the position risks getting capped again.
+    Friday: OTM expires (keep the shares, keep the premium, write the next week's call without
+    re-buying); ITM is assigned (shares sold at the strike, flat, restart Monday).</p>
+    <div class="stats-row" id="stats-row"></div>
+  </section>
+
+  <section id="nav">
+    <h2>NAV, initial &amp; maintenance margin</h2>
+    <p>Reg T account. NAV = cash + stock market value (the short call is closed out by the
+    time each week's mark is taken, so it never carries a separate negative MV into the
+    weekly snapshot). Initial margin is 50% of stock LMV; maintenance is 25%. A covered short
+    call adds $0 to either, since the position isn't naked.</p>
+    <div class="chart-wrap">
+      <div class="chart-legend">
+        <span><i style="background:#1a3a6e"></i>NAV</span>
+        <span><i style="background:#9a3b3b"></i>Initial margin</span>
+        <span><i style="background:#a6752c"></i>Maintenance margin</span>
+      </div>
+      <canvas id="navChart" height="110"></canvas>
+    </div>
+  </section>
+
+  <section id="scatter">
+    <h2>Midpoint assumption</h2>
+    <p>Every fill in this backtest is taken at mid = (BID + ASK) / 2. To justify that, every
+    hourly bar with a real trade print across the strikes actually used is plotted here:
+    TRDPRC_1 (last trade) against mid at that same bar.</p>
+    <div class="chart-wrap">
+      <canvas id="scatterChart" height="110"></canvas>
+    </div>
+  </section>
+
+  <section id="blotter">
+    <h2>Blotter</h2>
+    <p>Every trade actually booked — no working orders, no signal chart standing in for a
+    blotter. Friday OTM is EXPIRE; Friday ITM is ASSIGN on the call plus a STOCK SELL at the
+    strike.</p>
+    <div class="table-wrap">
+      <table id="blotterTable">
+        <thead><tr>
+          <th>Time</th><th>Instrument</th><th>Side</th><th>Qty</th>
+          <th>Fill</th><th>Cash Δ</th><th>Notes</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="ledger">
+    <h2>Ledger</h2>
+    <p>Running position, marked at each week's close. Cash only moves on a blotter event:
+    buying stock, collecting premium, expiring at $0, or assignment at the strike.</p>
+    <div class="table-wrap">
+      <table id="ledgerTable">
+        <thead><tr>
+          <th>Week of</th><th>Shares</th><th>Spot</th><th>Cash</th><th>LMV</th>
+          <th>NAV</th><th>Initial</th><th>Maint.</th><th>Available</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="regime">
+    <h2>Market regime analysis</h2>
+    <p>The same strategy, run unchanged across <span id="regime-n">21</span> stocks over the
+    same 13-week window, to test whether it consistently helps or hurts depending on how the
+    underlying itself performed — rather than assuming one universal answer.</p>
+    <div class="stats-row" id="regime-stats"></div>
+    <div class="chart-wrap">
+      <canvas id="regimeChart" height="110"></canvas>
+    </div>
+
+    <h3>By buy-and-hold return bucket</h3>
+    <div class="table-wrap">
+      <table id="bucketTable">
+        <thead><tr>
+          <th>Buy-hold range</th><th>N stocks</th><th>Avg buy-hold</th>
+          <th>Avg strategy gap</th><th>Tickers</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <h3>Every stock tested</h3>
+    <div class="table-wrap">
+      <table id="multiStockTable">
+        <thead><tr>
+          <th>Ticker</th><th>Buy-hold</th><th>Strategy</th><th>Gap</th>
+          <th>Assigned</th><th>Expired</th><th>Skipped</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <h3>What this shows</h3>
+    <p id="regime-narrative"></p>
+  </section>
+
   <section id="writeup">
     <h2>Write-up</h2>
 
@@ -130,6 +322,28 @@
     continuous daily mark-to-market of the open short call. The vol-regime signal is also
     noisier in the earliest weeks of the backtest, before enough implied-vol history has
     accumulated to make the calm/high-vol comparison statistically meaningful.</p>
+
+    <h3>When the strategy actually helps or hurts</h3>
+    <p>Running the identical, unmodified strategy across 21 stocks over the same 13-week
+    window (see Market Regime Analysis above) shows a real, moderate negative correlation
+    (r = -0.51) between a stock's own buy-and-hold return and how much the covered call
+    strategy gives up relative to it. In stocks that fell or stayed flat, the strategy
+    consistently matched or beat simple stock ownership — the collected premium cushioned
+    the decline, and getting assigned was rare, so most weeks kept full exposure to any
+    recovery. In stocks with the strongest run-ups, the strategy gave back the most ground,
+    since more weeks ended in assignment and capped the gain right at the strike.</p>
+    <p>Two results don't fit that pattern cleanly, and are worth naming rather than hiding.
+    <strong>XOM</strong> rallied +18.5% yet the strategy still slightly outperformed
+    (+23.3%) — most likely because assignment resets the position at a fresh cost basis the
+    following Monday, and if the stock dipped briefly right after an assignment before
+    continuing to climb, re-entering lower can occasionally beat a single static buy-and-hold
+    even in an uptrend. <strong>IBM</strong> is the sharper outlier: the stock was down only
+    -4.7%, yet the strategy lost -14.9%, a -10.2-point gap in the wrong direction. IBM was
+    assigned 7 of 13 weeks — far more than any other name — meaning it wasn't a smooth
+    decline but a choppy one, repeatedly rallying just enough to trigger assignment before
+    falling again. That pattern (frequent short-lived rallies inside a longer downtrend) is
+    close to the worst case for this strategy: it caps the rallies on the way up without
+    ever getting the benefit of riding a sustained recovery.</p>
   </section>
 
 </main>
@@ -137,6 +351,8 @@
 <footer>FINTECH 535 · Covered-call backtest · <a href="covered-call-data.html">Data</a> · <a href="/">Hanna Boudara</a></footer>
 
 <script src="covered-call-book.js"></script>
+<script src="covered-call-multi-book.js"></script>
 <script src="covered-call-render.js"></script>
+<script src="covered-call-multi-render.js"></script>
 </body>
 </html>
