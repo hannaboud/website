@@ -173,21 +173,7 @@ footer a{color:inherit}
 <p>To answer it, we built a pipeline that filters out market noise before looking for the signal. We use daily returns for 29 S&P 500 manufacturers, remove volatility clustering using a GJR-GARCH model, and run quantile-on-quantile regression on the days when rare earth prices actually moved — not the average day, but the shock days that matter for risk. We do this across three different rare earth price measures to stress-test every result.</p>
 <p>The most important thing we found before running a single regression: the standard equity-based rare earth index (MVREMXTR) has a daily correlation of <strong>ρ = 0.02</strong> with actual physical metal prices. Essentially zero. Most existing research on this topic has been regressing manufacturer stock returns on a variable that tells you almost nothing about what manufacturers pay for inputs. We show the consequences: 14 firms in our sample have positive sensitivity to the equity index but negative sensitivity to the commodity price — their stocks look like they benefit from rare earth price spikes when the physical cost data says the opposite.</p>
 
-<h3>Contribution Relative to Literature</h3>
-<div class="tw"><table class="dt">
-<thead><tr><th>Feature</th><th>Panazan & Gheorghe (2025, IJFS)</th><th>This paper</th></tr></thead>
-<tbody>
-<tr><td>Unit of analysis</td><td class="insig">Sector</td><td class="pos">Firm (29 S&P 500 cos.)</td></tr>
-<tr><td>RE price proxy</td><td class="insig">Single equity index</td><td class="pos">3 indices + SMM basis risk (EW & UW)</td></tr>
-<tr><td>Daily basis risk (ρ)</td><td class="insig">Not tested</td><td class="neg">ρ = 0.02 — essentially zero</td></tr>
-<tr><td>Volatility pre-filtering</td><td class="insig">None</td><td class="pos">GJR-GARCH(1,1), all 32 series</td></tr>
-<tr><td>Leverage effect</td><td class="insig">Not modeled</td><td class="pos">γ̂ &gt; 0 in 26/29 firms (89.7%)</td></tr>
-<tr><td>Regime conditioning</td><td class="insig">Full-sample QQR</td><td class="pos">Shock-day conditioned (10th/90th pctile)</td></tr>
-<tr><td>OVB diagnosis</td><td class="insig">Not addressed</td><td class="pos">Full vs. event delta scatter, full S&P 500</td></tr>
-<tr><td>Mispricing identification</td><td class="insig">Not addressed</td><td class="pos">14 firms with δᴹᵛ · δᴾᴾᴵ &lt; 0</td></tr>
-<tr><td>Dollar exposure</td><td class="insig">Not estimated</td><td class="pos">|δ| × σ_RE × MCap, firm-by-firm</td></tr>
-</tbody>
-</table></div>
+
 </section>
 
 <!-- DATA & SAMPLE -->
