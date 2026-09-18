@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multi-Stock Regime Analysis — Hanna Boudara</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="covered-call-style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+</head>
+<body>
+
+<header>
+  <div class="hi">
+    <div class="wp">FINTECH 535 · COVERED-CALL BACKTEST</div>
+    <h1 class="site-name">Multi-Stock <em>Regime Analysis</em></h1>
+    <p class="site-tagline">Same strategy, unchanged, run across 21 real stocks over the same 13-week window</p>
+  </div>
+  <nav>
+    <a href="covered-call.html">Blotter</a>
+    <a href="covered-call-data.html">Data</a>
+    <a href="covered-call-regime.html" class="active">Regime Analysis</a>
+    <a href="/">← Hanna Boudara</a>
+  </nav>
+</header>
+
+<main>
+
+  <section id="regime">
+    <p>The identical AAPL strategy — same delta-targeting rule, same vol-regime scaling, same
+    loss penalty — run unchanged on <span id="regime-n">21</span> stocks over the same 13-week
+    window, to test whether it consistently helps or hurts depending on how the underlying
+    itself performed, rather than assuming one universal answer.</p>
+    <div class="stats-row" id="regime-stats"></div>
+    <div class="chart-wrap">
+      <canvas id="regimeChart" height="110"></canvas>
+    </div>
+
+    <h2>By buy-and-hold return bucket</h2>
+    <div class="table-wrap">
+      <table id="bucketTable">
+        <thead><tr>
+          <th>Buy-hold range</th><th>N stocks</th><th>Avg buy-hold</th>
+          <th>Avg strategy gap</th><th>Tickers</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <h2>Every stock tested</h2>
+    <div class="table-wrap">
+      <table id="multiStockTable">
+        <thead><tr>
+          <th>Ticker</th><th>Buy-hold</th><th>Strategy</th><th>Gap</th>
+          <th>Assigned</th><th>Expired</th><th>Skipped</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <h2>What this shows</h2>
+    <p id="regime-narrative"></p>
+    <p>Two results don't fit that pattern cleanly, and are worth naming rather than hiding.
+    <strong>XOM</strong> rallied +18.5% yet the strategy still slightly outperformed
+    (+23.3%) — most likely because assignment resets the position at a fresh cost basis the
+    following Monday, and if the stock dipped briefly right after an assignment before
+    continuing to climb, re-entering lower can occasionally beat a single static buy-and-hold
+    even in an uptrend. <strong>IBM</strong> is the sharper outlier: the stock was down only
+    -4.7%, yet the strategy lost -14.9%, a -10.2-point gap in the wrong direction. IBM was
+    assigned 7 of 13 weeks — far more than any other name — meaning it wasn't a smooth
+    decline but a choppy one, repeatedly rallying just enough to trigger assignment before
+    falling again. That pattern (frequent short-lived rallies inside a longer downtrend) is
+    close to the worst case for this strategy: it caps the rallies on the way up without
+    ever getting the benefit of riding a sustained recovery.</p>
+  </section>
+
+</main>
+
+<footer>FINTECH 535 · Covered-call backtest · <a href="covered-call.html">Blotter</a> · <a href="/">Hanna Boudara</a></footer>
+
+<script src="covered-call-multi-book.js"></script>
+<script src="covered-call-multi-render.js"></script>
+</body>
+</html>
