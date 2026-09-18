@@ -6,7 +6,6 @@
 <title>Multi-Stock Regime Analysis — Hanna Boudara</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="covered-call-style.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 </head>
 <body>
 
@@ -26,59 +25,85 @@
 
 <main>
 
-  <section id="regime">
+  <section>
     <p>The identical AAPL strategy — same delta-targeting rule, same vol-regime scaling, same
-    loss penalty — run unchanged on <span id="regime-n">21</span> stocks over the same 13-week
-    window, to test whether it consistently helps or hurts depending on how the underlying
-    itself performed, rather than assuming one universal answer.</p>
-    <div class="stats-row" id="regime-stats"></div>
-    <div class="chart-wrap">
-      <canvas id="regimeChart" height="110"></canvas>
-    </div>
+    loss penalty — run unchanged on 21 stocks over the same 13-week window. Correlation between
+    a stock's own buy-and-hold return and the strategy's gap relative to it: <strong>r = -0.51</strong>.</p>
 
     <h2>By buy-and-hold return bucket</h2>
     <div class="table-wrap">
-      <table id="bucketTable">
+      <table>
         <thead><tr>
           <th>Buy-hold range</th><th>N stocks</th><th>Avg buy-hold</th>
           <th>Avg strategy gap</th><th>Tickers</th>
         </tr></thead>
-        <tbody></tbody>
+        <tbody>
+          <tr><td>&gt; +15%</td><td>4</td><td>+19.31%</td><td class="neg">-5.36%</td><td>JNJ, T, XOM, PYPL</td></tr>
+          <tr><td>+5% to +15%</td><td>3</td><td>+10.60%</td><td class="neg">-1.57%</td><td>PFE, KO, AAPL</td></tr>
+          <tr><td>0% to +5%</td><td>4</td><td>+2.18%</td><td class="neg">-0.27%</td><td>MMM, MO, DIS, BAC</td></tr>
+          <tr><td>-5% to 0%</td><td>1</td><td>-4.66%</td><td class="neg">-10.25%</td><td>IBM</td></tr>
+          <tr><td>-15% to -5%</td><td>7</td><td>-7.82%</td><td>+4.98%</td><td>GE, BA, WMT, C, CVS, UPS, F</td></tr>
+          <tr><td>&lt; -15%</td><td>2</td><td>-22.15%</td><td>+1.67%</td><td>INTC, NKE</td></tr>
+        </tbody>
       </table>
     </div>
 
     <h2>Every stock tested</h2>
     <div class="table-wrap">
-      <table id="multiStockTable">
+      <table>
         <thead><tr>
           <th>Ticker</th><th>Buy-hold</th><th>Strategy</th><th>Gap</th>
           <th>Assigned</th><th>Expired</th><th>Skipped</th>
         </tr></thead>
-        <tbody></tbody>
+        <tbody>
+          <tr><td>PYPL</td><td>+24.21%</td><td>+11.26%</td><td class="neg">-12.95%</td><td>4</td><td>8</td><td>2</td></tr>
+          <tr><td>XOM</td><td>+18.51%</td><td>+23.29%</td><td>+4.78%</td><td>4</td><td>8</td><td>2</td></tr>
+          <tr><td>T</td><td>+17.49%</td><td>+15.92%</td><td class="neg">-1.57%</td><td>1</td><td>10</td><td>3</td></tr>
+          <tr><td>JNJ</td><td>+17.03%</td><td>+5.33%</td><td class="neg">-11.70%</td><td>4</td><td>8</td><td>2</td></tr>
+          <tr><td>AAPL</td><td>+12.19%</td><td>+9.14%</td><td class="neg">-3.05%</td><td>6</td><td>6</td><td>2</td></tr>
+          <tr><td>KO</td><td>+10.68%</td><td>+6.38%</td><td class="neg">-4.30%</td><td>3</td><td>9</td><td>2</td></tr>
+          <tr><td>PFE</td><td>+8.93%</td><td>+11.58%</td><td>+2.65%</td><td>2</td><td>10</td><td>2</td></tr>
+          <tr><td>BAC</td><td>+3.02%</td><td>+5.62%</td><td>+2.60%</td><td>1</td><td>11</td><td>2</td></tr>
+          <tr><td>DIS</td><td>+2.98%</td><td>+2.82%</td><td class="neg">-0.16%</td><td>2</td><td>10</td><td>2</td></tr>
+          <tr><td>MO</td><td>+1.42%</td><td class="neg">-3.81%</td><td class="neg">-5.23%</td><td>2</td><td>10</td><td>2</td></tr>
+          <tr><td>MMM</td><td>+1.28%</td><td>+2.98%</td><td>+1.70%</td><td>2</td><td>10</td><td>2</td></tr>
+          <tr><td>IBM</td><td class="neg">-4.66%</td><td class="neg">-14.91%</td><td class="neg">-10.25%</td><td>7</td><td>5</td><td>2</td></tr>
+          <tr><td>F</td><td class="neg">-5.05%</td><td class="neg">-0.71%</td><td>+4.34%</td><td>0</td><td>12</td><td>2</td></tr>
+          <tr><td>UPS</td><td class="neg">-5.81%</td><td>+3.08%</td><td>+8.89%</td><td>3</td><td>9</td><td>2</td></tr>
+          <tr><td>CVS</td><td class="neg">-6.71%</td><td class="neg">-0.50%</td><td>+6.21%</td><td>1</td><td>11</td><td>2</td></tr>
+          <tr><td>C</td><td class="neg">-7.07%</td><td class="neg">-1.93%</td><td>+5.14%</td><td>2</td><td>10</td><td>2</td></tr>
+          <tr><td>WMT</td><td class="neg">-8.28%</td><td class="neg">-3.14%</td><td>+5.14%</td><td>2</td><td>10</td><td>2</td></tr>
+          <tr><td>BA</td><td class="neg">-9.32%</td><td class="neg">-7.56%</td><td>+1.76%</td><td>2</td><td>10</td><td>2</td></tr>
+          <tr><td>GE</td><td class="neg">-12.51%</td><td class="neg">-9.14%</td><td>+3.37%</td><td>2</td><td>10</td><td>2</td></tr>
+          <tr><td>NKE</td><td class="neg">-20.84%</td><td class="neg">-17.81%</td><td>+3.03%</td><td>1</td><td>10</td><td>3</td></tr>
+          <tr><td>INTC</td><td class="neg">-23.46%</td><td class="neg">-23.16%</td><td>+0.30%</td><td>3</td><td>9</td><td>2</td></tr>
+        </tbody>
       </table>
     </div>
 
     <h2>What this shows</h2>
-    <p id="regime-narrative"></p>
-    <p>Two results don't fit that pattern cleanly, and are worth naming rather than hiding.
-    <strong>XOM</strong> rallied +18.5% yet the strategy still slightly outperformed
-    (+23.3%) — most likely because assignment resets the position at a fresh cost basis the
-    following Monday, and if the stock dipped briefly right after an assignment before
-    continuing to climb, re-entering lower can occasionally beat a single static buy-and-hold
-    even in an uptrend. <strong>IBM</strong> is the sharper outlier: the stock was down only
-    -4.7%, yet the strategy lost -14.9%, a -10.2-point gap in the wrong direction. IBM was
-    assigned 7 of 13 weeks — far more than any other name — meaning it wasn't a smooth
-    decline but a choppy one, repeatedly rallying just enough to trigger assignment before
-    falling again. That pattern (frequent short-lived rallies inside a longer downtrend) is
-    close to the worst case for this strategy: it caps the rallies on the way up without
-    ever getting the benefit of riding a sustained recovery.</p>
+    <p>The more a stock rallied over the window, the more the covered call strategy tended to
+    lag simple buy-and-hold — visible clearly at the top of the table (PYPL -12.95%, JNJ
+    -11.70%) and bottom (INTC +0.30%, NKE +3.03%). In stocks that fell or stayed flat, the
+    strategy consistently matched or beat plain stock ownership: the premium collected
+    cushioned the decline, and assignment was rare, so most weeks kept full exposure to any
+    recovery.</p>
+    <p>Two results don't fit that pattern cleanly, worth naming rather than hiding.
+    <strong>XOM</strong> rallied +18.5% yet the strategy still slightly outperformed (+23.3%)
+    — most likely because assignment resets the position at a fresh cost basis the following
+    Monday, and a brief dip right after assignment before the stock continued climbing let the
+    strategy re-enter lower than a single static buy-and-hold. <strong>IBM</strong> is the
+    sharper outlier: down only -4.7%, yet the strategy lost -14.9% — a -10.2-point gap in the
+    wrong direction. IBM was assigned 7 of 13 weeks, far more than any other name, meaning it
+    wasn't a smooth decline but a choppy one: repeated short-lived rallies inside a longer
+    downtrend, each one capping gains right before the stock fell again. That pattern is close
+    to the worst case for this strategy — it caps every rally on the way up without ever
+    getting the benefit of riding a sustained recovery.</p>
   </section>
 
 </main>
 
 <footer>FINTECH 535 · Covered-call backtest · <a href="covered-call.html">Blotter</a> · <a href="/">Hanna Boudara</a></footer>
 
-<script src="covered-call-multi-book.js"></script>
-<script src="covered-call-multi-render.js"></script>
 </body>
 </html>
