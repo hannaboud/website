@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Code walkthrough — Hanna Boudara</title>
+<style>
+:root{
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --ink:#1a1a1a; --ink-mid:#4a4a4a; --ink-faint:#8a8a8a;
+  --rule:rgba(0,0,0,.08); --rule-dk:rgba(0,0,0,.16);
+  --A:#8a5a2b; --bg:#fdfdfc; --panel:#f6f5f2;
+  --kw:#7a3e9d; --str:#2f6f4f; --com:#8a8a8a; --num:#a5541f;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+     font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+header{padding:2.2rem 1.8rem 1.4rem;border-bottom:1px solid var(--rule-dk)}
+.wrap{max-width:800px;margin:0 auto}
+.site-name{font-size:1.15rem;font-weight:500;margin:0 0 .2rem}
+.site-name a{color:var(--ink);text-decoration:none}
+.site-tagline{font-size:.82rem;color:var(--ink-faint);margin:0}
+.back{font-family:var(--mono);font-size:.72rem;color:var(--A);text-decoration:none}
+main{padding:2rem 1.8rem 4rem}
+h2{font-size:1.45rem;font-weight:400;margin:0 0 .5rem;line-height:1.25}
+p{max-width:68ch;color:var(--ink-mid);margin:0 0 .9rem}
+.lede{color:var(--ink);margin-bottom:2rem}
+
+.proj-head{border-top:1px solid var(--rule-dk);margin-top:3rem;padding-top:2rem}
+.proj-head:first-of-type{border-top:0;margin-top:1rem;padding-top:0}
+.proj-head h3{font-size:1.2rem;font-weight:500;margin:0 0 .4rem}
+.tag{font-family:var(--mono);font-size:.66rem;letter-spacing:.08em;
+     text-transform:uppercase;color:var(--A);display:block;margin-bottom:.5rem}
+
+/* a step: numbered because these genuinely are a sequence */
+.step{display:grid;grid-template-columns:2.4rem 1fr;gap:0 1rem;
+      margin:2.2rem 0;padding-top:1.4rem;border-top:1px solid var(--rule)}
+.n{font-family:var(--mono);font-size:.95rem;color:var(--A);
+   padding-top:.15rem;font-variant-numeric:tabular-nums}
+.step h4{font-size:1.02rem;font-weight:600;margin:0 0 .5rem;color:var(--ink)}
+.want{font-size:.95rem;color:var(--ink);margin-bottom:.8rem}
+.want b{font-weight:600}
+.broke{border-left:2px solid var(--A);padding:.15rem 0 .15rem .95rem;
+       margin:1rem 0;font-size:.9rem;color:var(--ink-mid)}
+.broke b{display:block;color:var(--ink);font-weight:600;margin-bottom:.15rem}
+
+details{margin-top:1rem;border:1px solid var(--rule-dk);background:#fff}
+summary{cursor:pointer;padding:.55rem .9rem;font-family:var(--mono);
+        font-size:.76rem;color:var(--ink-mid);background:var(--panel);
+        display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+summary::-webkit-details-marker{display:none}
+summary:hover{color:var(--ink)}
+summary:focus-visible{outline:2px solid var(--A);outline-offset:-2px}
+summary .fn{color:var(--ink)}
+summary .hint{color:var(--ink-faint)}
+.code{overflow-x:auto;margin:0;padding:.7rem 0;max-height:34rem;overflow-y:auto}
+.code table{border-collapse:collapse;width:100%}
+.code td{padding:0;vertical-align:top;border:0}
+.code td.ln{width:1%;text-align:right;padding:0 .85rem;font-family:var(--mono);
+            font-size:.7rem;color:#c8c4bc;user-select:none;white-space:nowrap}
+.code td.src{font-family:var(--mono);font-size:.745rem;line-height:1.62;
+             white-space:pre;padding-right:1.1rem}
+.code tr:target td.src,.code tr.hit td.src{background:#fff7e0}
+.kw{color:var(--kw)} .str{color:var(--str)} .com{color:var(--com);font-style:italic}
+.num{color:var(--num)}
+.msg{padding:1.4rem 1rem;color:var(--ink-faint);font-size:.85rem;text-align:center}
+.msg code{font-family:var(--mono);font-size:.8rem;background:var(--panel);padding:.1em .35em}
+code{font-family:var(--mono);font-size:.86em;background:var(--panel);padding:.1em .35em}
+footer{border-top:1px solid var(--rule-dk);padding:1.6rem;text-align:center;
+       font-size:.74rem;color:var(--ink-faint)}
+a{color:var(--A)}
+@media (max-width:620px){
+  .step{grid-template-columns:1fr;gap:0}
+  .n{padding-bottom:.3rem}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1 class="site-name"><a href="/">Hanna Boudara</a></h1>
+    <p class="site-tagline">Senior at Duke University · Financial Engineering &amp; Mathematics</p>
+    <p style="margin:.9rem 0 0">
+      <a class="back" href="/">Back to site</a> &nbsp;·&nbsp;
+      <a class="back" href="/drafts.html">Drafts</a>
+    </p>
+  </div>
+</header>
+
+<main><div class="wrap">
+  <h2>Code walkthrough</h2>
+  <p class="lede">Both projects, step by step: what each stage was meant to
+  achieve, the reasoning behind the approach, what went wrong, and the code that
+  came out of it. Every file is shown complete and unedited.</p>
+
+  <!-- ============================== PROJECT ONE ============================== -->
+  <div class="proj-head">
+    <span class="tag">Project one</span>
+    <h3>Price coherence in Kalshi prediction markets</h3>
+    <p>Some prediction market prices must agree for logical reasons: a ladder of
+    nested thresholds cannot price a higher bar above a lower one, since
+    clearing a higher bar is never easier. The goal was to measure how often
+    that fails, by how much, and how long it lasts before anyone corrects it.</p>
+    <p>One constraint shaped everything. Kalshi's API reports the present, not
+    the past — historical trade prices exist, historical bid and ask do not.
+    Since the executable test needs both, the data cannot be downloaded; it has
+    to be collected going forward. That makes the collector the critical path,
+    and every other script exists to keep it honest.</p>
+  </div>
+
+  <div class="step">
+    <div class="n">01</div>
+    <div>
+      <h4>Find out what actually exists</h4>
+      <p class="want"><b>Goal:</b> get a complete picture of every open market,
+      and learn the real shape of the data before writing anything that parses it.</p>
+      <p>The temptation is to read the documentation and write a parser against
+      it. That fails quietly when the API has changed. This does the opposite:
+      fetch everything, save it raw, then <em>count</em> which fields actually
+      appear and how often. The field list it prints is what every later script
+      gets written against.</p>
+      <p>It probes two hostnames rather than trusting one, because the first
+      hostname I used did not resolve at all.</p>
+      <div class="broke"><b>What this caught</b>
+      Prices do not arrive as <code>yes_bid</code>. They arrive as
+      <code>yes_bid_dollars</code>, as strings, following an August 2026 format
+      change. A parser written from the documentation would have returned
+      nothing and raised nothing.</div>
+      <details data-file="code/prediction-markets/01_recon.py">
+        <summary><span class="fn">01_recon.py</span><span class="hint">click to read</span></summary>
+        <div class="body"></div>
+      </details>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="n">02</div>
+    <div>
+      <h4>Work out which markets are logically constrained</h4>
+      <p class="want"><b>Goal:</b> separate ladders, where prices must be
+      monotonic, from partitions, where prices must sum to a dollar.</p>
+      <p>Applying the wrong test makes every observation look like a violation,
+      so this step decides what gets tested and how. It classifies by counting
+      the shape of each family's rungs, and checks that family members share a
+      settlement source and closing time — if they settle differently they are
+      not comparable and the comparison means nothing.</p>
+      <div class="broke"><b>Two mistakes here, both instructive</b>
+      The first classifier collapsed rung types into a set, which answers "does
+      any rung look like this" when the question was "do most of them". A single
+      open-ended rung flipped an entire family's label.
+      <br><br>
+      Worse: I filtered on Kalshi's <code>mutually_exclusive</code> flag to find
+      ladders. But nested thresholds overlap — score three goals and "1+", "2+"
+      and "3+" all resolve yes — so the exchange correctly marks them
+      <em>not</em> mutually exclusive. The filter meant to find ladders was
+      deleting 4,436 of them and keeping 284 partitions instead.</div>
+      <details data-file="code/prediction-markets/03_universe.py">
+        <summary><span class="fn">03_universe.py</span><span class="hint">click to read</span></summary>
+        <div class="body"></div>
+      </details>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="n">03</div>
+    <div>
+      <h4>Build the instrument</h4>
+      <p class="want"><b>Goal:</b> record top-of-book for ~2,500 markets every
+      15 seconds, for weeks, unattended, without lying about what it saw.</p>
+      <p>Three decisions carry this. It polls the bulk endpoint rather than
+      per-market order books, because price <em>and</em> size at top of book come
+      back in one call and that is everything both tests need. It writes only
+      quotes that changed, with a full snapshot every hour — 2,500 markets every
+      15 seconds is 9 GB over three weeks, and 96% of those rows would repeat the
+      previous row exactly. And it writes a heartbeat every cycle recording what
+      it saw, including failures.</p>
+      <p>The heartbeat is the most important part. Without it, an outage during a
+      live violation records as one long violation — a fabricated data point in
+      the headline metric, produced by a monitoring system reporting perfect
+      health.</p>
+      <div class="broke"><b>The one I nearly missed</b>
+      Cycle durations came in exactly two clusters, 0.85s and 2.85s, with nothing
+      between. Network jitter is continuous; this was not. The two-second gap was
+      the first step of my own retry backoff — a third of cycles were being
+      rate-limited, retrying successfully, and logging nothing.</div>
+      <details data-file="code/prediction-markets/04_collect.py">
+        <summary><span class="fn">04_collect.py</span><span class="hint">click to read</span></summary>
+        <div class="body"></div>
+      </details>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="n">04</div>
+    <div>
+      <h4>Rebuild the full picture from the changes</h4>
+      <p class="want"><b>Goal:</b> turn a stream of edits back into "what did
+      every market look like at this moment", and prove the reconstruction is
+      correct rather than assume it.</p>
+      <p>Storing only changes is a large saving and a large risk: a bug here
+      silently corrupts everything downstream. Which is why the collector writes
+      an hourly full snapshot. This script carries state forward from the deltas
+      and compares it against that snapshot — if a quote ever changed without a
+      row being written, the two disagree and it says so.</p>
+      <p>It also reports gaps in coverage, which is subtler than it looks. A
+      restart leaves no hole in the cycle numbering, so a counter-based check
+      reports clean coverage across an eleven-minute hole in the clock. Gaps are
+      detected on timestamps, not counters.</p>
+      <div class="broke"><b>Verified, not assumed</b>
+      At the first scheduled checkpoint, 2,541 markets reconstructed from deltas
+      matched the snapshot exactly. Zero mismatches.</div>
+      <details data-file="code/prediction-markets/05_reconstruct.py">
+        <summary><span class="fn">05_reconstruct.py</span><span class="hint">click to read</span></summary>
+        <div class="body"></div>
+      </details>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="n">05</div>
+    <div>
+      <h4>Test the constraint</h4>
+      <p class="want"><b>Goal:</b> for every family at every moment, check the
+      prices step down as they must — and separate "the prices disagree" from
+      "you could have made money".</p>
+      <p>A <b>soft</b> violation is midpoints out of order: the markets are not
+      watching each other, but the spread means nobody can profit. A <b>hard</b>
+      violation means you could buy the underpriced rung at its ask, sell the
+      overpriced one at its bid, and be guaranteed not to lose.</p>
+      <p>The hard test needs only those two sides, not all four quotes — you do
+      not need to know what someone would pay for the rung you are buying. That
+      keeps thin markets in the sample instead of excluding exactly the
+      population where violations are most likely.</p>
+      <p>No magnitude threshold is applied. Every violation records its size and
+      depth, so a filter can be chosen later with the distribution in view. A
+      threshold baked into detection cannot be undone.</p>
+      <div class="broke"><b>Where economics beat testing</b>
+      The detector reported 1,667 guaranteed-profit opportunities. It compared
+      two prices correctly and had no notion that a price means nothing without
+      an order behind it. A guaranteed profit on zero contracts is not a thing
+      that exists in the world — which is what gave it away. No test of the
+      comparison logic would have caught it, because the comparison was never
+      wrong.</div>
+      <details data-file="code/prediction-markets/06_detect.py">
+        <summary><span class="fn">06_detect.py</span><span class="hint">click to read</span></summary>
+        <div class="body"></div>
+      </details>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="n">06</div>
+    <div>
+      <h4>Interrogate the result before believing it</h4>
+      <p class="want"><b>Goal:</b> find out whether the violations describe
+      something that could actually happen.</p>
+      <p>A rate on its own is not a finding. This prints the distribution of
+      magnitude, depth, dollar value and episode length, plus how concentrated
+      the violations are across events — a result that lives in one market is a
+      quirk rather than a property.</p>
+      <div class="broke"><b>And a bug in the inspector itself</b>
+      Depth printed as <code>0</code> for orders of 0.01 contracts, because I
+      formatted it with zero decimal places. I spent an hour diagnosing empty
+      order books that were really dust orders. Two separate bugs wearing the
+      same disguise — and the second was in the tool built to catch the first.</div>
+      <details data-file="code/prediction-markets/07_inspect.py">
+        <summary><span class="fn">07_inspect.py</span><span class="hint">click to read</span></summary>
+        <div class="body"></div>
+      </details>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="n">07</div>
+    <div>
+      <h4>Confirm the results came from the current code</h4>
+      <p class="want"><b>Goal:</b> rule out the possibility of analysing a stale
+      output file.</p>
+      <p>After a fix, one set of numbers changed and another did not, which could
+      not be true of a single run. Rather than reason further, this checks file
+      timestamps, then imports the detector from disk and feeds it a known case
+      to see what it actually does. The results file turned out to predate the
+      fix by three hours.</p>
+      <p>Worth keeping permanently. Comparing runs is meaningless if you cannot
+      establish which code produced them.</p>
+      <details data-file="code/prediction-markets/08_verify.py">
+        <summary><span class="fn">08_verify.py</span><span class="hint">click to read</span></summary>
+        <div class="body"></div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ============================== PROJECT TWO ============================== -->
+  <div class="proj-head">
+    <span class="tag">Project two</span>
+    <h3>Who actually owns US Treasury debt</h3>
+    <p>The published tables stop at categories — "depository institutions",
+    "mutual funds", "other investors". Those categories hide the thing worth
+    knowing: which named institutions hold the debt, and how concentrated that
+    is. The approach takes the aggregate table as a frame, then goes underneath
+    each line using the filings those institutions already make.</p>
+  </div>
+
+  <div class="step">
+    <div class="n">01</div>
+    <div>
+      <h4>Get ownership by investor class</h4>
+      <p class="want"><b>Goal:</b> a clean quarterly series of who holds Treasury
+      debt, from the Treasury Bulletin.</p>
+      <p>This leads with an <code>--inspect</code> mode for the same reason the
+      prediction-markets recon does: the first version guessed which column held
+      the investor class and was wrong. Inspecting the schema before parsing
+      turns a silent wrong answer into a visible one.</p>
+      <div class="broke"><b>Three traps in one table</b>
+      <code>record_date</code> is the Bulletin's <em>issue</em> date, not the
+      period the data describes, and each issue republishes the full
+      back-history — so filtering to the newest issue returns ten years of
+      periods at once and summing them gives a total in the quadrillions.
+      <br><br>
+      The investor-class detail derives from the Fed's Z.1 and lags the headline
+      totals by a quarter, so the newest period carries only two or three classes
+      and a share that sums to nonsense. The script picks the newest
+      <em>complete</em> period instead.
+      <br><br>
+      The table nests: total public debt equals Fed and government accounts plus
+      total privately held, and privately held is itself the sum of the detail
+      rows. Mixing levels double-counts, so subtotals are held back and used as a
+      reconciliation check — if the detail does not tie to the published total,
+      no shares are reported at all.</div>
+      <details data-file="code/debt/ownership.py">
+        <summary><span class="fn">ownership.py</span><span class="hint">click to read</span></summary>
+        <div class="body"></div>
+      </details>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="n">02</div>
+    <div>
+      <h4>Go underneath the aggregate lines</h4>
+      <p class="want"><b>Goal:</b> resolve "depository institutions, $2,170bn"
+      into named banks, and set up the same for funds and dealers.</p>
+      <p>Each holder category has a different regulatory filing underneath it.
+      Banks file call reports, collected by the FDIC. Registered funds file
+      N-PORT, which carries par value, market value <em>and</em> maturity date
+      per position — the only free source that yields a real holder-by-maturity
+      grid rather than an assumed one. Money market funds are excluded from
+      N-PORT and file N-MFP instead, and since they hold roughly $2.5tn of bills,
+      omitting them would gut any short-maturity analysis.</p>
+      <p>The docstring also records what does <em>not</em> work, which saved real
+      time: Form 13F covers exchange-traded equities and options. Treasuries are
+      not reportable on it. It is the obvious first place to look and it cannot
+      work.</p>
+      <div class="broke"><b>What the aggregate was hiding</b>
+      Of 4,353 insured institutions, 2,231 hold any Treasuries, together
+      $1,669bn. The Herfindahl index is 1,400 — an effective count of about seven
+      firms. JPMorgan Chase alone holds $497bn.
+      <br><br>
+      The missing $500bn matters too: Call Report Schedule RC-B excludes
+      trading-account securities, so the understatement falls specifically on
+      dealer-affiliated banks — the ones that matter most for market
+      functioning.</div>
+      <details data-file="code/debt/institutions.py">
+        <summary><span class="fn">institutions.py</span><span class="hint">click to read</span></summary>
+        <div class="body"></div>
+      </details>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="n">03</div>
+    <div>
+      <h4>Assemble one picture</h4>
+      <p class="want"><b>Goal:</b> put the aggregate and the named institutions
+      side by side, and state plainly what is still unresolved.</p>
+      <p>This fetches nothing — it reads what the other scripts produced. If a
+      file is missing, that section is skipped and flagged rather than silently
+      dropped, so the output never looks complete when it is not.</p>
+      <p>It ends with the section that matters most. "Other investors" is
+      $6,825bn, the third-largest line in the table, and it is a residual
+      containing individuals, GSEs, brokers, trusts and corporates. "Mutual
+      funds" at $5,123bn blends money funds holding bills with bond funds holding
+      the long end — different investors, different behaviour, one row.</p>
+      <details data-file="code/debt/recap.py">
+        <summary><span class="fn">recap.py</span><span class="hint">click to read</span></summary>
+        <div class="body"></div>
+      </details>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="n">04</div>
+    <div>
+      <h4>Draw it</h4>
+      <p class="want"><b>Goal:</b> two figures that carry the argument — where
+      the debt sits, and how concentrated the bank slice is.</p>
+      <p>Both default to PDF because vector text stays sharp in LaTeX. Units
+      convert on read: the FDIC reports in thousands, so everything becomes
+      billions immediately and the axis labels are honest. The ownership chart
+      highlights the US financial institution bloc; the bank chart flags
+      dealer-affiliated institutions, since those are the ones the data
+      understates.</p>
+      <details data-file="code/debt/plot_ownership.py">
+        <summary><span class="fn">plot_ownership.py</span><span class="hint">click to read</span></summary>
+        <div class="body"></div>
+      </details>
+      <details data-file="code/debt/plot_banks.py">
+        <summary><span class="fn">plot_banks.py</span><span class="hint">click to read</span></summary>
+        <div class="body"></div>
+      </details>
+    </div>
+  </div>
+
+</div></main>
+
+<footer>© 2026 Hanna Boudara</footer>
+
+<script>
+const KW = new RegExp("\\b(" + [
+  "False","None","True","and","as","assert","async","await","break","class",
+  "continue","def","del","elif","else","except","finally","for","from","global",
+  "if","import","in","is","lambda","nonlocal","not","or","pass","raise","return",
+  "try","while","with","yield","self","print"
+].join("|") + ")\\b","g");
+
+const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+/* Split on strings and comments FIRST so keyword and number patterns can never
+   fire inside a string literal. */
+function highlight(line){
+  const parts = line.split(/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|#.*$)/);
+  return parts.map((p,i) => {
+    if(!p) return "";
+    if(i % 2) return `<span class="${p.startsWith("#") ? "com" : "str"}">${esc(p)}</span>`;
+    return esc(p)
+      .replace(KW,'<span class="kw">$1</span>')
+      .replace(/\b(\d[\d_]*\.?\d*)\b/g,'<span class="num">$1</span>');
+  }).join("");
+}
+
+function render(text, file){
+  const lines = text.replace(/\r\n/g,"\n").split("\n");
+  /* Docstrings span lines, so track whether we are inside one rather than
+     highlighting each line in isolation. */
+  let inDoc = null, rows = "";
+  const base = file.split("/").pop().replace(/\W/g,"_");
+  lines.forEach((ln,i) => {
+    const n = i + 1, id = base + "_L" + n;
+    let html;
+    if(inDoc){
+      html = `<span class="str">${esc(ln)}</span>`;
+      if(ln.includes(inDoc)) inDoc = null;
+    } else {
+      const m = ln.match(/("""|''')/);
+      const closes = m && ln.slice(ln.indexOf(m[1]) + 3).includes(m[1]);
+      if(m && !closes){ inDoc = m[1]; html = `<span class="str">${esc(ln)}</span>`; }
+      else html = highlight(ln);
+    }
+    rows += `<tr id="${id}"><td class="ln"><a href="#${id}" style="color:inherit;text-decoration:none">${n}</a></td><td class="src">${html || "&nbsp;"}</td></tr>`;
+  });
+  return `<div class="code"><table>${rows}</table></div>`;
+}
+
+async function loadInto(det){
+  if(det.dataset.loaded) return;
+  const file = det.dataset.file;
+  const body = det.querySelector(".body");
+  body.className = "body msg";
+  body.textContent = "Loading…";
+  try{
+    const r = await fetch(file);
+    if(!r.ok) throw new Error(r.status + " " + r.statusText);
+    const text = await r.text();
+    body.className = "body";
+    body.innerHTML = render(text, file);
+    det.dataset.loaded = "1";
+    const n = text.split("\n").length;
+    det.querySelector(".hint").textContent =
+      `${n.toLocaleString()} lines · ${(text.length/1024).toFixed(1)} kB`;
+  }catch(e){
+    body.className = "body msg";
+    body.innerHTML = `Could not load <code>${file}</code> (${e.message}).<br><br>
+      Commit the file to your repo at that path, then reload.`;
+  }
+}
+
+document.querySelectorAll("details[data-file]").forEach(det => {
+  det.addEventListener("toggle", () => { if(det.open) loadInto(det); });
+});
+
+/* Deep link: ?f=code/debt/recap.py#recap_py_L42 */
+(async () => {
+  const want = new URLSearchParams(location.search).get("f");
+  if(!want) return;
+  const det = document.querySelector(`details[data-file="${CSS.escape(want)}"]`);
+  if(!det) return;
+  det.open = true;
+  await loadInto(det);
+  if(location.hash){
+    const el = document.querySelector(location.hash);
+    if(el){ el.classList.add("hit"); el.scrollIntoView({block:"center"}); }
+  } else {
+    det.scrollIntoView({block:"start"});
+  }
+})();
+</script>
+</body>
+</html>

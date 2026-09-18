@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drafts — Hanna Boudara</title>
+<style>
+/* ------------------------------------------------------------------
+   If these colours don't match your other pages, copy the :root block
+   from index.html and paste it over this one. Everything below uses
+   the same variable names and class names as your existing site.
+   ------------------------------------------------------------------ */
+:root{
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --ink:#1a1a1a;
+  --ink-mid:#4a4a4a;
+  --ink-faint:#8a8a8a;
+  --rule:rgba(0,0,0,.08);
+  --rule-dk:rgba(0,0,0,.16);
+  --A:#8a5a2b;
+  --bg:#fdfdfc;
+  --panel:#f6f5f2;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:var(--sans);font-size:16px;line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+header{padding:2.4rem 1.8rem 1.6rem;border-bottom:1px solid var(--rule-dk)}
+.wrap{max-width:760px;margin:0 auto}
+.site-name{font-size:1.15rem;font-weight:500;margin:0 0 .2rem}
+.site-name a{color:var(--ink);text-decoration:none}
+.site-tagline{font-size:.82rem;color:var(--ink-faint);margin:0}
+.back{font-family:var(--mono);font-size:.72rem;color:var(--A);text-decoration:none}
+main{padding:2.2rem 1.8rem 4rem}
+h2{font-size:1.5rem;font-weight:400;margin:0 0 .6rem;line-height:1.25}
+h3{font-size:1.05rem;font-weight:500;margin:2.4rem 0 .7rem}
+h4{font-size:.92rem;font-weight:600;margin:1.6rem 0 .4rem}
+p{max-width:68ch;color:var(--ink-mid);margin:0 0 1rem}
+.lede{color:var(--ink);font-size:1.02rem}
+.project-tag{
+  font-family:var(--mono);font-size:.66rem;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--A);display:block;margin-bottom:.6rem;
+}
+section.proj{padding-top:2.6rem;margin-top:2.6rem;border-top:1px solid var(--rule-dk)}
+section.proj:first-of-type{border-top:0;margin-top:0;padding-top:1rem}
+
+/* status strip — the live state of a running experiment */
+.status{
+  display:flex;flex-wrap:wrap;gap:0;border:1px solid var(--rule-dk);
+  margin:1.4rem 0 1.8rem;background:var(--panel);
+}
+.status div{
+  flex:1 1 140px;padding:.85rem 1rem;border-right:1px solid var(--rule);
+}
+.status div:last-child{border-right:0}
+.status .k{
+  font-family:var(--mono);font-size:.64rem;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-faint);display:block;
+}
+.status .v{font-size:1.05rem;color:var(--ink);font-variant-numeric:tabular-nums}
+.live{color:#2f7a3f}
+
+table{border-collapse:collapse;width:100%;margin:1rem 0 1.4rem;font-size:.86rem}
+th,td{text-align:left;padding:.45rem .7rem;border-bottom:1px solid var(--rule)}
+th{
+  font-family:var(--mono);font-size:.66rem;letter-spacing:.05em;
+  text-transform:uppercase;color:var(--ink-faint);font-weight:400;
+}
+td.num{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:.82rem}
+caption{caption-side:bottom;font-size:.75rem;color:var(--ink-faint);text-align:left;padding-top:.5rem}
+
+pre{
+  background:var(--panel);border:1px solid var(--rule);overflow-x:auto;
+  padding:.9rem 1rem;font-family:var(--mono);font-size:.76rem;line-height:1.6;
+  color:var(--ink);margin:1rem 0 1.4rem;
+}
+code{font-family:var(--mono);font-size:.86em;background:var(--panel);padding:.1em .35em}
+pre code{background:none;padding:0;font-size:1em}
+
+/* the bug log — a dated record, the point of this page */
+.log{list-style:none;padding:0;margin:1rem 0 0}
+.log li{padding:.9rem 0;border-bottom:1px solid var(--rule)}
+.log .when{
+  font-family:var(--mono);font-size:.68rem;color:var(--ink-faint);
+  display:block;margin-bottom:.2rem;
+}
+.log .what{color:var(--ink);font-size:.93rem}
+.log .how{color:var(--ink-mid);font-size:.87rem;margin-top:.15rem;max-width:68ch}
+
+.note{
+  border-left:2px solid var(--A);padding:.2rem 0 .2rem 1rem;
+  margin:1.4rem 0;color:var(--ink-mid);font-size:.9rem;
+}
+.todo{color:var(--ink-faint);font-style:italic}
+footer{
+  border-top:1px solid var(--rule-dk);padding:1.6rem;text-align:center;
+  font-size:.74rem;color:var(--ink-faint);
+}
+a{color:var(--A)}
+@media (max-width:600px){
+  .status div{flex:1 1 50%;border-right:0;border-bottom:1px solid var(--rule)}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1 class="site-name"><a href="/">Hanna Boudara</a></h1>
+    <p class="site-tagline">Senior at Duke University · Financial Engineering &amp; Mathematics</p>
+    <p style="margin:.9rem 0 0"><a class="back" href="/">Back to site</a></p>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+
+  <h2>Drafts</h2>
+  <p class="lede">Work in progress. These are unfinished and the numbers move;
+  I update this page as I go. Everything here is honest about what is measured
+  and what is still assumption.</p>
+
+  <!-- ================= PREDICTION MARKETS ================= -->
+  <section class="proj">
+    <span class="project-tag">In progress · started Sep 2026</span>
+    <h3 style="margin-top:0">Price coherence in Kalshi prediction markets</h3>
+
+    <p><strong>Question.</strong> Some prediction market prices must agree with
+    each other for logical reasons. A ladder of nested thresholds — "above
+    2.75%", "above 3.00%", "above 3.25%" — cannot price a higher bar above a
+    lower one, since clearing a higher bar is never easier. How often does that
+    fail, by how much, and how long does it last before someone fixes it?</p>
+
+    <div class="status">
+      <div><span class="k">Collector</span><span class="v live">running</span></div>
+      <div><span class="k">Markets polled</span><span class="v">2,547</span></div>
+      <div><span class="k">Interval</span><span class="v">15 s</span></div>
+      <div><span class="k">Pairs tested</span><span class="v">697,532</span></div>
+    </div>
+
+    <h4>Why the data has to be collected rather than downloaded</h4>
+    <p>Kalshi's API reports the present, not the past. Historical trade prices
+    exist, but historical <em>bid and ask</em> do not — and the executable test
+    needs both. So the study is prospective: build an instrument, run it,
+    report what it records. The dataset begins the day the collector starts.</p>
+
+    <h4>Method</h4>
+    <p>Poll top-of-book for every market in fourteen series every 15 seconds,
+    storing only quotes that changed, with a full snapshot every hour as a
+    checkpoint. Replay those changes to reconstruct the state of every market
+    at every moment, then test each family's rungs pairwise in strike order.</p>
+    <p>Two tests. A <strong>soft</strong> violation is midpoints out of order —
+    the markets are not watching each other, but the spread means nobody can
+    profit. A <strong>hard</strong> violation means you could buy the
+    underpriced rung at its ask, sell the overpriced one at its bid, and be
+    guaranteed not to lose.</p>
+
+<pre><code>for i in range(len(present) - 1):
+    (t_lo, k_lo, q_lo) = present[i]
+    (t_hi, k_hi, q_hi) = present[i + 1]
+
+    # A price with no size behind it is not a quote.
+    bid_lo, bsz_lo = side(q_lo["yes_bid_dollars"], q_lo["yes_bid_size_fp"])
+    ask_lo, asz_lo = side(q_lo["yes_ask_dollars"], q_lo["yes_ask_size_fp"])
+    bid_hi, bsz_hi = side(q_hi["yes_bid_dollars"], q_hi["yes_bid_size_fp"])
+    ask_hi, asz_hi = side(q_hi["yes_ask_dollars"], q_hi["yes_ask_size_fp"])
+
+    # SOFT — midpoints must fall as the strike rises.
+    if None not in (bid_lo, ask_lo, bid_hi, ask_hi):
+        diff = (bid_hi + ask_hi) / 2 - (bid_lo + ask_lo) / 2
+        if diff &gt; 0:
+            record("soft", magnitude=diff)
+
+    # HARD — buy the lower rung at its ask, sell the upper at its bid.
+    # Only those two sides matter; the other two quotes are irrelevant.
+    if ask_lo is not None and bid_hi is not None:
+        edge = bid_hi - ask_lo
+        if edge &gt; 0:
+            record("hard", magnitude=edge, depth=min(asz_lo, bsz_hi))</code></pre>
+
+    <h4>Preliminary result</h4>
+    <p>From roughly 83 minutes of collection on a Saturday afternoon. These
+    rates are a first look at the shape, not a measurement — the sample is one
+    slice of one day.</p>
+
+    <table>
+      <caption>Violation rate per rung pair tested. 332 cycles, 2026-09-14.</caption>
+      <thead><tr><th>Series</th><th>What it is</th>
+        <th style="text-align:right">Pairs</th>
+        <th style="text-align:right">Soft</th>
+        <th style="text-align:right">Hard</th></tr></thead>
+      <tbody>
+        <tr><td>KXAAAGASDMI</td><td>Michigan gas prices</td><td class="num">11,952</td><td class="num">8.16%</td><td class="num">0%</td></tr>
+        <tr><td>KXFED</td><td>Fed funds rate</td><td class="num">26,892</td><td class="num">7.74%</td><td class="num">0%</td></tr>
+        <tr><td>KXNCAAFTOTAL</td><td>College football totals</td><td class="num">442,224</td><td class="num">2.37%</td><td class="num">0.37%*</td></tr>
+        <tr><td>KXNFL1HTOTAL</td><td>NFL first-half totals</td><td class="num">4,316</td><td class="num">1.78%</td><td class="num">0.35%*</td></tr>
+        <tr><td>KXBTCD</td><td>Bitcoin hourly</td><td class="num">42,496</td><td class="num">0.46%</td><td class="num">0%</td></tr>
+        <tr><td>KXNFLTOTAL</td><td>NFL totals</td><td class="num">95,616</td><td class="num">0.36%</td><td class="num">0%</td></tr>
+        <tr><td>KXMLBTOTAL</td><td>MLB totals</td><td class="num">72,044</td><td class="num">0.07%</td><td class="num">0%</td></tr>
+      </tbody>
+    </table>
+
+    <p>*Almost all of these are unusable. Of 1,667 hard violations, only six
+    offered at least one whole contract; the rest sell into resting orders of
+    0.01 contracts. The median guaranteed profit is one hundredth of a cent,
+    and the largest in the entire dataset is twenty cents.</p>
+
+    <p>Soft violations persist: median about one minute, a tenth of them past
+    ten minutes, the longest 76 minutes. Only 1.6% disappear before the next
+    poll, so these are not two order books updating out of step — they are
+    sustained disagreements between markets that must agree.</p>
+
+    <div class="note">
+      Working conclusion: the ladder surface is frequently incoherent at
+      midpoints and stays that way for minutes at a time, but the bid–ask
+      spread absorbs essentially all of it. Executable incoherence is
+      vanishingly rare. The market is not so much efficient as undisturbed —
+      nobody enforces coherence because enforcing it does not pay.
+    </div>
+
+    <h4>Pipeline</h4>
+    <table>
+      <thead><tr><th>Script</th><th>Does</th></tr></thead>
+      <tbody>
+        <tr><td><code>01_recon.py</code></td><td>Fetch every open event; report the schema actually returned rather than the documented one</td></tr>
+        <tr><td><code>03_universe.py</code></td><td>Classify families as ladders or partitions; check rungs share settlement rules</td></tr>
+        <tr><td><code>04_collect.py</code></td><td>Poll on a fixed cadence; store changed quotes with hourly checkpoints and a per-cycle heartbeat</td></tr>
+        <tr><td><code>05_reconstruct.py</code></td><td>Replay changes into full state; validate against checkpoints; find gaps in coverage</td></tr>
+        <tr><td><code>06_detect.py</code></td><td>Test monotonicity pairwise, soft and hard</td></tr>
+        <tr><td><code>07_inspect.py</code></td><td>Distribution of magnitude, depth, and episode length</td></tr>
+        <tr><td><code>08_verify.py</code></td><td>Check results were produced by the current code, not a stale run</td></tr>
+      </tbody>
+    </table>
+
+    <h4>Log</h4>
+    <p>What broke, and how it surfaced. Every one of these was silent — the
+    code ran without error and produced plausible numbers.</p>
+
+    <ul class="log">
+      <li>
+        <span class="when">Sep 14 · classification</span>
+        <span class="what">Ladder families were being read as partitions, and vice versa.</span>
+        <p class="how">A temperature family is a partition of disjoint ranges,
+        but its two end rungs are one-sided. A single open-ended rung flipped
+        the whole family's label. The classifier collapsed rung types into a
+        set, which answers "does any rung look like this" when the question was
+        "do most of them". Fixed by counting the open ends directly: a
+        partition has exactly two.</p>
+      </li>
+      <li>
+        <span class="when">Sep 14 · universe selection</span>
+        <span class="what">The cleanest ladders were being excluded by the filter meant to find them.</span>
+        <p class="how">Kalshi marks mutually exclusive events with a flag, and I
+        filtered on it. But nested thresholds <em>overlap</em> — score three
+        goals and "1+", "2+" and "3+" all resolve yes — so the exchange
+        correctly marks them not mutually exclusive. Filtering on the flag
+        deleted 4,436 ladder families and kept 284 partitions.</p>
+      </li>
+      <li>
+        <span class="when">Sep 14 · collection</span>
+        <span class="what">A third of cycles were being rate-limited invisibly.</span>
+        <p class="how">Cycle durations came in exactly two clusters, 0.85s and
+        2.85s, with nothing between. The two-second gap was the first step of
+        my own backoff. Retries that eventually succeeded were logged nowhere,
+        so the collector reported perfect health while being throttled. Fixed by
+        spacing requests and recording retry counts.</p>
+      </li>
+      <li>
+        <span class="when">Sep 15 · replay</span>
+        <span class="what">Restarting the collector made time appear to run backwards.</span>
+        <p class="how">Cycle numbers reset to 1 on restart, and cycle number is
+        the ordering key for replay. Any violation spanning a restart would have
+        been given a nonsense duration. Separately, a restart leaves no gap in
+        the numbering, so the gap check reported clean coverage across an
+        eleven-minute hole. Now gaps are detected on the clock, not the counter.</p>
+      </li>
+      <li>
+        <span class="when">Sep 15 · detection</span>
+        <span class="what">1,661 "guaranteed profit" opportunities offered zero contracts.</span>
+        <p class="how">The detector compared two prices without checking whether
+        any order rested behind them. Kalshi reports a price field even when the
+        side is empty. A guaranteed profit on zero contracts is not a thing that
+        exists, which is what gave it away — the arithmetic was right and the
+        economics were impossible.</p>
+      </li>
+      <li>
+        <span class="when">Sep 15 · reporting</span>
+        <span class="what">The depth column printed 0 for orders of 0.01 contracts.</span>
+        <p class="how">Formatted with zero decimal places. I spent an hour
+        diagnosing empty order books that were actually dust orders, because my
+        own output rounded them away. Two separate bugs wore the same disguise.</p>
+      </li>
+    </ul>
+
+    <h4>Next</h4>
+    <p>Move the collector off a laptop and run it unattended for three weeks.
+    Thread wall-clock timestamps through replay so episode durations are
+    measured in seconds rather than cycle counts. Exclude episodes that span a
+    coverage gap. Then break persistence down by volume, rung spacing, and time
+    to resolution.</p>
+  </section>
+
+  <!-- ================= DEBT PROJECT ================= -->
+  <section class="proj">
+    <span class="project-tag">In progress · 2026</span>
+    <h3 style="margin-top:0">Who actually owns US Treasury debt</h3>
+
+    <p><strong>Question.</strong> The published ownership tables stop at
+    categories: "depository institutions", "mutual funds", "other investors".
+    Those categories hide the thing worth knowing — which named institutions
+    hold the debt, how concentrated that is, and how much of it sits with
+    entities whose holdings are driven by regulation rather than preference.
+    This goes underneath the aggregates using the filings those institutions
+    already make.</p>
+
+    <div class="status">
+      <div><span class="k">Snapshot</span><span class="v">31 Mar 2026</span></div>
+      <div><span class="k">Total public debt</span><span class="v">$39.1tn</span></div>
+      <div><span class="k">Banks resolved</span><span class="v">2,231</span></div>
+      <div><span class="k">Sources live</span><span class="v">2 of 6</span></div>
+    </div>
+
+    <h4>Where the debt sits</h4>
+    <table>
+      <caption>Treasury Bulletin OFS-2, 31 March 2026. Subtotal rows excluded
+      and reconciled against the published total.</caption>
+      <thead><tr><th>Holder</th>
+        <th style="text-align:right">$bn</th>
+        <th style="text-align:right">Share</th></tr></thead>
+      <tbody>
+        <tr><td>Federal Reserve and government accounts</td><td class="num">12,024</td><td class="num">30.8%</td></tr>
+        <tr><td>Foreign and international</td><td class="num">9,355</td><td class="num">23.9%</td></tr>
+        <tr><td>Other investors</td><td class="num">6,825</td><td class="num">17.5%</td></tr>
+        <tr><td>Mutual funds</td><td class="num">5,123</td><td class="num">13.1%</td></tr>
+        <tr><td>Depository institutions</td><td class="num">2,170</td><td class="num">5.6%</td></tr>
+        <tr><td>State and local governments</td><td class="num">1,642</td><td class="num">4.2%</td></tr>
+        <tr><td>Private pension funds</td><td class="num">607</td><td class="num">1.6%</td></tr>
+        <tr><td>Insurance companies</td><td class="num">598</td><td class="num">1.5%</td></tr>
+        <tr><td>State and local pension funds</td><td class="num">574</td><td class="num">1.5%</td></tr>
+        <tr><td>US savings bonds</td><td class="num">149</td><td class="num">0.4%</td></tr>
+      </tbody>
+    </table>
+
+    <p>US financial institutions — banks, funds, pensions, insurers — hold
+    $9,071bn between them, close to the entire foreign holding. That bloc is
+    the subject of the project.</p>
+
+    <h4>Underneath the "depository institutions" line</h4>
+    <p>FDIC call report data resolves that single $2,170bn row into named
+    banks. Of 4,353 insured institutions, 2,231 hold any Treasuries at all,
+    and together they account for $1,669bn — about 77% of the aggregate line.</p>
+
+    <p>The holdings are concentrated to a degree the aggregate row completely
+    conceals. The Herfindahl index is 1,400, an effective count of about seven
+    firms. Twenty-five banks reach 90% of all bank holdings. JPMorgan Chase
+    alone holds $497bn and Bank of America $318bn — each larger than all but a
+    handful of sovereign holders.</p>
+
+    <div class="note">
+      The gap matters as much as the number. Call Report Schedule RC-B excludes
+      trading-account securities, so the roughly $500bn difference between the
+      aggregate depository line and the sum of bank filings sits mostly in
+      dealer trading books — meaning the dealer-affiliated banks, the ones that
+      matter most for market functioning, are the ones most understated.
+    </div>
+
+    <h4>Sources</h4>
+    <table>
+      <thead><tr><th>Source</th><th>Gives</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Treasury Bulletin OFS-2</td><td>Ownership by investor class, quarterly</td><td>Working</td></tr>
+        <tr><td>FDIC BankFind</td><td>Per-bank Treasury holdings, HTM/AFS split</td><td>Working</td></tr>
+        <tr><td>SEC Form N-PORT</td><td>Position-level fund holdings with maturity dates</td><td class="todo">Next</td></tr>
+        <tr><td>SEC Form N-MFP</td><td>Money market funds, excluded from N-PORT</td><td class="todo">Next</td></tr>
+        <tr><td>NY Fed FR 2004</td><td>Primary dealer positions by maturity bucket</td><td class="todo">Planned</td></tr>
+        <tr><td>Fed Z.1 table L.210</td><td>Pre-2024 history; decomposing "other investors"</td><td class="todo">Manual download</td></tr>
+      </tbody>
+    </table>
+
+    <p>N-PORT is the important one. It carries par value, market value
+    <em>and</em> maturity date per position, which makes it the only free
+    source that yields a real holder-by-maturity grid rather than an assumed
+    one. Money funds file N-MFP instead and hold roughly $2.5tn of bills, so
+    leaving them out would gut any short-maturity analysis.</p>
+
+    <h4>Log</h4>
+    <ul class="log">
+      <li>
+        <span class="when">Treasury Bulletin API</span>
+        <span class="what">Summing the latest data gave a total in the quadrillions.</span>
+        <p class="how"><code>record_date</code> is the Bulletin's <em>issue</em>
+        date, not the period the data describes. Every quarterly issue
+        republishes the full back-history, so filtering to the newest issue
+        returns ten years of periods at once. The period lives in a separate
+        column entirely.</p>
+      </li>
+      <li>
+        <span class="when">Column mapping</span>
+        <span class="what">The holder column came back full of dates.</span>
+        <p class="how">The first version guessed at which column held the
+        investor class and fell through to <code>df.columns[1]</code>, which is
+        the period. Replaced guessing with a schema inspection step that prints
+        what the API actually returns before any parsing happens.</p>
+      </li>
+      <li>
+        <span class="when">pandas 3.x</span>
+        <span class="what">Every column mapping silently matched nothing.</span>
+        <p class="how">The detection used <code>dtype == object</code> to find
+        text columns. pandas 3 gives string columns a dedicated dtype, so that
+        test matches nothing and the mapping fails without error. Now tested by
+        exclusion — not numeric, not datetime, not boolean.</p>
+      </li>
+      <li>
+        <span class="when">Period selection</span>
+        <span class="what">One quarter showed a single holder with a 98% share.</span>
+        <p class="how">OFS-2's investor-class detail derives from the Fed's Z.1
+        and lags the headline totals by a quarter, so the newest period carries
+        only the fast-reporting classes. Taking the maximum period leaves two or
+        three categories and a share that sums to nonsense. Now picks the newest
+        period carrying a full set.</p>
+      </li>
+      <li>
+        <span class="when">Aggregation</span>
+        <span class="what">Shares summed to well over 100%.</span>
+        <p class="how">The table nests: total public debt equals Fed and
+        government accounts plus total privately held, and privately held is
+        itself the sum of the detail rows. Mixing levels double-counts.
+        Subtotals are now held back and used as a reconciliation check instead —
+        if the detail does not tie to the published total, no shares get
+        reported.</p>
+      </li>
+      <li>
+        <span class="when">Scope</span>
+        <span class="what">Form 13F does not cover Treasuries.</span>
+        <p class="how">13F covers Section 13(f) securities — exchange-traded
+        equities, options, convertible debt. Treasuries are not reportable.
+        Worth writing down because it is the obvious first place to look for
+        institution-level holdings and it cannot work.</p>
+      </li>
+    </ul>
+
+    <h4>Unresolved</h4>
+    <p><strong>"Other investors", $6,825bn.</strong> A residual holding
+    individuals, GSEs, brokers, trusts and corporates. At 17.5% of all debt it
+    is the third-largest line in the table and nobody knows what is in it.
+    Z.1 is the route in.</p>
+    <p><strong>"Mutual funds", $5,123bn.</strong> Blends money market funds
+    holding bills under a year with bond funds holding the long end. Those are
+    different investors with different behaviour, and the aggregate treats them
+    as one. N-PORT and N-MFP separate them.</p>
+    <p><strong>Bank trading books, roughly $500bn.</strong> The gap between the
+    aggregate depository line and what the call reports show.</p>
+
+    <h4>Next</h4>
+    <p>Build the N-PORT loader and get a holder-by-maturity grid for funds,
+    then the same for money funds via N-MFP. The question that grid answers is
+    whether the maturity structure of the debt is matched by the maturity
+    preferences of the people holding it, or whether it is being absorbed by
+    whoever is obliged to hold it.</p>
+  </section>
+
+
+</div>
+</main>
+
+<footer>© 2026 Hanna Boudara</footer>
+</body>
+</html>
