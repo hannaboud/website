@@ -49,12 +49,31 @@
       <td>${r.note}</td>
     </tr>`).join('');
 
+  // ---------------- derive short call (strike + expiry) per week from the blotter ----------------
+  const shortCallByWeek = {};
+  let pendingStrike = null, pendingWeek = null;
+  for (const r of blotter) {
+    if (r.side === 'SELL' && r.instrument !== 'STOCK') {
+      const m = r.note && r.note.match(/Wrote ([\d.]+) call/);
+      pendingStrike = m ? m[1] : null;
+      pendingWeek = r.time;
+    } else if ((r.side === 'EXPIRE' || r.side === 'ASSIGN') && pendingWeek) {
+      shortCallByWeek[pendingWeek] = { strike: pendingStrike, expiry: r.time };
+      pendingWeek = null;
+      pendingStrike = null;
+    }
+  }
+
   // ---------------- ledger table ----------------
   const ledgerBody = document.querySelector('#ledgerTable tbody');
-  ledgerBody.innerHTML = ledger.map(r => `
+  ledgerBody.innerHTML = ledger.map(r => {
+    const sc = shortCallByWeek[r.week_of];
+    const scText = sc ? `${sc.strike} exp ${sc.expiry}` : '—';
+    return `
     <tr>
       <td>${r.week_of}</td>
       <td>${r.shares}</td>
+      <td>${scText}</td>
       <td>${r.stock_mark.toFixed(2)}</td>
       <td class="${r.cash < 0 ? 'neg' : ''}">${r.cash.toFixed(2)}</td>
       <td>${r.lmv.toFixed(2)}</td>
@@ -62,7 +81,9 @@
       <td>${r.initial_margin.toFixed(2)}</td>
       <td>${r.maintenance_margin.toFixed(2)}</td>
       <td class="${r.available_funds < 0 ? 'neg' : ''}">${r.available_funds.toFixed(2)}</td>
-    </tr>`).join('');
+      <td class="${r.excess_equity < 0 ? 'neg' : ''}">${r.excess_equity != null ? r.excess_equity.toFixed(2) : '—'}</td>
+    </tr>`;
+  }).join('');
 
   // ---------------- NAV chart ----------------
   new Chart(document.getElementById('navChart'), {

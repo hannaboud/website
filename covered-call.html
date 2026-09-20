@@ -18,7 +18,6 @@
   </div>
   <nav>
     <a href="covered-call.html" class="active">Blotter</a>
-    <a href="covered-call-data.html">Data</a>
     <a href="covered-call-regime.html">Regime Analysis</a>
     <a href="#writeup">Write-up</a>
     <a href="/">← Hanna Boudara</a>
@@ -84,12 +83,15 @@
   <section id="ledger">
     <h2>Ledger</h2>
     <p>Running position, marked at each week's close. Cash only moves on a blotter event:
-    buying stock, collecting premium, expiring at $0, or assignment at the strike.</p>
+    buying stock, collecting premium, expiring at $0, or assignment at the strike. Short
+    Call shows the strike written that week and its expiry, once it's resolved. Excess
+    equity (NAV minus maintenance margin) is the margin-call line — if it goes negative,
+    the account would be in a margin call.</p>
     <div class="table-wrap">
       <table id="ledgerTable">
         <thead><tr>
-          <th>Week of</th><th>Shares</th><th>Spot</th><th>Cash</th><th>LMV</th>
-          <th>NAV</th><th>Initial</th><th>Maint.</th><th>Available</th>
+          <th>Week of</th><th>Shares</th><th>Short Call</th><th>Spot</th><th>Cash</th><th>LMV</th>
+          <th>NAV</th><th>Initial</th><th>Maint.</th><th>Available</th><th>Excess</th>
         </tr></thead>
         <tbody></tbody>
       </table>
@@ -182,7 +184,7 @@
 
 </main>
 
-<footer>FINTECH 535 · Covered-call backtest · <a href="covered-call-data.html">Data</a> · <a href="/">Hanna Boudara</a></footer>
+<footer>FINTECH 535 · Covered-call backtest · <a href="/">Hanna Boudara</a></footer>
 
 <script src="covered-call-book.js"></script>
 <script src="covered-call-render.js"></script>
