@@ -44,6 +44,7 @@
       <td class="side-${r.side}">${r.side}</td>
       <td>${r.qty}</td>
       <td>${r.fill != null ? Number(r.fill).toFixed(2) : '—'}</td>
+      <td>${r.fill != null ? Number(r.fill).toFixed(2) : '—'}</td>
       <td class="${r.cash_delta < 0 ? 'neg' : ''}">${r.cash_delta != null ? r.cash_delta.toFixed(2) : '—'}</td>
       <td>${r.note}</td>
     </tr>`).join('');

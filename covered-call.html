@@ -74,7 +74,7 @@
       <table id="blotterTable">
         <thead><tr>
           <th>Time</th><th>Instrument</th><th>Side</th><th>Qty</th>
-          <th>Fill</th><th>Cash Δ</th><th>Notes</th>
+          <th>Limit</th><th>Fill</th><th>Cash Δ</th><th>Notes</th>
         </tr></thead>
         <tbody></tbody>
       </table>
@@ -124,6 +124,16 @@
     <p>Reg T is computable without a broker's PM/SPAN engine and isn't broker-dependent. A
     book that survives Reg T's margin requirements survives portfolio margin too — the
     reverse isn't guaranteed.</p>
+
+    <h3>Could this trade actually have been put on?</h3>
+    <p>With $10,000 of starting capital, most weeks in this backtest show <strong>negative
+    available funds</strong> (see the Ledger above) — buying ~$30,000 of AAPL stock requires
+    roughly $15,000 of initial margin at Reg T's 50% rate, more than double what this account
+    started with. In practice, that means: as capitalized here, this account could not
+    actually have put most of these trades on. A real version of this strategy would need
+    starting capital closer to 1.5&times; the worst-case initial margin in the window
+    (roughly $15,000&ndash;$17,000 for AAPL over this period) to clear margin comfortably
+    every week rather than most weeks.</p>
 
     <h3>Known limitations</h3>
     <p>The option leg's daily mark between Monday's write and Friday's resolution is not
