@@ -17,7 +17,6 @@
   </div>
   <nav>
     <a href="covered-call.html">Blotter</a>
-    <a href="covered-call-data.html">Data</a>
     <a href="covered-call-regime.html" class="active">Regime Analysis</a>
     <a href="/">← Hanna Boudara</a>
   </nav>
@@ -26,9 +25,10 @@
 <main>
 
   <section>
-    <p>The identical AAPL strategy — same delta-targeting rule, same vol-regime scaling, same
-    loss penalty — run unchanged on 21 stocks over the same 13-week window. Correlation between
-    a stock's own buy-and-hold return and the strategy's gap relative to it: <strong>r = -0.51</strong>.</p>
+    <p>I wanted to look at the same strategy over different stocks. I chose many stocks that
+    had very different performance over the same amount of time to check if the results were
+    different. Correlation between a stock's own buy-and-hold return and the strategy's gap
+    relative to it: <strong>r = -0.51</strong>.</p>
 
     <h2>By buy-and-hold return bucket</h2>
     <div class="table-wrap">
@@ -81,24 +81,29 @@
       </table>
     </div>
 
-    <h2>What this shows</h2>
+    <h2>What I found</h2>
     <p>The more a stock rallied over the window, the more the covered call strategy tended to
-    lag simple buy-and-hold — visible clearly at the top of the table (PYPL -12.95%, JNJ
+    lag simple buy-and-hold: visible clearly at the top of the table (PYPL -12.95%, JNJ
     -11.70%) and bottom (INTC +0.30%, NKE +3.03%). In stocks that fell or stayed flat, the
     strategy consistently matched or beat plain stock ownership: the premium collected
     cushioned the decline, and assignment was rare, so most weeks kept full exposure to any
     recovery.</p>
-    <p>Two results don't fit that pattern cleanly, worth naming rather than hiding.
-    <strong>XOM</strong> rallied +18.5% yet the strategy still slightly outperformed (+23.3%)
-    — most likely because assignment resets the position at a fresh cost basis the following
-    Monday, and a brief dip right after assignment before the stock continued climbing let the
-    strategy re-enter lower than a single static buy-and-hold. <strong>IBM</strong> is the
-    sharper outlier: down only -4.7%, yet the strategy lost -14.9% — a -10.2-point gap in the
-    wrong direction. IBM was assigned 7 of 13 weeks, far more than any other name, meaning it
-    wasn't a smooth decline but a choppy one: repeated short-lived rallies inside a longer
-    downtrend, each one capping gains right before the stock fell again. That pattern is close
-    to the worst case for this strategy — it caps every rally on the way up without ever
-    getting the benefit of riding a sustained recovery.</p>
+    <p>Two results don't fit that pattern cleanly, worth naming rather than hiding. XOM
+    rallied +18.5% yet the strategy still slightly outperformed (+23.3%) — most likely
+    because assignment resets the position at a fresh cost basis the following Monday, and a
+    brief dip right after assignment before the stock continued climbing let the strategy
+    re-enter lower than a single static buy-and-hold. IBM is the sharper outlier: down only
+    -4.7%, yet the strategy lost -14.9%, a -10.2-point gap in the wrong direction. IBM was
+    assigned 7 of 13 weeks, far more than any other name, meaning it wasn't a smooth decline
+    but a choppy one: repeated short-lived rallies inside a longer downtrend, each one
+    capping gains right before the stock fell again. That pattern is close to the worst case
+    for this strategy, it caps every rally on the way up without ever getting the benefit of
+    riding a sustained recovery.</p>
+    <p>This makes sense; the gain is capped, so when a stock performs extremely well, it is
+    actually not beneficial to run this strategy. I believe that this strategy is perfect
+    when you want to bet on market volatility (you think the IV is higher than it should be
+    so you can collect extra premium), or when you are already long a stock that you think
+    will have a slow decrease in the next few weeks.</p>
   </section>
 
 </main>
