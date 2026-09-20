@@ -99,31 +99,36 @@
   <section id="writeup">
     <h2>Write-up</h2>
 
-    <h3>Why this stock</h3>
-    <p>AAPL was chosen for liquid weeklies and tight, well-quoted markets, which makes the
-    midpoint fill assumption easier to defend than it would be on a thin name.</p>
-
     <h3>How the strike is chosen</h3>
-    <p>The strike is picked by targeting a Black-Scholes delta rather than a fixed dollar
-    distance from spot. The target itself is not constant: it slides between a calm-market
-    value and a high-vol value based on where current implied vol sits in its own recent
-    history, and it's pulled down further — capped at a floor so it can't go arbitrarily low —
-    after a week where the stock lost money. A lower target delta means a strike further
-    out of the money, i.e. more room before the position risks being capped again.</p>
+    <p>To choose the strike, I wanted to find a rule that was actually used in the real
+    world, so I went with the delta targeting strategy. The way this works is that instead
+    of picking a random constant strike, I am targeting a Black-Scholes delta; this delta is
+    chosen based on market volatility and last week's result. If the market is very
+    volatile, then we will choose a lower delta because the premium is already richer even
+    further out; on the other hand, if the market is quite calm, then the delta chosen is
+    higher, since we need to sit closer to the money to collect a meaningful premium at all.
+    As well, the delta is also affected by last week's performance: after a week when the
+    stock lost money, we decrease the delta. Selecting a lower delta target sets the strike
+    price deeper out of the money, providing additional buffer before the portfolio's gains
+    face capping.</p>
 
     <h3>Wait through expiry</h3>
-    <p>No rolls, no buy-to-close. A written call either expires worthless (shares and premium
-    both kept, next week's call written without re-buying) or is assigned (shares delivered
-    at the strike, position flat, restart the following Monday).</p>
+    <p>In this approach, there are no rolls and no buy-to-close trades. The short call
+    option simply runs through expiration: it either finishes out of the money (allowing us
+    to keep the full premium alongside the underlying stock before writing a new contract)
+    or gets exercised (where our shares are called away at the strike price, leaving us
+    neutral until resuming the strategy next week).</p>
 
     <h3>Fill assumption</h3>
-    <p>Every fill uses mid = (BID + ASK) / 2 at the order timestamp. The scatter above tests
-    this directly against real trade prints on the strikes actually used in the backtest.</p>
+    <p>For execution, each order is filled at the midpoint price, calculated as
+    (BID + ASK) / 2 recorded at that specific moment. In the chart above, this approach is
+    evaluated by comparing it directly to actual transaction data for the strikes selected
+    during backtesting.</p>
 
     <h3>Why Reg T, not portfolio margin</h3>
-    <p>Reg T is computable without a broker's PM/SPAN engine and isn't broker-dependent. A
-    book that survives Reg T's margin requirements survives portfolio margin too — the
-    reverse isn't guaranteed.</p>
+    <p>Reg T is an easier-to-compute formula and more reliable without having access to a
+    broker's specific risk management book. With Reg T, we are sure to be in the legal
+    limit without making any guesses.</p>
 
     <h3>Could this trade actually have been put on?</h3>
     <p>With $10,000 of starting capital, most weeks in this backtest show <strong>negative
@@ -135,35 +140,44 @@
     (roughly $15,000&ndash;$17,000 for AAPL over this period) to clear margin comfortably
     every week rather than most weeks.</p>
 
-    <h3>Known limitations</h3>
-    <p>The option leg's daily mark between Monday's write and Friday's resolution is not
-    tracked intraweek — NAV reflects the position's value at each week's close, not a
-    continuous daily mark-to-market of the open short call. The vol-regime signal is also
-    noisier in the earliest weeks of the backtest, before enough implied-vol history has
-    accumulated to make the calm/high-vol comparison statistically meaningful.</p>
+    <h3>Known limitation</h3>
+    <p>This backtest only checks the value of the position twice a week: once on Monday
+    right after buying stock and writing the call, and once on Friday after the call is
+    resolved. In between those two days, the option's real market price is changing
+    constantly: it moves with the stock, with time passing, with volatility, but we don't
+    track any of that. So the NAV chart is accurate at the start and end of each week, but
+    it can't show what happened in the middle; if the stock spiked on a Wednesday and came
+    back down by Friday, that swing simply wouldn't show up. With this exact algorithm, it
+    does not hurt much because we would not be doing any actions during the week anyways,
+    but if we were to be able to change our position during the week, then we would have to
+    change this.</p>
+    <p>The strategy's strike choice also depends on comparing today's volatility to its own
+    recent history. But at the very start of the backtest, there is no "usual" yet to
+    compare against. The first few weeks are judging volatility off just one or two data
+    points, which isn't a very reliable comparison. By the later weeks, once more history
+    has built up, that comparison becomes much more meaningful. So the earliest strike
+    choices in the backtest are a bit shakier than the later ones, simply because the model
+    hadn't warmed up yet.</p>
 
-    <h3>When the strategy actually helps or hurts</h3>
-    <p>Running the identical, unmodified strategy across 21 stocks over the same 13-week
-    window (see the separate <a href="covered-call-regime.html">Regime Analysis</a> page)
-    shows a real, moderate negative correlation
-    (r = -0.51) between a stock's own buy-and-hold return and how much the covered call
-    strategy gives up relative to it. In stocks that fell or stayed flat, the strategy
-    consistently matched or beat simple stock ownership — the collected premium cushioned
-    the decline, and getting assigned was rare, so most weeks kept full exposure to any
-    recovery. In stocks with the strongest run-ups, the strategy gave back the most ground,
-    since more weeks ended in assignment and capped the gain right at the strike.</p>
+    <h3>When does the strategy work, or hurt?</h3>
+    <p>Running the identical strategy across 21 stocks over the same 13-week window (see the
+    separate <a href="covered-call-regime.html">Regime Analysis</a> page) shows a real,
+    moderate negative correlation (r = -0.51) between a stock's own buy-and-hold return and
+    how much the covered call strategy gives up relative to it. In stocks that fell or
+    stayed flat, the strategy consistently matched or beat simple stock ownership: the
+    collected premium cushioned the decline, and getting assigned was rare, so most weeks
+    kept full exposure to any recovery. In stocks with the strongest run-ups, the strategy
+    gave back the most ground, since more weeks ended in assignment and capped the gain
+    right at the strike.</p>
     <p>Two results don't fit that pattern cleanly, and are worth naming rather than hiding.
-    <strong>XOM</strong> rallied +18.5% yet the strategy still slightly outperformed
-    (+23.3%) — most likely because assignment resets the position at a fresh cost basis the
-    following Monday, and if the stock dipped briefly right after an assignment before
-    continuing to climb, re-entering lower can occasionally beat a single static buy-and-hold
-    even in an uptrend. <strong>IBM</strong> is the sharper outlier: the stock was down only
-    -4.7%, yet the strategy lost -14.9%, a -10.2-point gap in the wrong direction. IBM was
-    assigned 7 of 13 weeks — far more than any other name — meaning it wasn't a smooth
-    decline but a choppy one, repeatedly rallying just enough to trigger assignment before
-    falling again. That pattern (frequent short-lived rallies inside a longer downtrend) is
-    close to the worst case for this strategy: it caps the rallies on the way up without
-    ever getting the benefit of riding a sustained recovery.</p>
+    XOM rallied +18.5%, yet the strategy still slightly outperformed (+23.3%). IBM is
+    another outlier: the stock was down only -4.7%, yet the strategy lost -14.9%, a
+    -10.2-point gap in the wrong direction. IBM was assigned 7 of 13 weeks, which is far
+    more than any other name, meaning it wasn't a smooth decline but a choppy one,
+    repeatedly rallying just enough to trigger assignment before falling again. That pattern
+    (frequent short-lived rallies inside a longer downtrend) is close to the worst case for
+    this strategy: it caps the rallies on the way up without ever getting the benefit of
+    riding a sustained recovery.</p>
   </section>
 
 </main>
