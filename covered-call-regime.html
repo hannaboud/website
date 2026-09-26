@@ -25,12 +25,14 @@
 
 <main>
 
-  <section>
+  <section id="intro">
     <p>I wanted to look at the same strategy over different stocks. I chose many stocks that
     had very different performance over the same amount of time to check if the results were
     different. Correlation between a stock's own buy-and-hold return and the strategy's gap
     relative to it: <strong>r = -0.51</strong>.</p>
+  </section>
 
+  <section id="buckets">
     <h2>By buy-and-hold return bucket</h2>
     <div class="table-wrap">
       <table>
@@ -42,93 +44,15 @@
           <tr><td>&gt; +15%</td><td>4</td><td>+19.31%</td><td class="neg">-5.36%</td><td>JNJ, T, XOM, PYPL</td></tr>
           <tr><td>+5% to +15%</td><td>3</td><td>+10.60%</td><td class="neg">-1.57%</td><td>PFE, KO, AAPL</td></tr>
           <tr><td>0% to +5%</td><td>4</td><td>+2.18%</td><td class="neg">-0.27%</td><td>MMM, MO, DIS, BAC</td></tr>
-          <tr><td>-5% to 0%</td><td>1</td><td>-4.66%</td><td class="neg">-10.25%</td><td>IBM</td></tr>
-          <tr><td>-15% to -5%</td><td>7</td><td>-7.82%</td><td>+4.98%</td><td>GE, BA, WMT, C, CVS, UPS, F</td></tr>
-          <tr><td>&lt; -15%</td><td>2</td><td>-22.15%</td><td>+1.67%</td><td>INTC, NKE</td></tr>
+          <tr><td>-5% to 0%</td><td>1</td><td class="neg">-4.66%</td><td class="neg">-10.25%</td><td>IBM</td></tr>
+          <tr><td>-15% to -5%</td><td>7</td><td class="neg">-7.82%</td><td>+4.98%</td><td>GE, BA, WMT, C, CVS, UPS, F</td></tr>
+          <tr><td>&lt; -15%</td><td>2</td><td class="neg">-22.15%</td><td>+1.67%</td><td>INTC, NKE</td></tr>
         </tbody>
       </table>
     </div>
+  </section>
 
-    <h2>Every stock tested</h2>
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          <th>Ticker</th><th>Buy-hold</th><th>Strategy</th><th>Gap</th>
-          <th>Assigned</th><th>Expired</th><th>Skipped</th>
-        </tr></thead>
-        <tbody>
-          <tr><td>PYPL</td><td>+24.21%</td><td>+11.26%</td><td class="neg">-12.95%</td><td>4</td><td>8</td><td>2</td></tr>
-          <tr><td>XOM</td><td>+18.51%</td><td>+23.29%</td><td>+4.78%</td><td>4</td><td>8</td><td>2</td></tr>
-          <tr><td>T</td><td>+17.49%</td><td>+15.92%</td><td class="neg">-1.57%</td><td>1</td><td>10</td><td>3</td></tr>
-          <tr><td>JNJ</td><td>+17.03%</td><td>+5.33%</td><td class="neg">-11.70%</td><td>4</td><td>8</td><td>2</td></tr>
-          <tr><td>AAPL</td><td>+12.19%</td><td>+9.14%</td><td class="neg">-3.05%</td><td>6</td><td>6</td><td>2</td></tr>
-          <tr><td>KO</td><td>+10.68%</td><td>+6.38%</td><td class="neg">-4.30%</td><td>3</td><td>9</td><td>2</td></tr>
-          <tr><td>PFE</td><td>+8.93%</td><td>+11.58%</td><td>+2.65%</td><td>2</td><td>10</td><td>2</td></tr>
-          <tr><td>BAC</td><td>+3.02%</td><td>+5.62%</td><td>+2.60%</td><td>1</td><td>11</td><td>2</td></tr>
-          <tr><td>DIS</td><td>+2.98%</td><td>+2.82%</td><td class="neg">-0.16%</td><td>2</td><td>10</td><td>2</td></tr>
-          <tr><td>MO</td><td>+1.42%</td><td class="neg">-3.81%</td><td class="neg">-5.23%</td><td>2</td><td>10</td><td>2</td></tr>
-          <tr><td>MMM</td><td>+1.28%</td><td>+2.98%</td><td>+1.70%</td><td>2</td><td>10</td><td>2</td></tr>
-          <tr><td>IBM</td><td class="neg">-4.66%</td><td class="neg">-14.91%</td><td class="neg">-10.25%</td><td>7</td><td>5</td><td>2</td></tr>
-          <tr><td>F</td><td class="neg">-5.05%</td><td class="neg">-0.71%</td><td>+4.34%</td><td>0</td><td>12</td><td>2</td></tr>
-          <tr><td>UPS</td><td class="neg">-5.81%</td><td>+3.08%</td><td>+8.89%</td><td>3</td><td>9</td><td>2</td></tr>
-          <tr><td>CVS</td><td class="neg">-6.71%</td><td class="neg">-0.50%</td><td>+6.21%</td><td>1</td><td>11</td><td>2</td></tr>
-          <tr><td>C</td><td class="neg">-7.07%</td><td class="neg">-1.93%</td><td>+5.14%</td><td>2</td><td>10</td><td>2</td></tr>
-          <tr><td>WMT</td><td class="neg">-8.28%</td><td class="neg">-3.14%</td><td>+5.14%</td><td>2</td><td>10</td><td>2</td></tr>
-          <tr><td>BA</td><td class="neg">-9.32%</td><td class="neg">-7.56%</td><td>+1.76%</td><td>2</td><td>10</td><td>2</td></tr>
-          <tr><td>GE</td><td class="neg">-12.51%</td><td class="neg">-9.14%</td><td>+3.37%</td><td>2</td><td>10</td><td>2</td></tr>
-          <tr><td>NKE</td><td class="neg">-20.84%</td><td
-cat > covered-call-regime.html << 'PYEOF'
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Multi-Stock Regime Analysis — Hanna Boudara</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="covered-call-style.css">
-</head>
-<body>
-
-<header>
-  <div class="hi">
-    <div class="wp">FINTECH 535 · COVERED-CALL BACKTEST</div>
-    <h1 class="site-name">Multi-Stock <em>Regime Analysis</em></h1>
-    <p class="site-tagline">Same strategy, unchanged, run across 21 real stocks over the same 13-week window</p>
-  </div>
-  <nav>
-    <a href="covered-call.html">Blotter</a>
-    <a href="covered-call-data.html">Data</a>
-    <a href="covered-call-regime.html" class="active">Regime Analysis</a>
-    <a href="/">← Hanna Boudara</a>
-  </nav>
-</header>
-
-<main>
-
-  <section>
-    <p>I wanted to look at the same strategy over different stocks. I chose many stocks that
-    had very different performance over the same amount of time to check if the results were
-    different. Correlation between a stock's own buy-and-hold return and the strategy's gap
-    relative to it: <strong>r = -0.51</strong>.</p>
-
-    <h2>By buy-and-hold return bucket</h2>
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          <th>Buy-hold range</th><th>N stocks</th><th>Avg buy-hold</th>
-          <th>Avg strategy gap</th><th>Tickers</th>
-        </tr></thead>
-        <tbody>
-          <tr><td>&gt; +15%</td><td>4</td><td>+19.31%</td><td class="neg">-5.36%</td><td>JNJ, T, XOM, PYPL</td></tr>
-          <tr><td>+5% to +15%</td><td>3</td><td>+10.60%</td><td class="neg">-1.57%</td><td>PFE, KO, AAPL</td></tr>
-          <tr><td>0% to +5%</td><td>4</td><td>+2.18%</td><td class="neg">-0.27%</td><td>MMM, MO, DIS, BAC</td></tr>
-          <tr><td>-5% to 0%</td><td>1</td><td>-4.66%</td><td class="neg">-10.25%</td><td>IBM</td></tr>
-          <tr><td>-15% to -5%</td><td>7</td><td>-7.82%</td><td>+4.98%</td><td>GE, BA, WMT, C, CVS, UPS, F</td></tr>
-          <tr><td>&lt; -15%</td><td>2</td><td>-22.15%</td><td>+1.67%</td><td>INTC, NKE</td></tr>
-        </tbody>
-      </table>
-    </div>
-
+  <section id="stocks">
     <h2>Every stock tested</h2>
     <div class="table-wrap">
       <table>
@@ -161,7 +85,9 @@ cat > covered-call-regime.html << 'PYEOF'
         </tbody>
       </table>
     </div>
+  </section>
 
+  <section id="findings">
     <h2>What I found</h2>
     <p>The more a stock rallied over the window, the more the covered call strategy tended to
     lag simple buy-and-hold: visible clearly at the top of the table (PYPL -12.95%, JNJ
