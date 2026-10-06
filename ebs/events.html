@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Events | EBS Duke</title>
+  <meta name="description" content="Upcoming events, info sessions and deadlines from the European Business Society at Duke.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main>
+    <section class="page-head"><div class="wrap">
+      <h1>Events</h1>
+      <p>Info sessions, workshops, socials and application deadlines.</p>
+    </div></section>
+
+    <section class="section"><div class="wrap">
+      <div class="filters" id="filters" aria-label="Filter events by type"></div>
+      <div class="cal-bar">
+        <h2 id="cal-title" aria-live="polite"></h2>
+        <div class="cal-nav">
+          <button type="button" id="cal-prev" aria-label="Previous month">&lsaquo;</button>
+          <button type="button" id="cal-next" aria-label="Next month">&rsaquo;</button>
+        </div>
+      </div>
+      <div class="cal" id="calendar"></div>
+      <div class="cal-detail" id="cal-detail" aria-live="polite"></div>
+    </div></section>
+
+    <section class="section white"><div class="wrap">
+      <h2>Upcoming</h2>
+      <div class="event-list" id="event-list"></div>
+    </div></section>
+
+    <section class="section"><div class="wrap">
+      <h2>Past events</h2>
+      <div class="event-list" id="past-events"></div>
+    </div></section>
+  </main>
+
+  <footer id="site-footer"></footer>
+  <script src="data/site-data.js"></script>
+  <script src="js/site.js"></script>
+</body>
+</html>

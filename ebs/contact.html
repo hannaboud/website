@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contact | EBS Duke</title>
+  <meta name="description" content="Get in touch with the European Business Society at Duke.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main>
+    <section class="page-head"><div class="wrap">
+      <h1>Contact</h1>
+      <p>Students with questions and companies with projects: write to us.</p>
+    </div></section>
+
+    <section class="section"><div class="wrap">
+      <div class="split">
+        <form class="form" id="contact-form">
+          <label>Your name <input name="name" required autocomplete="name"></label>
+          <label>Your email <input name="email" type="email" required autocomplete="email"></label>
+          <label>I am a
+            <select name="type">
+              <option>Duke student</option>
+              <option>Company</option>
+              <option>Other</option>
+            </select>
+          </label>
+          <label>Message <textarea name="message" required></textarea></label>
+          <div><button class="btn btn-navy" type="submit">Open in my email app</button></div>
+          <p class="muted">This opens your email app with the message filled in, ready to send.</p>
+        </form>
+        <div>
+          <h2>Or email us directly</h2>
+          <p><a class="text-link" data-email href="#"></a></p>
+          <p>We usually reply within a few days during the semester.</p>
+        </div>
+      </div>
+    </div></section>
+  </main>
+
+  <footer id="site-footer"></footer>
+  <script src="data/site-data.js"></script>
+  <script src="js/site.js"></script>
+</body>
+</html>
