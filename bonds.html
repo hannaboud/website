@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Treasury market dashboard | Hanna Boudara</title>
+<meta name="description" content="A teaching dashboard for the U.S. Treasury market: yields, spreads, inflation, scenarios and a Monte Carlo simulation.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+:root{--ink:#14213D;--blue:#1D4E89;--amber:#C8811A;--gray:#8A93A3;--wash:#EAF3FB;--panel:#F6F8FB;--line:#DCE3EC;
+  --green:#2E7D5B;--red:#B3372E;--serif:'Source Serif 4',Georgia,serif;--sans:'Libre Franklin','Helvetica Neue',Arial,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5}
+.wrap{max-width:1240px;margin:0 auto;padding:28px 22px 60px}
+a{color:var(--blue)}
+header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+h1{font-family:var(--serif);font-weight:600;font-size:2.3rem;letter-spacing:-0.01em;margin:6px 0 2px}
+h2{font-family:var(--serif);font-weight:600;font-size:1.55rem;margin:34px 0 14px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+h3{font-family:var(--serif);font-weight:600;font-size:1.2rem;margin:26px 0 10px}
+.sub{color:#4A5568;font-size:.92rem;margin:0 0 4px}
+.home{font-size:.9rem;text-decoration:none}
+.switch{font-size:.92rem;display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.switch input{width:18px;height:18px;accent-color:var(--blue)}
+nav.tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin:22px 0 22px}
+nav.tabs button{font:500 1.02rem var(--sans);background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px;color:#4A5568;cursor:pointer}
+nav.tabs button[aria-selected="true"]{color:var(--blue);border-bottom-color:var(--blue)}
+nav.tabs button:focus-visible,.seg button:focus-visible,button.plain:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+section.tab{display:none}section.tab.on{display:block}
+.grid{display:grid;gap:14px}
+.g6{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.g2{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
+.split{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:20px;align-items:start}
+@media(max-width:860px){.split{grid-template-columns:minmax(0,1fr)}}
+.metric{background:var(--panel);border-top:2px solid var(--ink);border-radius:0 0 6px 6px;padding:10px 14px 9px}
+.metric .l{font-size:.85rem;color:#4A5568}
+.metric .v{font-size:1.5rem;font-weight:500;font-variant-numeric:tabular-nums}
+.metric .d{font-size:.84rem;color:#4A5568;font-variant-numeric:tabular-nums}
+.metric .d.up{color:var(--red)}.metric .d.down{color:var(--green)}
+.note{background:var(--wash);border-left:3px solid var(--blue);border-radius:0 6px 6px 0;padding:13px 18px 12px;margin:12px 0;
+  font-family:var(--serif);font-size:1.02rem;line-height:1.62}
+.note .t{font:600 .92rem var(--sans);color:var(--blue);margin-bottom:5px}
+.note p{margin:0 0 9px}.note p:last-child,.note ul:last-child,.note ol:last-child{margin-bottom:0}
+.note ul,.note ol{margin:4px 0 9px;padding-left:20px}
+body.hide-notes .note{display:none}
+.read{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:13px 18px;margin:12px 0;line-height:1.6}
+.read p{margin:0 0 8px}.read p:last-child{margin:0}
+.status{border-radius:6px;padding:10px 14px;margin:10px 0;font-size:.96rem}
+.status.ok{background:#E6F4EC;color:#1F5A41}.status.warn{background:#FCF1DC;color:#7A4E0B}
+.status.bad{background:#FBE9E7;color:#8A2A22}.status.info{background:var(--wash);color:var(--ink)}
+.cap{font-size:.85rem;color:#4A5568;margin:6px 0}
+.chart{width:100%;min-height:340px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;flex-wrap:wrap}
+.seg button{font:500 .9rem var(--sans);background:#fff;border:0;border-right:1px solid var(--line);padding:7px 13px;cursor:pointer;color:var(--ink)}
+.seg button:last-child{border-right:0}.seg button.on{background:var(--blue);color:#fff}
+.controls{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-end;margin:6px 0 14px}
+.controls label{font-size:.85rem;color:#4A5568;display:flex;flex-direction:column;gap:5px}
+.controls select,.controls input[type=range]{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink)}
+.controls input[type=range]{padding:0;accent-color:var(--blue);width:170px}
+.checks{display:flex;gap:12px;flex-wrap:wrap;font-size:.92rem}
+.checks input{accent-color:var(--blue)}
+button.plain{font:500 .9rem var(--sans);background:#fff;border:1px solid var(--blue);color:var(--blue);border-radius:6px;padding:8px 14px;cursor:pointer}
+.tablewrap{overflow-x:auto;margin:10px 0}
+table{border-collapse:collapse;width:100%;font-size:.92rem;font-variant-numeric:tabular-nums}
+th,td{padding:7px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left;font-weight:500}
+th{font-weight:600;color:#4A5568;font-size:.84rem;background:var(--panel)}
+.formula{font-family:var(--serif);font-size:1.25rem;text-align:center;margin:14px 0}
+details{margin:14px 0}summary{cursor:pointer;font-weight:500;color:var(--blue)}
+footer{margin-top:44px;padding-top:14px;border-top:1px solid var(--line);font-size:.85rem;color:#4A5568}
+.banner{background:#FCF1DC;color:#7A4E0B;border-radius:6px;padding:10px 14px;margin:12px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <a class="home" href="/">Hanna Boudara</a>
+      <h1>Treasury market dashboard</h1>
+      <p class="sub" id="asof">Loading market data</p>
+    </div>
+    <label class="switch"><input type="checkbox" id="notesToggle" checked> Show explanations</label>
+  </header>
+  <div id="banner"></div>
+  <nav class="tabs" role="tablist" id="tabs"></nav>
+  <main id="main"></main>
+  <footer>For teaching. Scenarios and simulations are illustrations, not forecasts or investment advice.
+    Data: U.S. Treasury, BLS and ICE via FRED, refreshed each weekday.</footer>
+</div>
+
+<script>
+"use strict";
+/* ====================================================================
+   1. SETTINGS YOU CAN EDIT
+   ==================================================================== */
+const DATA_URL = "bonds-data.json";
+const MATS = [["DGS3MO",0.25,"3 mo"],["DGS6MO",0.5,"6 mo"],["DGS1",1,"1 yr"],["DGS2",2,"2 yr"],["DGS5",5,"5 yr"],
+              ["DGS7",7,"7 yr"],["DGS10",10,"10 yr"],["DGS20",20,"20 yr"],["DGS30",30,"30 yr"]];
+const PRE = ["2016-01-01","2019-12-31"], PRE_LABEL = "2016 to 2019 average";
+const RANGES = {"1M":30,"6M":182,"1Y":365,"5Y":1826,"10Y":3652,"Max":null};
+// Scenarios: yield changes in basis points at 3 months, 2, 5, 10 and 30 years.
+// THESE NUMBERS ARE PLACEHOLDERS. Replace them with the professor's.
+const KEY_MATS = [0.25,2,5,10,30];
+const SCENARIOS = {
+  "Soft landing":{shifts:[-75,-60,-40,-25,-10],story:"Inflation cools and the Fed cuts rates. Short-term yields fall the most, so the curve steepens and bond prices rise."},
+  "Sticky inflation":{shifts:[25,50,60,70,75],story:"Inflation stays high and rate cuts are priced out. Yields rise across the curve and every bond loses value."},
+  "Fiscal crisis":{shifts:[0,40,90,150,200],story:"Investors demand more to hold long-term government debt. Long yields jump and long bonds fall the hardest."}
+};
+const BONDS = [2,10,30];
+const C = {ink:"#14213D",blue:"#1D4E89",amber:"#C8811A",gray:"#8A93A3",green:"#2E7D5B",red:"#B3372E",purple:"#6B5CA5"};
+
+/* ====================================================================
+   2. TEACHING TEXT (edit freely)
+   ==================================================================== */
+const SPREAD_INFO = {
+  "10 yr minus 2 yr":{ids:["DGS10","DGS2"],
+    what:"The extra yield investors get for lending to the government for 10 years instead of 2.",
+    means:"The 2-year yield follows where markets think the Fed will set rates over the next two years. The 10-year also reflects long-run growth, inflation and the extra pay investors want for tying money up. So this spread is the market's view of the future compared with today.",
+    healthy:"There's no official healthy number. The normal state is a positive spread, because lending for longer is riskier and should pay more. A negative spread (an inverted curve) means markets expect rates to fall, usually because they expect the economy to weaken. Inversions have come before most U.S. recessions of the past 50 years, though not every inversion was followed by one."},
+  "10 yr minus 3 mo":{ids:["DGS10","DGS3MO"],
+    what:"The 10-year yield minus the 3-month Treasury bill yield.",
+    means:"The 3-month bill sits almost exactly at the Fed's current policy rate, so this compares long-term yields with policy today. Many economists prefer it to the 10 yr minus 2 yr as a recession signal, and the New York Fed uses it in its recession probability model.",
+    healthy:"Positive is normal. When it's negative, short-term borrowing costs more than long-term borrowing, which squeezes banks (they borrow short and lend long) and tends to slow lending."},
+  "30 yr minus 5 yr":{ids:["DGS30","DGS5"],
+    what:"The 30-year yield minus the 5-year yield: how steep the long end of the curve is.",
+    means:"It isolates what investors demand for very long lending. It tends to widen when markets worry about long-run inflation or about how much debt the government will have to sell.",
+    healthy:"A moderate positive number is normal. A fast rise while short yields are steady is a sign that investors are asking for more compensation to hold long-term government debt."}
+};
+const CREDIT_INFO = {
+  "Investment grade":{id:"BAMLC0A0CM",text:"The extra yield on bonds from financially strong companies, over Treasuries of similar maturity. It's the price of the risk that a solid company runs into trouble. It moves slowly in calm markets and jumps when investors fear a recession."},
+  "High yield":{id:"BAMLH0A0HYM2",text:"The extra yield on bonds from riskier companies (rated below investment grade), over Treasuries. It's the market's fear gauge for corporate defaults. It's several times larger than the investment-grade spread and reacts much more sharply to bad news."}
+};
+const GLOSSARY = [
+  ["Yield","the annual return you earn if you buy a bond today and hold it until it's repaid."],
+  ["Basis point (bp)","one hundredth of a percentage point. A move from 4.00% to 4.25% is 25 bp."],
+  ["Maturity","how long until the bond is repaid, from 3 months to 30 years."],
+  ["Yield curve","today's yields lined up from the shortest maturity to the longest."],
+  ["Price and yield","they move in opposite directions. When yields rise, existing bonds with lower coupons are worth less."],
+  ["Spread","the gap between two yields. It shows how the market prices one thing relative to another."],
+  ["Duration","how sensitive a bond's price is to yields. A duration of 8 means roughly an 8% price fall for a 1 point rise in yield."],
+  ["Convexity","a correction to duration, because the price-yield relationship is curved, not straight."],
+  ["Real yield","the yield after taking out inflation, measured with inflation-protected Treasuries (TIPS)."],
+  ["Breakeven inflation","the average inflation rate the bond market is pricing in over a given period."],
+  ["Percentile","where today's value ranks against history. The 90th percentile means higher than on 90% of past days."]
+];
+
+/* ====================================================================
+   3. DATA HELPERS
+   ==================================================================== */
+let D = null; const cache = {};
+const $ = id => document.getElementById(id);
+function ser(id){
+  if(cache[id]!==undefined) return cache[id];
+  const a = D.series[id]; if(!a) return cache[id]=null;
+  const t=[],v=[]; for(let i=0;i<a.length;i++) if(a[i]!=null){t.push(D.dates[i]);v.push(a[i]);}
+  return cache[id] = t.length?{t,v}:null;
+}
+function combine(idA,idB,f){
+  const a=D.series[idA], b=D.series[idB]; if(!a||!b) return null;
+  const t=[],v=[]; for(let i=0;i<a.length;i++) if(a[i]!=null&&b[i]!=null){t.push(D.dates[i]);v.push(f(a[i],b[i]));}
+  return t.length?{t,v}:null;
+}
+function shiftDate(d,days){const x=new Date(d+"T00:00:00Z");x.setUTCDate(x.getUTCDate()+days);return x.toISOString().slice(0,10);}
+function asof(s,d){let lo=0,hi=s.t.length-1,ans=-1;while(lo<=hi){const m=(lo+hi)>>1;if(s.t[m]<=d){ans=m;lo=m+1;}else hi=m-1;}return ans<0?NaN:s.v[ans];}
+const last = s => s.v[s.v.length-1], lastDate = s => s.t[s.t.length-1];
+function clip(s,key){const days=RANGES[key];if(!days) return s;const start=shiftDate(lastDate(s),-days);let i=s.t.findIndex(x=>x>=start);if(i<0)i=0;return {t:s.t.slice(i),v:s.v.slice(i)};}
+const mean = a => a.reduce((x,y)=>x+y,0)/a.length;
+function sd(a){const m=mean(a);return Math.sqrt(a.reduce((x,y)=>x+(y-m)*(y-m),0)/(a.length-1));}
+function bench(s){
+  const now=last(s), pre=[]; let hi=-Infinity,lo=Infinity,hiD="",loD="",below=0;
+  for(let i=0;i<s.v.length;i++){const v=s.v[i],t=s.t[i];
+    if(t>=PRE[0]&&t<=PRE[1]) pre.push(v);
+    if(v>hi){hi=v;hiD=t;} if(v<lo){lo=v;loD=t;} if(v<now) below++;}
+  return {now,pre:pre.length>200?mean(pre):NaN,long:mean(s.v),since:+s.t[0].slice(0,4),pct:100*below/s.v.length,hi,hiD,lo,loD};
+}
+function curveOn(d){const out=[];for(const [id,m,lab] of MATS){const s=ser(id);if(!s)continue;const y=asof(s,d);if(!isNaN(y)) out.push({m,lab,y});}return out;}
+function interp(x,xs,ys){if(x<=xs[0])return ys[0];for(let i=1;i<xs.length;i++) if(x<=xs[i]) return ys[i-1]+(ys[i]-ys[i-1])*(x-xs[i-1])/(xs[i]-xs[i-1]);return ys[ys.length-1];}
+const scenShift = (m,name) => interp(m,KEY_MATS,SCENARIOS[name].shifts);
+const matLabel = m => MATS.find(x=>x[1]===m)[2], matId = m => MATS.find(x=>x[1]===m)[0];
+const fx = (v,d=2) => (v==null||isNaN(v))?"n/a":v.toFixed(d);
+const sg = (v,d=0) => (v==null||isNaN(v))?"n/a":(v>=0?"+":"")+v.toFixed(d);
+const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const monYr = d => MON[+d.slice(5,7)-1]+" "+d.slice(0,4);
+const longDate = d => new Date(d+"T00:00:00Z").toLocaleDateString("en-US",{timeZone:"UTC",month:"long",day:"numeric",year:"numeric"});
+function pctile(sorted,p){const i=(sorted.length-1)*p/100,lo=Math.floor(i),hi=Math.ceil(i);return sorted[lo]+(sorted[hi]-sorted[lo])*(i-lo);}
+
+/* ====================================================================
+   4. BOND MATH
+   ==================================================================== */
+function bondPrice(y,c,years){const n=Math.round(years*2),r=y/200;let p=0;for(let t=1;t<=n;t++)p+=(c/2)/Math.pow(1+r,t);return p+100/Math.pow(1+r,n);}
+function durConv(y,years){const h=0.01,dy=0.0001,p0=bondPrice(y,y,years),up=bondPrice(y+h,y,years),dn=bondPrice(y-h,y,years);
+  return [(dn-up)/(2*p0*dy),(up+dn-2*p0)/(p0*dy*dy)];}
+function priceImpact(y,bp,years){const [dur,conv]=durConv(y,years),dy=bp/10000;
+  return {bp,dur,conv,durOnly:-dur*dy*100,durConv:(-dur*dy+0.5*conv*dy*dy)*100,exact:(bondPrice(y+bp/100,y,years)/100-1)*100};}
+
+/* ====================================================================
+   5. MONTE CARLO
+   ==================================================================== */
+function calibrate(v,model){
+  const n=v.length-1;
+  if(model==="vasicek"){
+    let sx=0,sy=0,sxx=0,sxy=0;for(let i=0;i<n;i++){sx+=v[i];sy+=v[i+1];sxx+=v[i]*v[i];sxy+=v[i]*v[i+1];}
+    const b=(n*sxy-sx*sy)/(n*sxx-sx*sx),a=(sy-b*sx)/n;
+    if(b>0&&b<1){let ss=0;for(let i=0;i<n;i++){const e=v[i+1]-(a+b*v[i]);ss+=e*e;}
+      const s=Math.sqrt(ss/(n-2)),kappa=-Math.log(b)*252;
+      return {model:"vasicek",a,b,sd:s,kappa,theta:a/(1-b),sigma:s*Math.sqrt(252),half:Math.log(2)/kappa};}
+  }
+  const d=[];for(let i=0;i<n;i++)d.push(v[i+1]-v[i]);const s=sd(d);
+  return {model:"walk",a:0,b:1,sd:s,sigma:s*Math.sqrt(252),fellBack:model==="vasicek"};
+}
+function rng(seed){let a=seed>>>0;const u=()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
+  return ()=>{let x=0;while(x===0)x=u();return Math.sqrt(-2*Math.log(x))*Math.cos(2*Math.PI*u());};}
+function simulate(y0,p,nDays,nPaths,seed){
+  const z=rng(seed),cur=new Float64Array(nPaths).fill(y0),mx=new Float64Array(nPaths).fill(y0),mn=new Float64Array(nPaths).fill(y0);
+  const q={5:[y0],25:[y0],50:[y0],75:[y0],95:[y0]},samples=[[y0],[y0],[y0]];
+  for(let t=0;t<nDays;t++){
+    for(let i=0;i<nPaths;i++){const x=p.a+p.b*cur[i]+p.sd*z();cur[i]=x;if(x>mx[i])mx[i]=x;if(x<mn[i])mn[i]=x;}
+    const s=Float64Array.from(cur).sort();for(const k in q)q[k].push(pctile(s,+k));
+    for(let j=0;j<3;j++)samples[j].push(cur[j]);
+  }
+  return {final:Array.from(cur),mx,mn,q,samples};
+}
+function businessDays(start,n){const out=[start];let d=start;while(out.length<n+1){d=shiftDate(d,1);const w=new Date(d+"T00:00:00Z").getUTCDay();if(w!==0&&w!==6)out.push(d);}return out;}
+
+/* ====================================================================
+   6. UI BUILDING BLOCKS
+   ==================================================================== */
+const note = (title,html) => `<div class="note"><div class="t">${title}</div>${html.startsWith("<")?html:"<p>"+html+"</p>"}</div>`;
+const reading = html => `<div class="read">${html}</div>`;
+const statusBox = (cls,html) => `<div class="status ${cls}">${html}</div>`;
+function metric(label,value,delta,dir){return `<div class="metric"><div class="l">${label}</div><div class="v">${value}</div>${delta?`<div class="d ${dir||""}">${delta}</div>`:""}</div>`;}
+function table(head,rows){return `<div class="tablewrap"><table><thead><tr>${head.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;}
+function seg(id,options,current){return `<div class="seg" id="${id}">${options.map(o=>`<button type="button" data-v="${o}" class="${o===current?"on":""}">${o}</button>`).join("")}</div>`;}
+function onSeg(id,fn){$(id).addEventListener("click",e=>{const b=e.target.closest("button");if(b)fn(b.dataset.v);});}
+const benchRow = (b,unit,f) => `<div class="grid g3">${metric("Today",f(b.now)+unit)}${metric(PRE_LABEL,f(b.pre)+(isNaN(b.pre)?"":unit))}${metric("Average since "+b.since,f(b.long)+unit)}</div>`;
+const LAYOUT = {font:{family:"Libre Franklin, Helvetica Neue, Arial, sans-serif",color:C.ink,size:13},
+  colorway:[C.blue,C.amber,C.green,C.red,C.purple,C.gray],paper_bgcolor:"#fff",plot_bgcolor:"#fff",
+  margin:{l:52,r:16,t:16,b:40},legend:{orientation:"h",y:1.14},hovermode:"x unified"};
+const AXIS = {gridcolor:"#EEF1F5",linecolor:"#C9D1DC",zeroline:false};
+function plot(id,traces,opts={}){
+  const layout=Object.assign({},LAYOUT,{height:opts.height||360,
+    xaxis:Object.assign({},AXIS,opts.xaxis||{}),yaxis:Object.assign({title:{text:opts.y||""}},AXIS,opts.yaxis||{}),
+    shapes:[],annotations:[]},opts.layout||{});
+  if(opts.zero) layout.shapes.push({type:"line",xref:"paper",x0:0,x1:1,y0:0,y1:0,line:{color:C.ink,width:1}});
+  for(const r of (opts.refs||[])) if(!isNaN(r.v)){
+    layout.shapes.push({type:"line",xref:"paper",x0:0,x1:1,y0:r.v,y1:r.v,line:{color:C.amber,width:1.2,dash:r.dash||"dash"}});
+    layout.annotations.push({xref:"paper",x:0.01,y:r.v,text:r.label,showarrow:false,yshift:9,xanchor:"left",font:{size:11,color:C.amber}});}
+  for(const v of (opts.vlines||[])){
+    layout.shapes.push({type:"line",yref:"paper",y0:0,y1:1,x0:v.x,x1:v.x,line:{color:C.ink,width:1,dash:v.dash||"solid"}});
+    layout.annotations.push({yref:"paper",y:1,x:v.x,text:v.label,showarrow:false,textangle:v.angle||0,xanchor:"left",yanchor:"top",font:{size:11}});}
+  Plotly.react(id,traces,layout,{displayModeBar:false,responsive:true});
+}
+const lineTrace = (s,name,extra={}) => Object.assign({x:s.t,y:s.v,name,mode:"lines",type:"scatter"},extra);
+function histogram(values,bins){
+  let lo=Math.min(...values),hi=Math.max(...values);if(hi===lo)hi=lo+1;const w=(hi-lo)/bins,c=new Array(bins).fill(0);
+  for(const v of values){let i=Math.floor((v-lo)/w);if(i>=bins)i=bins-1;c[i]++;}
+  return {x:c.map((_,i)=>lo+w*(i+0.5)),y:c,w};
+}
+
+/* ====================================================================
+   7. TABS
+   ==================================================================== */
+const state = {yRange:"1Y",yPick:["2 yr","10 yr","30 yr"],sRange:"10Y",iRange:"5Y",scen:Object.keys(SCENARIOS)[0],
+               mcMat:10,mcH:6,mcModel:"vasicek",mcLook:5,mcN:5000,mcSeed:42};
+const TABS = {Overview:renderOverview,Yields:renderYields,Spreads:renderSpreads,Inflation:renderInflation,Scenarios:renderScenarios,"Monte Carlo":renderMC};
+let L, today, monthAgo, yearAgo;   // last date and three curves
+const yAt = (curve,m) => {const p=curve.find(x=>x.m===m);return p?p.y:NaN;};
+
+function renderOverview(el){
+  const slope=combine("DGS10","DGS2",(a,b)=>(a-b)*100), sb=bench(slope), slopeThen=asof(slope,shiftDate(L,-30));
+  let cards="";
+  for(const m of [0.25,2,10,30]){const y=yAt(today,m);if(isNaN(y))continue;const d=(y-yAt(monthAgo,m))*100;
+    cards+=metric(matLabel(m)+" yield",fx(y)+"%",sg(d)+" bp, 1 month",d>0?"up":"down");}
+  cards+=metric("10 yr minus 2 yr",sg(sb.now)+" bp",sg(sb.now-slopeThen)+" bp, 1 month");
+  const be=ser("T10YIE");
+  if(be) cards+=metric("10 yr breakeven inflation",fx(last(be))+"%",sg((last(be)-asof(be,shiftDate(L,-30)))*100)+" bp, 1 month");
+  const d10=(yAt(today,10)-yAt(monthAgo,10))*100,d2=(yAt(today,2)-yAt(monthAgo,2))*100,yb=bench(ser("DGS10"));
+  const rows=[];
+  for(const [id,,lab] of MATS){const s=ser(id);if(!s)continue;const n=last(s),ytd=asof(s,(+L.slice(0,4)-1)+"-12-31");
+    rows.push([lab,fx(n)+"%",sg((n-s.v[s.v.length-2])*100),sg((n-asof(s,shiftDate(L,-7)))*100),sg((n-asof(s,shiftDate(L,-30)))*100),
+      sg((n-asof(s,shiftDate(L,-91)))*100),sg((n-ytd)*100),sg((n-asof(s,shiftDate(L,-365)))*100)]);}
+  el.innerHTML=`<div class="grid g6">${cards}</div>
+  <div class="cap">Yield changes are red when yields rose, because rising yields mean falling bond prices.</div>
+  ${reading(`<p><b>What happened.</b> Over the past month the 10-year yield has ${d10>0?"risen":"fallen"} ${Math.abs(d10).toFixed(0)} bp and the 2-year has moved ${sg(d2)} bp, so the curve has ${sb.now>slopeThen?"steepened":"flattened"} by ${Math.abs(sb.now-slopeThen).toFixed(0)} bp. Against a year ago, the 10-year is ${sg((yAt(today,10)-yAt(yearAgo,10))*100)} bp.</p>
+  <p><b>How unusual is that?</b> The 10-year is at ${fx(yb.now)}%, against a ${PRE_LABEL} of ${fx(yb.pre)}% and higher than on ${yb.pct.toFixed(0)}% of days since ${yb.since}. The 10 yr minus 2 yr spread is ${sg(sb.now)} bp, against ${sg(sb.pre)} bp in 2016 to 2019.</p>`)}
+  <div class="split"><div><h3>Yield curve</h3><div id="ovCurve" class="chart"></div></div>
+  <div><h3>Change in yields (bp)</h3>${table(["","Latest","1 day","1 week","1 month","3 months","Year to date","1 year"],rows)}</div></div>
+  <div class="grid g2">${note("How to read the yield curve",`<p>Each point is the yield on a Treasury of that maturity. Normally the line slopes up, because investors want more pay to lend for longer.</p><ul>
+    <li><b>Whole curve moves up:</b> borrowing gets more expensive for everyone, and existing bonds lose value.</li>
+    <li><b>Short end moves:</b> markets changed their mind about what the Fed will do soon.</li>
+    <li><b>Long end moves:</b> markets changed their view on long-run inflation, growth, or how much government debt they're willing to hold.</li>
+    <li><b>Curve slopes down (inverted):</b> markets expect rates to fall, usually because they expect a slowdown.</li></ul>`)}
+  ${note("Why this matters outside the bond market","Treasury yields are the base rate for the whole economy. Mortgage rates follow the 10-year, company borrowing is priced as a spread over Treasuries, and stock valuations fall when the yield on safe bonds rises. A rise in yields also raises the government's own interest bill.")}</div>
+  <div class="note"><details><summary>Glossary: the terms used in this dashboard</summary><ul>${GLOSSARY.map(g=>`<li><b>${g[0]}:</b> ${g[1]}</li>`).join("")}</ul></details></div>`;
+  const tr=(c,name,extra)=>Object.assign({x:c.map(p=>p.lab),y:c.map(p=>p.y),name,type:"scatter"},extra);
+  plot("ovCurve",[tr(yearAgo,"1 year ago",{mode:"lines",line:{width:1.5,dash:"dot",color:C.gray}}),
+    tr(monthAgo,"1 month ago",{mode:"lines",line:{width:1.5,dash:"dash",color:C.amber}}),
+    tr(today,"Today",{mode:"lines+markers",line:{width:3,color:C.blue}})],
+    {y:"Yield (%)",height:380,xaxis:{type:"category",categoryorder:"array",categoryarray:MATS.map(m=>m[2])},layout:{hovermode:"closest"}});
+}
+
+function renderYields(el){
+  const labs=MATS.filter(m=>ser(m[0])).map(m=>m[2]);
+  el.innerHTML=`${note("What moves each part of the curve",`<p><b>Short maturities (3 months to 2 years)</b> track the Fed. They move when markets expect rate hikes or cuts.</p><p><b>Long maturities (10 to 30 years)</b> add three things on top: expected inflation, expected growth, and a <i>term premium</i>, the extra pay investors want for the risk of holding a bond for decades. When people say the bond market is under stress, they usually mean long yields are rising faster than short ones because that premium is going up.</p>`)}
+  <div class="controls"><div><div class="cap">Maturities</div><div class="checks" id="yChecks">${labs.map(l=>`<label><input type="checkbox" value="${l}" ${state.yPick.includes(l)?"checked":""}> ${l}</label>`).join("")}</div></div>
+  <div><div class="cap">Period</div>${seg("yRange",Object.keys(RANGES),state.yRange)}</div></div>
+  <div id="yBody"></div>`;
+  $("yChecks").addEventListener("change",()=>{state.yPick=[...$("yChecks").querySelectorAll("input:checked")].map(i=>i.value);renderYields(el);});
+  onSeg("yRange",v=>{state.yRange=v;renderYields(el);});
+  const body=$("yBody");
+  if(!state.yPick.length){body.innerHTML=statusBox("info","Pick at least one maturity.");return;}
+  const picked=MATS.filter(m=>state.yPick.includes(m[2])&&ser(m[0]));
+  const comp=[],perf=[];
+  for(const [id,m,lab] of picked){const s=ser(id),b=bench(s),w=clip(s,state.yRange),y0=w.v[0],y1=last(w);
+    const diffs=[];for(let i=1;i<w.v.length;i++)diffs.push(w.v[i]-w.v[i-1]);
+    comp.push([lab,fx(b.now),fx(b.pre),fx(b.long),sg((b.now-b.pre)*100),b.pct.toFixed(0),fx(b.hi),fx(b.lo)]);
+    perf.push([lab,fx(y0),fx(y1),sg((y1-y0)*100),fx(Math.max(...w.v)),fx(Math.min(...w.v)),diffs.length>1?fx(sd(diffs)*100):"n/a",sg((bondPrice(y1,y0,m)/100-1)*100,1)]);}
+  const since=bench(ser(picked[0][0])).since;
+  body.innerHTML=`<div id="yChart" class="chart"></div>
+  <h3>How today compares with history</h3>
+  ${table(["","Today (%)",PRE_LABEL+" (%)","Average since "+since+" (%)","Today minus 2016 to 2019 (bp)","Percentile","Highest (%)","Lowest (%)"],comp)}
+  ${note("How to read this table",`The <b>${PRE_LABEL}</b> is the four years before COVID: a period without a crisis, a recession or emergency Fed policy, so it's a reasonable picture of normal. <b>Percentile</b> ranks today against every day in the history: 90 means yields were lower than today on 90% of days. There's no single correct level for a yield, so these comparisons tell you whether today is ordinary or unusual, not whether it's good or bad.`)}
+  <h3>Performance over the selected period</h3>
+  ${table(["","Start yield (%)","End yield (%)","Change (bp)","High (%)","Low (%)","Daily volatility (bp)","Est. price change (%)"],perf)}
+  ${note("How to read this table","<b>Daily volatility</b> is the typical size of a one-day move. <b>Est. price change</b> is what happened to the price of a bond bought at par at the start of the period, repriced at the new yield (coupon income not included). Compare the rows: the same yield move costs a 30-year bond far more than a 2-year, because its payments are further away. That sensitivity is duration.")}`;
+  plot("yChart",picked.map(([id,,lab])=>lineTrace(clip(ser(id),state.yRange),lab)),{y:"Yield (%)",height:420});
+}
+
+function renderSpreads(el){
+  let html=`${note("What a spread is, and why watch it",`A spread is one yield minus another. A single yield tells you the price of borrowing; a spread tells you what the market thinks about the <i>difference</i> between two things: the future against today (curve spreads), or risky borrowers against the government (credit spreads). Each chart below marks two reference lines: the <b>${PRE_LABEL}</b> (normal times before COVID) and the average over the full history.`)}
+  <div class="controls"><div><div class="cap">Period</div>${seg("sRange",Object.keys(RANGES),state.sRange)}</div></div><h2>Curve spreads</h2>`;
+  const charts=[];let k=0;
+  for(const name in SPREAD_INFO){const info=SPREAD_INFO[name],s=combine(info.ids[0],info.ids[1],(a,b)=>(a-b)*100);if(!s)continue;
+    const b=bench(s),id="spc"+(k++);let st;
+    if(b.now<0) st=statusBox("bad",`<b>Reading: inverted.</b> Long yields are below short yields, which has happened on ${(100*s.v.filter(v=>v<0).length/s.v.length).toFixed(0)}% of days since ${b.since}.`);
+    else if(b.pct<25) st=statusBox("warn",`<b>Reading: flatter than usual.</b> Wider than on only ${b.pct.toFixed(0)}% of days since ${b.since}.`);
+    else if(b.pct<=75) st=statusBox("ok",`<b>Reading: in its typical range.</b> Wider than on ${b.pct.toFixed(0)}% of days since ${b.since}.`);
+    else st=statusBox("warn",`<b>Reading: steeper than usual.</b> Wider than on ${b.pct.toFixed(0)}% of days since ${b.since}.`);
+    html+=`<h3>${name}</h3><div class="split"><div id="${id}" class="chart"></div><div>${benchRow(b," bp",v=>sg(v))}${st}
+      <div class="cap">Range since ${b.since}: ${sg(b.lo)} bp (${monYr(b.loD)}) to ${sg(b.hi)} bp (${monYr(b.hiD)}).</div>${note("What it is",info.what)}</div></div>
+      <div class="grid g2">${note("What it tells you",info.means)}${note("What's a healthy level?",info.healthy)}</div>`;
+    charts.push([id,s,name,b,true]);}
+  let creditHtml="";
+  for(const name in CREDIT_INFO){const raw=ser(CREDIT_INFO[name].id);if(!raw)continue;
+    const s={t:raw.t,v:raw.v.map(x=>x*100)},b=bench(s),id="spc"+(k++);let st;
+    if(b.pct<25) st=statusBox("ok",`<b>Reading: tight.</b> Investors are relaxed about defaults. Wider than on only ${b.pct.toFixed(0)}% of days since ${b.since}.`);
+    else if(b.pct<=75) st=statusBox("info",`<b>Reading: typical.</b> Wider than on ${b.pct.toFixed(0)}% of days since ${b.since}.`);
+    else st=statusBox("bad",`<b>Reading: wide.</b> Investors are worried about defaults. Wider than on ${b.pct.toFixed(0)}% of days since ${b.since}.`);
+    creditHtml+=`<h3>${name}</h3><div class="split"><div id="${id}" class="chart"></div><div>${benchRow(b," bp",v=>fx(v,0))}${st}
+      <div class="cap">Widest in this history: ${fx(b.hi,0)} bp (${monYr(b.hiD)}). Tightest: ${fx(b.lo,0)} bp (${monYr(b.loD)}).</div>${note("What it is and what it tells you",CREDIT_INFO[name].text)}</div></div>`;
+    charts.push([id,s,name,b,false]);}
+  if(creditHtml) html+=`<h2>Corporate credit spreads</h2>${note("Why look at company bonds in a Treasury dashboard","Companies borrow at the Treasury yield plus a spread. If Treasury yields rise <i>and</i> credit spreads widen, companies are hit twice. If Treasury yields rise but credit spreads stay calm, investors are worried about the government or inflation, not about companies failing. Comparing the two tells you what kind of stress you're looking at.")}${creditHtml}
+    ${note("What's a healthy level?","Tight spreads mean cheap borrowing for companies, which is good for growth. But very tight spreads can also mean investors are underpricing risk, so tight isn't the same as safe. The readings above rank today against the history available from the data source, which may cover only recent years.")}`;
+  el.innerHTML=html;
+  onSeg("sRange",v=>{state.sRange=v;renderSpreads(el);});
+  for(const [id,s,name,b,zero] of charts) plot(id,[lineTrace(clip(s,state.sRange),name,{line:{color:C.blue}})],
+    {y:zero?"Spread (bp)":"Spread over Treasuries (bp)",height:340,zero,layout:{showlegend:false},
+     refs:[{v:b.pre,label:PRE_LABEL,dash:"dash"},{v:b.long,label:"Average since "+b.since,dash:"dot"}]});
+}
+
+function cpiYoY(){const c=D.cpi,t=[],v=[];for(let i=12;i<c.values.length;i++){t.push(c.dates[i]);v.push((c.values[i]/c.values[i-12]-1)*100);}return t.length?{t,v}:null;}
+function renderInflation(el){
+  const cpi=cpiYoY(),be10=ser("T10YIE"),be5=ser("T5YIE"),fwd=ser("T5YIFR"),real=ser("DFII10"),nom=ser("DGS10");
+  let cards="";
+  if(cpi){const n=cpi.v.length,d=cpi.v[n-1]-cpi.v[n-2];cards+=metric(`CPI inflation (${monYr(cpi.t[n-1])})`,fx(cpi.v[n-1],1)+"%",sg(d,1)+" pts vs prior month",d>0?"up":"down");}
+  for(const [s,name] of [[be10,"10 yr breakeven"],[fwd,"5 yr, 5 yr forward"],[real,"10 yr real yield"]])
+    if(s) cards+=metric(name,fx(last(s))+"%",sg((last(s)-asof(s,shiftDate(lastDate(s),-30)))*100)+" bp, 1 month");
+  let html=`${note("Why inflation is on a bond dashboard","A bond pays fixed dollar amounts, so inflation eats its value. Every yield therefore contains a guess about future inflation. This tab separates that guess from the rest: <b>nominal yield = real yield + breakeven inflation</b>.")}
+  <div class="grid g4">${cards}</div><div class="controls" style="margin-top:14px"><div><div class="cap">Period</div>${seg("iRange",Object.keys(RANGES),state.iRange)}</div></div>`;
+  const parts=(real&&be10)?combineSeries(real,be10):null;
+  if(parts){const ago=shiftDate(lastDate(parts.a),-365),dr=(last(parts.a)-asof(parts.a,ago))*100,db=(last(parts.b)-asof(parts.b,ago))*100;
+    html+=`<h3>What's inside the 10-year yield</h3><div class="split"><div id="inParts" class="chart"></div><div>
+    ${reading(`<b>Over the past year:</b> the real yield moved ${sg(dr)} bp and breakeven inflation moved ${sg(db)} bp. Most of the change in the 10-year came from <b>${Math.abs(dr)>Math.abs(db)?"real yields":"inflation expectations"}</b>.`)}
+    ${note("How to read this chart",`<p>The two shaded areas add up to the dark line.</p><ul><li><b>Breakeven grows:</b> investors expect more inflation.</li><li><b>Real yield grows:</b> investors want a higher return after inflation. That happens when the Fed is tight, when growth is strong, or when buyers need more pay to absorb government debt.</li></ul><p>A rise in yields driven by real yields is the more painful kind for the economy, because it raises the true cost of borrowing.</p>`)}</div></div>`;}
+  html+=`<h3>Actual inflation against what the market expects</h3><div class="split"><div id="inExp" class="chart"></div><div>
+    ${note("How to read this chart",`<p>The dark line is inflation that already happened. The colored lines are what bond prices imply for the future.</p><ul><li><b>5-year breakeven</b> reacts to near-term news like oil prices.</li><li><b>5 yr, 5 yr forward</b> skips the next five years, so it shows whether people still trust the Fed over the long run. Central bankers watch it closely.</li></ul>`)}
+    ${note("What's a healthy level?","The Fed aims for 2% inflation. Expectations that sit a little above 2% and barely move are called <i>anchored</i>, and that's the healthy state. (The Fed's target uses a different price index that tends to run slightly below CPI, so breakevens a bit over 2% are consistent with the target.) The warning sign is long-run expectations drifting up and staying there.")}</div></div>`;
+  const rows=[];
+  for(const [s,name] of [[be5,"5-year breakeven inflation"],[be10,"10-year breakeven inflation"],[fwd,"5-year, 5-year forward inflation"],[real,"10-year real yield (TIPS)"]])
+    if(s){const b=bench(s);rows.push([name,fx(b.now),fx(b.pre),fx(b.long)+" (since "+b.since+")",b.pct.toFixed(0)]);}
+  if(rows.length) html+=table(["","Today (%)",PRE_LABEL+" (%)","Long-run average (%)","Percentile"],rows);
+  el.innerHTML=html;
+  onSeg("iRange",v=>{state.iRange=v;renderInflation(el);});
+  if(parts){const a=clip(parts.a,state.iRange),b=clip(parts.b,state.iRange);
+    plot("inParts",[lineTrace(a,"Real yield",{stackgroup:"a",line:{color:C.blue}}),lineTrace(b,"Breakeven inflation",{stackgroup:"a",line:{color:C.amber}}),
+      lineTrace(clip(nom,state.iRange),"10 yr nominal yield",{line:{color:C.ink,width:1.5}})],{y:"Percent",height:380});}
+  const tr=[];let start=null;
+  for(const [s,name] of [[be5,"5-year breakeven"],[be10,"10-year breakeven"],[fwd,"5 yr, 5 yr forward"]]) if(s){const c=clip(s,state.iRange);start=start||c.t[0];tr.push(lineTrace(c,name));}
+  if(cpi){let i=start?cpi.t.findIndex(x=>x>=start.slice(0,8)+"01"):0;if(i<0)i=0;
+    tr.push({x:cpi.t.slice(i),y:cpi.v.slice(i),name:"CPI, year over year",mode:"lines+markers",type:"scatter",line:{color:C.ink,width:2}});}
+  plot("inExp",tr,{y:"Percent",height:380,refs:[{v:2,label:"Fed's 2% target",dash:"dash"}]});
+}
+function combineSeries(a,b){const mb=new Map(b.t.map((t,i)=>[t,b.v[i]])),A={t:[],v:[]},B={t:[],v:[]};
+  for(let i=0;i<a.t.length;i++){const x=mb.get(a.t[i]);if(x!==undefined){A.t.push(a.t[i]);A.v.push(a.v[i]);B.t.push(a.t[i]);B.v.push(x);}}
+  return A.t.length?{a:A,b:B}:null;}
+
+function renderScenarios(el){
+  const name=state.scen,sc=SCENARIOS[name],imp=BONDS.map(m=>[m,priceImpact(yAt(today,m),scenShift(m,name),m)]),lg=imp[imp.length-1];
+  el.innerHTML=`${note("What a scenario is","A scenario is a what-if. We pick a story about the economy, decide how far each yield would move if it came true, and work out what that does to bond prices. It doesn't say how likely the story is. The Monte Carlo tab deals with likelihood.")}
+  <div class="controls"><div><div class="cap">Scenario</div>${seg("scSeg",Object.keys(SCENARIOS),name)}</div></div>
+  ${reading(`<b>${name}.</b> ${sc.story}`)}
+  <div class="split"><div id="scChart" class="chart"></div><div><div class="cap"><b>Price change of a bond bought today at par</b></div>
+    <div class="grid">${imp.map(([m,r])=>metric(m+"-year bond",sg(r.exact,1)+"%",sg(r.bp)+" bp in yield")).join("")}</div></div></div>
+  <h3>The math: duration and convexity</h3>
+  <div class="split"><div><div class="formula">ΔP / P ≈ −D · Δy + ½ · C · (Δy)²</div>
+    ${table(["","Yield change (bp)","Duration","Convexity","Duration only (%)","Duration + convexity (%)","Exact repricing (%)"],
+      imp.map(([m,r])=>[m+"-year",sg(r.bp),fx(r.dur),fx(r.conv),sg(r.durOnly,2),sg(r.durConv,2),sg(r.exact,2)]))}
+    ${reading(`<b>Worked example, ${lg[0]}-year bond.</b> Duration is ${fx(lg[1].dur,1)}, so a ${sg(lg[1].bp)} bp move gives ${sg(lg[1].durOnly,1)}% from duration alone. Convexity adds ${sg(lg[1].durConv-lg[1].durOnly,1)} points, for ${sg(lg[1].durConv,1)}%. Repricing every cash flow exactly gives ${sg(lg[1].exact,1)}%.`)}</div>
+  <div>${note("How to read the table",`<ul><li><b>Duration only:</b> the straight-line estimate, minus duration times the yield change.</li><li><b>Duration + convexity:</b> adds the correction for the curve in the price-yield relationship.</li><li><b>Exact repricing:</b> discounts every coupon at the new yield. This is the true answer.</li></ul><p>For small moves all three agree. For big moves on long bonds, duration alone overstates losses and understates gains. Convexity is always in the bondholder's favor.</p>`)}
+    ${note("Why long bonds move more","A 30-year bond's payments are far in the future, so a change in the discount rate compounds over many more years. That's why its duration is several times a 2-year note's, and why the same scenario barely touches short bonds and hits long bonds hard.")}</div></div>`;
+  onSeg("scSeg",v=>{state.scen=v;renderScenarios(el);});
+  plot("scChart",[{x:today.map(p=>p.lab),y:today.map(p=>p.y),name:"Today",mode:"lines+markers",type:"scatter",line:{color:C.gray,width:2}},
+    {x:today.map(p=>p.lab),y:today.map(p=>p.y+scenShift(p.m,name)/100),name,mode:"lines+markers",type:"scatter",line:{color:C.blue,width:3}}],
+    {y:"Yield (%)",height:360,xaxis:{type:"category"},layout:{hovermode:"closest"}});
+}
+
+function renderMC(el){
+  const m=state.mcMat,lab=matLabel(m),hist=ser(matId(m)),y0=last(hist),H=state.mcH,nDays=H*21;
+  const fit=clip(hist,"Max"),from=shiftDate(L,-365*state.mcLook),i0=Math.max(0,fit.t.findIndex(x=>x>=from));
+  const p=calibrate(fit.v.slice(i0),state.mcModel),sim=simulate(y0,p,nDays,state.mcN,state.mcSeed);
+  const fin=sim.final,sorted=Float64Array.from(fin).sort(),p5=pctile(sorted,5),p50=pctile(sorted,50),p95=pctile(sorted,95);
+  const probs={},rows=[];
+  for(const name in SCENARIOS){const sh=scenShift(m,name),lv=y0+sh/100;let end=0,ever=0;
+    for(let i=0;i<fin.length;i++){if(sh>=0){if(fin[i]>=lv)end++;if(sim.mx[i]>=lv)ever++;}else{if(fin[i]<=lv)end++;if(sim.mn[i]<=lv)ever++;}}
+    probs[name]={sh,lv,end:100*end/fin.length,ever:100*ever/fin.length};
+    rows.push([name,sg(sh),fx(lv)+"%",fx(probs[name].end,1)+"%",fx(probs[name].ever,1)+"%"]);}
+  const rets=fin.map(y=>(bondPrice(y,y0,m)/100-1)*100+y0*H/12),rs=Float64Array.from(rets).sort(),v5=pctile(rs,5);
+  const worst=Object.keys(probs).reduce((a,b)=>probs[a].sh>probs[b].sh?a:b),w=probs[worst];
+  const opt=(v,cur,text)=>`<option value="${v}" ${String(v)===String(cur)?"selected":""}>${text}</option>`;
+  const modelHtml=p.model==="vasicek"?`<div class="formula">dr = κ (θ − r) dt + σ dW</div>
+    <p>This is the <b>Vasicek model</b>, fitted to the last ${state.mcLook} years of daily ${lab} yields.</p>
+    ${table(["Symbol","Meaning","Fitted value"],[["θ (theta)","The long-run level the yield is pulled toward",fx(p.theta)+"%"],
+      ["κ (kappa)","How strong the pull is",fx(p.kappa)+" per year (half of any gap closes in about "+fx(p.half,1)+" years)"],
+      ["σ (sigma)","How big the random shocks are",fx(p.sigma*100,0)+" bp per year"],["dW","The random shock itself","A fresh draw from a bell curve each day"]])}
+    <p>Today's yield (${fx(y0)}%) is ${y0>p.theta?"above":"below"} the fitted long-run level, so the median path drifts ${y0>p.theta?"down":"up"}.</p>`
+   :`<div class="formula">r<sub>t+1</sub> = r<sub>t</sub> + σ √Δt · ε,  ε ~ N(0, 1)</div>
+    <p>This is a <b>random walk</b>: tomorrow's yield is today's plus a random shock, with no pull toward any level. The size of the shocks, σ = <b>${fx(p.sigma*100,0)} bp per year</b>, comes from the last ${state.mcLook} years of daily changes. The median path stays flat at today's yield, and only the uncertainty grows.</p>`;
+  el.innerHTML=`<div class="grid g2">${note("Why run a simulation at all?","Nobody knows where yields will be in six months. A single forecast hides that uncertainty. A Monte Carlo simulation does the opposite: it generates thousands of possible futures, each one a random path that behaves the way the yield has behaved in the past. Looking at all of them together shows the <i>range</i> of outcomes and lets us attach rough probabilities to them, including to the scenarios on the previous tab.")}
+  ${note("How it works, in four steps",`<ol><li><b>Learn from history.</b> Measure how much the yield typically moves in a day, and whether it tends to drift back toward a long-run level.</li><li><b>Roll the dice.</b> Starting from today's yield, add a random daily move, day after day, to build one path.</li><li><b>Repeat thousands of times.</b> Each repeat is one possible future.</li><li><b>Count.</b> The share of paths where something happens is our estimate of its probability.</li></ol>`)}</div>
+  <div class="controls">
+    <label>Yield<select id="mcMat">${BONDS.map(b=>opt(b,m,matLabel(b))).join("")}</select></label>
+    <label>Horizon: <span id="mcHLab">${H} months</span><input type="range" id="mcH" min="1" max="24" step="1" value="${H}"></label>
+    <label>Model<select id="mcModel">${opt("vasicek",state.mcModel,"Mean-reverting (Vasicek)")}${opt("walk",state.mcModel,"Random walk")}</select></label>
+    <label>Learn from the last<select id="mcLook">${[2,5,10].map(y=>opt(y,state.mcLook,y+" years")).join("")}</select></label>
+    <label>Paths<select id="mcN">${[1000,5000,20000].map(n=>opt(n,state.mcN,n.toLocaleString("en-US"))).join("")}</select></label>
+    <button type="button" class="plain" id="mcRedraw">Draw new random paths</button></div>
+  ${p.fellBack?statusBox("warn","Over this window the yield shows no pull toward a long-run level, so a mean-reverting model can't be fitted. Using a random walk instead."):""}
+  <div class="grid g4">${metric("Today",fx(y0)+"%")}${metric("Median in "+H+" months",fx(p50)+"%")}${metric("90% of paths end between",fx(p5)+"% and "+fx(p95)+"%")}${metric("Chance yield ends higher",(100*fin.filter(y=>y>y0).length/fin.length).toFixed(0)+"%")}</div>
+  ${reading(`<b>In plain words.</b> Starting from ${fx(y0)}%, the middle path puts the ${lab} yield at ${fx(p50)}% in ${H} months. Nine times out of ten it ends between ${fx(p5)}% and ${fx(p95)}%, a range of ${((p95-p5)*100).toFixed(0)} bp. That width is the main lesson: the uncertainty is much larger than the expected move.`)}
+  <h3>Range of simulated paths</h3><div class="split"><div id="mcFan" class="chart"></div><div>
+  ${note("How to read this chart",`<p>The gray line is the past year. From today, the chart fans out into the future.</p><ul><li><b>Thin lines:</b> three individual simulated paths, to show what one possible future looks like.</li><li><b>Dark band:</b> where the middle half of all paths lie.</li><li><b>Light band:</b> where 90% of paths lie.</li><li><b>Thick line:</b> the median path.</li></ul><p>The fan widens with time because small daily surprises add up. That's why a six-month view is far less certain than a one-month view.</p>`)}</div></div>
+  <h3>How likely is each scenario?</h3><div class="split"><div>${table(["","Move (bp)","Yield level","Beyond it at horizon","Touched at any point"],rows)}<div id="mcHist" class="chart"></div></div><div>
+  ${reading(`<b>Example: ${worst}.</b> That scenario needs the ${lab} yield to move ${sg(w.sh)} bp, to ${fx(w.lv)}%. In this simulation, ${fx(w.end,1)}% of paths are beyond that level after ${H} months, and ${fx(w.ever,1)}% touch it at some point along the way.`)}
+  ${note("How to read the table and the histogram",`<p>The histogram stacks up where all the paths ended. Tall bars are common outcomes; the thin tails are rare ones. Each vertical line is a scenario's yield level.</p><ul><li><b>Beyond it at horizon:</b> the share of paths that finish past the scenario's level.</li><li><b>Touched at any point:</b> the share that reach it at least once, even if they come back. This is always the larger number.</li></ul><p>Use these as rough orders of magnitude (is this a 1-in-3 event or a 1-in-100 event?), not as precise odds.</p>`)}</div></div>
+  <h3>What this means for a ${lab} bond bought today</h3><div class="split"><div>
+  <div class="grid g3">${metric("Median return",sg(pctile(rs,50),1)+"%")}${metric("Chance of losing money",(100*rets.filter(r=>r<0).length/rets.length).toFixed(0)+"%")}${metric("Worst 5% of paths lose at least",v5<0?fx(-v5,1)+"%":"no loss")}</div>
+  <div id="mcRet" class="chart"></div></div><div>
+  ${note("How to read this",`<p>Each simulated yield is turned into a bond return: the price change from the yield move, plus the coupon income earned while waiting.</p><p><b>Worst 5% of paths</b> is a simple version of <i>Value at Risk</i>, the measure banks and funds use to size their risk: the loss you'd expect to exceed only one time in twenty.</p><p>Try switching the yield to 2 yr and then 30 yr. The 30-year's range of returns is far wider, which is duration at work again. (Simplification: the bond is assumed not to get shorter as time passes.)</p>`)}</div></div>
+  <h3>The model behind the simulation</h3><div class="split"><div>${modelHtml}</div><div>
+  ${note("Which model should I believe?",`<p>Neither is true; each is a simplification.</p><ul><li><b>Mean-reverting</b> assumes yields return toward a normal level. It gives narrower ranges and can be badly wrong if the world has changed and the old normal is gone.</li><li><b>Random walk</b> assumes nothing about normal. It gives wider ranges and never predicts a direction.</li></ul><p>Switch between them and between the learning windows. If the answers change a lot, that tells you how much the result depends on assumptions.</p>`)}
+  ${note("What this simulation can't do",`<ul><li>It simulates one yield, not the whole curve moving together.</li><li>Its shocks follow a bell curve, so it understates sudden jumps like a crisis. Real markets have fatter tails.</li><li>It assumes the future is as volatile as the past window.</li></ul><p>So it's a tool for thinking about ranges and rough odds. It is not a forecast.</p>`)}</div></div>`;
+  const rerun=()=>renderMC(el);
+  $("mcMat").onchange=e=>{state.mcMat=+e.target.value;rerun();};
+  $("mcH").oninput=e=>{$("mcHLab").textContent=e.target.value+" months";};
+  $("mcH").onchange=e=>{state.mcH=+e.target.value;rerun();};
+  $("mcModel").onchange=e=>{state.mcModel=e.target.value;rerun();};
+  $("mcLook").onchange=e=>{state.mcLook=+e.target.value;rerun();};
+  $("mcN").onchange=e=>{state.mcN=+e.target.value;rerun();};
+  $("mcRedraw").onclick=()=>{state.mcSeed++;rerun();};
+  const fut=businessDays(L,nDays),past={t:hist.t.slice(-250),v:hist.v.slice(-250)},band=(a,b,name,fill)=>[
+    {x:fut,y:sim.q[b],mode:"lines",line:{width:0},showlegend:false,hoverinfo:"skip",type:"scatter"},
+    {x:fut,y:sim.q[a],name,mode:"lines",line:{width:0},fill:"tonexty",fillcolor:fill,type:"scatter"}];
+  plot("mcFan",[lineTrace(past,"History",{line:{color:C.gray}}),...band(5,95,"5th to 95th percentile","rgba(29,78,137,0.15)"),
+    ...band(25,75,"25th to 75th percentile","rgba(29,78,137,0.30)"),
+    {x:fut,y:sim.q[50],name:"Median",mode:"lines",type:"scatter",line:{color:C.blue,width:2.5}},
+    ...sim.samples.map((s,i)=>({x:fut,y:s,mode:"lines",type:"scatter",line:{width:0.8,color:"rgba(29,78,137,0.5)"},name:"Sample paths",showlegend:i===0,hoverinfo:"skip"}))],
+    {y:"Yield (%)",height:400,layout:{hovermode:"closest"}});
+  const h1=histogram(fin,60);
+  plot("mcHist",[{x:h1.x,y:h1.y,type:"bar",width:h1.w*0.95,marker:{color:C.blue,opacity:0.85}}],{y:"Number of paths",height:320,
+    xaxis:{title:{text:`${lab} yield after ${H} months (%)`}},layout:{showlegend:false,hovermode:"closest",margin:{l:52,r:16,t:26,b:46}},
+    vlines:[{x:y0,label:"Today",dash:"dot"},...Object.keys(probs).map(n=>({x:probs[n].lv,label:n,angle:-90}))]});
+  const h2=histogram(rets,60);
+  plot("mcRet",[{x:h2.x,y:h2.y,type:"bar",width:h2.w*0.95,marker:{color:C.amber,opacity:0.85}}],{y:"Number of paths",height:280,
+    xaxis:{title:{text:`Total return over ${H} months (%)`}},layout:{showlegend:false,hovermode:"closest",margin:{l:52,r:16,t:26,b:46}},
+    vlines:[{x:0,label:"Break even",dash:"dot"}]});
+}
+
+/* ====================================================================
+   8. START
+   ==================================================================== */
+function showTab(name){
+  for(const b of $("tabs").children) b.setAttribute("aria-selected",b.dataset.tab===name?"true":"false");
+  for(const s of $("main").children) s.classList.toggle("on",s.dataset.tab===name);
+  const el=[...$("main").children].find(s=>s.dataset.tab===name);
+  try{TABS[name](el);}catch(err){console.error(err);el.innerHTML=`<div class="banner">This tab couldn't be drawn: ${err.message}</div>`;}
+}
+async function start(){
+  $("notesToggle").addEventListener("change",e=>document.body.classList.toggle("hide-notes",!e.target.checked));
+  try{
+    const resp=await fetch(DATA_URL,{cache:"no-cache"});if(!resp.ok) throw new Error("status "+resp.status);
+    D=await resp.json();
+  }catch(err){
+    $("asof").textContent="";
+    $("banner").innerHTML=`<div class="banner">The market data file couldn't be loaded, so there's nothing to show yet. If you're setting this up, run <code>python3 update_data.py</code> to create <code>bonds-data.json</code> and open the page through a web server, not by double-clicking the file.</div>`;
+    return;
+  }
+  L=D.updated;today=curveOn(L);monthAgo=curveOn(shiftDate(L,-30));yearAgo=curveOn(shiftDate(L,-365));
+  $("asof").textContent=`Data through ${longDate(L)}. Source: U.S. Treasury, BLS and ICE via FRED.`;
+  if(D.sample) $("banner").innerHTML=`<div class="banner">This is made-up sample data for testing, not real markets.</div>`;
+  $("tabs").innerHTML=Object.keys(TABS).map(n=>`<button type="button" role="tab" data-tab="${n}">${n}</button>`).join("");
+  $("main").innerHTML=Object.keys(TABS).map(n=>`<section class="tab" role="tabpanel" data-tab="${n}"></section>`).join("");
+  $("tabs").addEventListener("click",e=>{const b=e.target.closest("button");if(b)showTab(b.dataset.tab);});
+  showTab("Overview");
+}
+start();
+</script>
+</body>
+</html>
