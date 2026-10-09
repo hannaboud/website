@@ -98,8 +98,8 @@
 
   <section id="rules">
     <h2>Rules</h2>
-    <p>Every trade follows from these rules. One option contract covers 100 shares. Two terms
-    are used throughout: the <strong>entry day</strong> is the first trading day of a week
+    <p>Every trade follows from these rules. One option contract covers 100 shares. The
+    <strong>entry day</strong> is the first trading day of a week
     (Monday, or Tuesday when Monday is a holiday), and the <strong>expiry day</strong> is the
     last trading day of the same week (Friday, or Thursday when Friday is a holiday), which is
     the day that week's listed option expires.</p>
@@ -108,19 +108,28 @@
       <span data-k="metrics.strategy.capital" data-f="usd"></span>, the price of 100 LLY shares
       at that day's close. Buy and hold spends all of it on 100 shares. The PMCC spends
       <span data-k="metrics.long_call_cost" data-f="usd"></span> on the long call and keeps the
-      rest in cash, which earns <span data-k="meta.cash_rate" data-f="pct2"></span> a year.</li>
-      <li><b>Long call.</b> On the start date, buy one call expiring 18 Sep 2026, the listed
+      rest in cash, which earns <span data-k="meta.cash_rate" data-f="pct2"></span> a year, which
+      is the risk-free rate. I chose to start with the same amount of cash for both strategies
+      (PMCC and holding the stock) just so that I would be able to make sure that my cash was
+      never negative. However, this method gives a bad representation of the statistics.
+      Indeed, since <span data-k="metrics.idle_cash_at_start" data-f="usd"></span> is sitting in
+      the bank with only a <span data-k="meta.cash_rate" data-f="pct2"></span> return, it
+      averages out with the overall return, which could lead people to think that the PMCC is
+      not as performant as holding the shares, when in reality it is.</li>
+      <li><b>Long call (the LEAP).</b> On the start date, buy one call expiring 18 Sep 2026, the listed
       expiry closest to 12 months away. The strike is the listed strike whose delta at the
-      previous day's close is closest to <span data-k="meta.leap_delta"></span>, and never
+      previous day's close is closest to <span data-k="meta.leap_delta"></span> (the delta that I chose for the LEAP), and never
       below <span data-k="meta.leap_min_delta"></span>. It is bought at the closing ask and
-      held to expiry, where it is settled at its in-the-money amount (close minus strike). On
+      held to expiry, where it is settled at its in-the-money amount. On
       the next trading day a replacement is bought by the same rule, expiring 17 Sep 2027.</li>
       <li><b>Trend signal.</b> On the trading day before each entry day, compare LLY's close
       with the average of its last <span data-k="meta.ma_days"></span> closes, that day
       included. Above the average is an uptrend; at or below is a downtrend.</li>
       <li><b>Target delta.</b> <span data-k="meta.delta_up"></span> in an uptrend,
       <span data-k="meta.delta_down"></span> in a downtrend. A lower delta is a strike further
-      above the stock price, which leaves more room for the stock to rise.</li>
+      above the stock price, which leaves more room for the stock to rise. I decided to do so so that I could maximize
+      my exposure to the stock going up when general market sentiment was good; when it is less
+      good, I am choosing delta = <span data-k="meta.delta_down"></span> to get a better premium.</li>
       <li><b>Short call.</b> On the entry day, take every listed call that expires on that
       week's expiry day and has a bid at the close. Sell one contract of the strike whose
       delta at that close is closest to the target delta. Delta is the value LSEG reports for
@@ -177,7 +186,11 @@
     <p>The PMCC is for someone who wants covered-call exposure to a stock without paying for
     100 shares. Here the long call cost <span data-k="metrics.long_call_cost" data-f="usd"></span>
     against <span data-k="metrics.buy_hold.capital" data-f="usd"></span> for the shares. In
-    exchange, the long call has an expiry date, loses time value, and pays no dividends.</p>
+    exchange, the long call has an expiry date, loses time value, and pays no dividends. It is also a little bit more dangerous: if the
+    LEAP does not end up in the money there will be a big loss. As well, it can be expensive to
+    buy shares directly from the market and deliver them at the strike price; we must do so
+    because we do not want to be short any shares and we do not want to exercise the LEAP
+    early.</p>
 
     <h3>What happened</h3>
     <p>The PMCC account returned <span data-k="metrics.strategy.total_return" data-f="pct1"></span>
@@ -204,36 +217,22 @@
     drawdown. That is mostly because about two thirds of the account sat in cash, not because
     of the options.</p>
 
-    <h3>How much capital it really takes</h3>
-    <p>The long call cost <span data-k="metrics.long_call_cost" data-f="usd"></span>, but the
-    strategy could not have been run on that amount alone. When a short call finishes in the
-    money the cost is paid in cash, while the offsetting gain stays inside the long call. An
-    account funded with only the cost of the long call would have seen its cash fall to
-    <span data-k="metrics.minimum_funding.min_cash" data-f="usd"></span>. On that basis the
-    same trades return <span data-k="metrics.minimum_funding.total_return" data-f="pct1"></span>
-    with volatility of <span data-k="metrics.minimum_funding.volatility" data-f="pct0"></span>
-    and a drawdown of <span data-k="metrics.minimum_funding.max_drawdown" data-f="pct1"></span>,
-    but only by borrowing. That is why both accounts here start with the same cash: the PMCC
-    account's cash never fell below <span data-k="metrics.min_cash" data-f="usd"></span>, and
-    all returns on this page use one capital base.</p>
-
-    <h3>No look-ahead</h3>
-    <p>The trend signal and the long call's strike use the previous trading day's close. The
-    short call's strike is chosen from deltas at the entry day's close and sold at that same
-    close's bid. This assumes the delta seen just before the close is the delta at the close.
-    No data from after a trade is used to make it. Option contracts that had already expired
-    were pulled individually from LSEG by contract code, so the backtest sees the strikes that
-    were listed at the time.</p>
-
-    <h3>Two rules were changed after the first run</h3>
-    <p>The first version had a floor that kept the short strike above the long call's strike
-    plus its price, and it chose the short strike from the previous day's delta. The floor
-    left almost no premium in the weeks after a long call was bought, and the previous day's
-    delta meant three calls were sold with the strike already below the stock price. Both
-    rules were changed after seeing those results, which is a form of hindsight. For
-    reference, the first version returned
-    <span data-k="first_draft.strategy.total_return" data-f="pct1"></span> with a short-call
-    net of <span data-k="first_draft.short_leg_net" data-f="usd"></span>.</p>
+    <h3>If the account started with only the cost of the long call</h3>
+    <p>The table compares the account on this page with the same rules run in an account
+    that starts with only <span data-k="metrics.long_call_cost" data-f="usd"></span>, the cost
+    of the long call.</p>
+    <div class="table-wrap">
+      <table id="fundTable">
+        <thead><tr><th></th><th class="num">PMCC, same cash as the shares</th>
+        <th class="num">PMCC, long call cost only</th><th class="num">Buy and hold 100 shares</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p style="margin-top:1rem">With only the cost of the long call, the cash balance falls to
+    <span data-k="metrics.minimum_funding.min_cash" data-f="usd"></span>. When a short call
+    finishes in the money the cost is paid in cash, while the offsetting gain stays inside the
+    long call. That account would have had to borrow, and no borrowing cost is charged
+    here.</p>
 
     <h3>Limitations</h3>
     <p>One stock, one year, and a year in which the stock rose strongly. The result says
@@ -248,14 +247,6 @@
     The purchase and the delivery happen at the same close, so only the difference is paid.</p>
     <p>A few option quotes could not be retrieved from LSEG in May to July 2026 because of
     dropped requests. Every week still has at least 22 strikes to choose from.</p>
-
-    <h3>Reproduce it</h3>
-    <p>The code and the data it produced are in the
-    <a href="https://github.com/hannaboud/website/tree/main/code/pmcc">repository</a>.
-    <code>04_pull_lly.py</code> pulls the stock and option history from LSEG (it needs an LSEG
-    Workspace login). <code>05_backtest.py</code> runs the backtest from the saved CSV files
-    and needs only pandas. <code>06_build_site_data.py</code> writes the data file this page
-    reads, so every number here comes from the backtest output.</p>
   </section>
 
 </main>

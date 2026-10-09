@@ -73,6 +73,20 @@
     <td class="num">${r[1]}</td><td class="num">${r[2]}</td><td class="num">${r[3]}</td><td class="num">${usd(r[4])}</td>
     <td class="num">${usd(r[5])}</td><td class="num ${r[6] < 0 ? 'neg' : ''}">${usd(r[6])}</td></tr>`).join('');
 
+  // ---------------- funding comparison ----------------
+  const N = M.minimum_funding;
+  const fund = [
+    ['Starting cash', usd(S.capital), usd(N.capital), usd(B.capital)],
+    ['Profit', usd(S.pnl), usd(N.pnl), usd(B.pnl)],
+    ['Total return', F.pct1(S.total_return), F.pct1(N.total_return), F.pct1(B.total_return)],
+    ['Volatility, annualized', F.pct1(S.volatility), F.pct1(N.volatility), F.pct1(B.volatility)],
+    ['Sharpe ratio', S.sharpe.toFixed(2), N.sharpe.toFixed(2), B.sharpe.toFixed(2)],
+    ['Max drawdown', F.pct1(S.max_drawdown), F.pct1(N.max_drawdown), F.pct1(B.max_drawdown)],
+    ['Lowest cash balance', usd(M.min_cash), `<span class="neg">${usd(N.min_cash)}</span>`, '$0'],
+  ];
+  document.querySelector('#fundTable tbody').innerHTML = fund.map(
+    r => `<tr><td>${r[0]}</td>${r.slice(1).map(c => `<td class="num">${c}</td>`).join('')}</tr>`).join('');
+
   // ---------------- blotter ----------------
   document.getElementById('blotterCount').textContent = blotter.length;
   document.querySelector('#blotterTable tbody').innerHTML = blotter.map(r => `

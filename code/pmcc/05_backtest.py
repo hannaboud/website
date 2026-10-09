@@ -39,6 +39,7 @@ MA_DAYS = 21
 DELTA_UPTREND, DELTA_DOWNTREND = 0.15, 0.35
 USE_FLOOR = False           # breakeven floor: short strike >= long strike + price paid
 SHORT_DELTA_DAY = "entry"   # "entry" = delta at the close we trade on; "prior" = previous trading day
+FUNDING = "shares"          # starting cash: "shares" = cost of 100 shares; "long_call" = cost of the long call only
 CASH_RATE = 0.0363             # annual interest earned on idle cash (0 = none)
 RISK_FREE = 0.0363          # annual, for the Sharpe ratio (effective fed funds, Sept 2026)
 MULT = 100
@@ -124,8 +125,8 @@ def main(out=OUT, quiet=False):
             buy_leap(day)
             if capital is None:
                 leap_cost = MULT * leap["paid"]
-                cash += capital0                      # account funded with the cost of 100 shares
-                capital = capital0
+                capital = capital0 if FUNDING == "shares" else leap_cost
+                cash += capital
 
         # 2) sell this week's short call
         if day in entry_of and short is None and leap is not None:
@@ -216,9 +217,6 @@ def main(out=OUT, quiet=False):
         long_call_cost=round(leap_cost, 2), idle_cash_at_start=round(capital - leap_cost, 2),
         min_cash=round(nav["cash"].min(), 2), interest_earned=round(interest, 2),
         final_cash=round(cash, 2), final_long_call_value=round(nav["long_call"].iloc[-1], 2),
-        # what-if: the same trades in an account funded with only the long call's cost
-        minimum_funding=dict(stats(nav["nav"] - capital + leap_cost, leap_cost),
-                             min_cash=round(nav["cash"].min() - (capital - leap_cost), 2)),
         weeks=len(wkdf), calls_sold=len(sold), weeks_skipped=int((wkdf["outcome"] == "SKIPPED").sum()),
         premium_collected=round(sold["premium"].sum(), 2),
         weeks_assigned=int((wkdf["outcome"] == "ASSIGNED").sum()),

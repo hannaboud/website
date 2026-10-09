@@ -24,6 +24,15 @@ draft = bt.main(out="results/first_draft", quiet=True)
 bt.USE_FLOOR, bt.SHORT_DELTA_DAY = False, "entry"
 
 
+# what-if: the same rules in an account funded with only the cost of the long call.
+# Cash goes negative in this run; no borrowing cost is charged on the negative balance.
+bt.FUNDING = "long_call"
+small = bt.main(out="results/long_call_only", quiet=True)
+bt.FUNDING = "shares"
+final["minimum_funding"] = dict(small["strategy"], min_cash=small["min_cash"],
+                                interest_earned=small["interest_earned"])
+
+
 def records(path):
     df = pd.read_csv(path)
     return json.loads(df.to_json(orient="records"))
