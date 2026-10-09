@@ -1,0 +1,83 @@
+{
+  "period": "2025-10-03 to 2026-10-02",
+  "trading_days": 251,
+  "strategy": {
+    "capital": 83987.0,
+    "final_value": 102659.3,
+    "pnl": 18672.3,
+    "total_return": 0.2223,
+    "annualized_return": 0.2233,
+    "volatility": 0.2656,
+    "sharpe": 0.7,
+    "max_drawdown": -0.1655
+  },
+  "buy_hold": {
+    "capital": 83987.0,
+    "final_value": 114285.0,
+    "pnl": 30298.0,
+    "total_return": 0.3607,
+    "annualized_return": 0.3624,
+    "volatility": 0.3446,
+    "sharpe": 0.95,
+    "max_drawdown": -0.2331
+  },
+  "long_call_cost": 26700.0,
+  "idle_cash_at_start": 57287.0,
+  "min_cash": 49354.35,
+  "interest_earned": 2160.3,
+  "final_cash": 67709.3,
+  "final_long_call_value": 34950.0,
+  "minimum_funding": {
+    "capital": 26700.0,
+    "final_value": 45372.3,
+    "pnl": 18672.3,
+    "total_return": 0.6993,
+    "annualized_return": 0.7029,
+    "volatility": 0.6248,
+    "sharpe": 1.07,
+    "max_drawdown": -0.3501,
+    "min_cash": -7932.65
+  },
+  "weeks": 52,
+  "calls_sold": 52,
+  "weeks_skipped": 0,
+  "premium_collected": 27445.0,
+  "weeks_assigned": 11,
+  "assignment_cost": 33971.0,
+  "short_leg_net": -6526.0,
+  "weeks_uptrend": 32,
+  "weeks_downtrend": 20,
+  "weeks_floor_binding": 0,
+  "long_calls": [
+    {
+      "time": "2025-10-03",
+      "instrument": "LLYI182662000.U^I26",
+      "side": "BUY",
+      "qty": 1,
+      "limit": 267.0,
+      "fill": 267.0,
+      "cash_delta": -26700.0,
+      "note": "Long call 620 exp 2026-09-18, prior-day delta 0.846, filled at ask"
+    },
+    {
+      "time": "2026-09-18",
+      "instrument": "LLYI182662000.U^I26",
+      "side": "SETTLE",
+      "qty": 1,
+      "limit": null,
+      "fill": 532.9300000000001,
+      "cash_delta": 53293.0,
+      "note": "Long call expired, settled at intrinsic value (close 1152.93 - strike 620)"
+    },
+    {
+      "time": "2026-09-21",
+      "instrument": "LLYI172786000.U",
+      "side": "BUY",
+      "qty": 1,
+      "limit": 385.05,
+      "fill": 385.05,
+      "cash_delta": -38505.0,
+      "note": "Long call 860 exp 2027-09-17, prior-day delta 0.844, filled at ask"
+    }
+  ]
+}

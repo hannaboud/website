@@ -1,0 +1,130 @@
+time,instrument,side,qty,limit,fill,cash_delta,note
+2025-10-03,LLYI182662000.U^I26,BUY,1,267.0,267.0,-26700.0,"Long call 620 exp 2026-09-18, prior-day delta 0.846, filled at ask"
+2025-10-06,LLYJ102589500.U^J25,SELL,1,3.25,3.25,325.0,"Sold 895 call, trend up, target delta 0.15, delta 0.156"
+2025-10-10,LLYJ102589500.U^J25,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 833.49 <= strike 895)
+2025-10-13,LLYJ172585500.U^J25,SELL,1,2.28,2.28,228.0,"Sold 855 call, trend up, target delta 0.15, delta 0.147"
+2025-10-17,LLYJ172585500.U^J25,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 802.83 <= strike 855)
+2025-10-20,LLYJ242584000.U^J25,SELL,1,2.0,2.0,200.0,"Sold 840 call, trend up, target delta 0.15, delta 0.152"
+2025-10-24,LLYJ242584000.U^J25,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 825.45 <= strike 840)
+2025-10-27,LLYJ312589500.U^J25,SELL,1,4.0,4.0,400.0,"Sold 895 call, trend up, target delta 0.15, delta 0.145"
+2025-10-31,LLYJ312589500.U^J25,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 862.86 <= strike 895)
+2025-11-03,LLYK072595000.U^K25,SELL,1,3.4,3.4,340.0,"Sold 950 call, trend up, target delta 0.15, delta 0.146"
+2025-11-07,LLYK072595000.U^K25,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 924.37 <= strike 950)
+2025-11-10,LLYk142510100.U^K25,SELL,1,3.1,3.1,310.0,"Sold 1010 call, trend up, target delta 0.15, delta 0.159"
+2025-11-14,LLYk142510100.U^K25,ASSIGN,1,,1010.0,0.0,Call in the money at expiry (close 1025.28 > strike 1010)
+2025-11-14,LLY.N,BUY,100,1025.28,1025.28,-102528.0,Buy shares at the close to deliver
+2025-11-14,LLY.N,SELL,100,1010.0,1010.0,101000.0,Deliver shares at strike 1010
+2025-11-17,LLYk212510750.U^K25,SELL,1,2.73,2.73,273.0,"Sold 1075 call, trend up, target delta 0.15, delta 0.144"
+2025-11-21,LLYk212510750.U^K25,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 1059.70 <= strike 1075)
+2025-11-24,LLYk282511050.U^K25,SELL,1,1.9,1.9,190.0,"Sold 1105 call, trend up, target delta 0.15, delta 0.142"
+2025-11-28,LLYk282511050.U^K25,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 1075.47 <= strike 1105)
+2025-12-01,LLYl052511000.U^L25,SELL,1,2.39,2.39,239.0,"Sold 1100 call, trend up, target delta 0.15, delta 0.142"
+2025-12-05,LLYl052511000.U^L25,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 1010.31 <= strike 1100)
+2025-12-08,LLYl122510100.U^L25,SELL,1,8.05,8.05,805.0,"Sold 1010 call, trend down, target delta 0.35, delta 0.373"
+2025-12-12,LLYl122510100.U^L25,ASSIGN,1,,1010.0,0.0,Call in the money at expiry (close 1027.51 > strike 1010)
+2025-12-12,LLY.N,BUY,100,1027.51,1027.51,-102751.0,Buy shares at the close to deliver
+2025-12-12,LLY.N,SELL,100,1010.0,1010.0,101000.0,Deliver shares at strike 1010
+2025-12-15,LLYl192510800.U^L25,SELL,1,8.5,8.5,850.0,"Sold 1080 call, trend down, target delta 0.35, delta 0.341"
+2025-12-19,LLYl192510800.U^L25,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 1071.44 <= strike 1080)
+2025-12-22,LLYl262511100.U^L25,SELL,1,2.06,2.06,206.0,"Sold 1110 call, trend up, target delta 0.15, delta 0.151"
+2025-12-26,LLYl262511100.U^L25,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 1077.75 <= strike 1110)
+2025-12-29,LLYa022611100.U^A26,SELL,1,1.26,1.26,126.0,"Sold 1110 call, trend up, target delta 0.15, delta 0.130"
+2026-01-02,LLYa022611100.U^A26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 1080.36 <= strike 1110)
+2026-01-05,LLYa092610850.U^A26,SELL,1,3.1,3.1,310.0,"Sold 1085 call, trend up, target delta 0.15, delta 0.151"
+2026-01-09,LLYa092610850.U^A26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 1063.56 <= strike 1085)
+2026-01-12,LLYa162611300.U^A26,SELL,1,3.15,3.15,315.0,"Sold 1130 call, trend up, target delta 0.15, delta 0.154"
+2026-01-16,LLYa162611300.U^A26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 1038.40 <= strike 1130)
+2026-01-20,LLYa232610550.U^A26,SELL,1,8.0,8.0,800.0,"Sold 1055 call, trend down, target delta 0.35, delta 0.364"
+2026-01-23,LLYa232610550.U^A26,ASSIGN,1,,1055.0,0.0,Call in the money at expiry (close 1064.29 > strike 1055)
+2026-01-23,LLY.N,BUY,100,1064.29,1064.29,-106429.0,Buy shares at the close to deliver
+2026-01-23,LLY.N,SELL,100,1055.0,1055.0,105500.0,Deliver shares at strike 1055
+2026-01-26,LLYa302610775.U^A26,SELL,1,5.5,5.5,550.0,"Sold 1077.5 call, trend down, target delta 0.35, delta 0.352"
+2026-01-30,LLYa302610775.U^A26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 1037.15 <= strike 1077.5)
+2026-02-02,LLYb062610800.U^B26,SELL,1,17.25,17.25,1725.0,"Sold 1080 call, trend down, target delta 0.35, delta 0.352"
+2026-02-06,LLYb062610800.U^B26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 1058.18 <= strike 1080)
+2026-02-09,LLYb132610950.U^B26,SELL,1,2.95,2.95,295.0,"Sold 1095 call, trend up, target delta 0.15, delta 0.148"
+2026-02-13,LLYb132610950.U^B26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 1040.00 <= strike 1095)
+2026-02-17,LLYb202610500.U^B26,SELL,1,8.3,8.3,830.0,"Sold 1050 call, trend down, target delta 0.35, delta 0.372"
+2026-02-20,LLYb202610500.U^B26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 1009.52 <= strike 1050)
+2026-02-23,LLYb272610750.U^B26,SELL,1,8.6,8.6,860.0,"Sold 1075 call, trend down, target delta 0.35, delta 0.357"
+2026-02-27,LLYb272610750.U^B26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 1051.99 <= strike 1075)
+2026-03-02,LLYc062610700.U^C26,SELL,1,2.91,2.91,291.0,"Sold 1070 call, trend up, target delta 0.15, delta 0.145"
+2026-03-06,LLYc062610700.U^C26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 990.33 <= strike 1070)
+2026-03-09,LLYc132610250.U^C26,SELL,1,8.2,8.2,820.0,"Sold 1025 call, trend down, target delta 0.35, delta 0.353"
+2026-03-13,LLYc132610250.U^C26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 985.08 <= strike 1025)
+2026-03-16,LLYc202610050.U^C26,SELL,1,8.4,8.4,840.0,"Sold 1005 call, trend down, target delta 0.35, delta 0.356"
+2026-03-20,LLYc202610050.U^C26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 906.70 <= strike 1005)
+2026-03-23,LLYC272692500.U^C26,SELL,1,8.15,8.15,815.0,"Sold 925 call, trend down, target delta 0.35, delta 0.364"
+2026-03-27,LLYC272692500.U^C26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 878.24 <= strike 925)
+2026-03-30,LLYD022690000.U^D26,SELL,1,7.9,7.9,790.0,"Sold 900 call, trend down, target delta 0.35, delta 0.365"
+2026-04-02,LLYD022690000.U^D26,ASSIGN,1,,900.0,0.0,Call in the money at expiry (close 935.58 > strike 900)
+2026-04-02,LLY.N,BUY,100,935.58,935.58,-93558.0,Buy shares at the close to deliver
+2026-04-02,LLY.N,SELL,100,900.0,900.0,90000.0,Deliver shares at strike 900
+2026-04-06,LLYD102694000.U^D26,SELL,1,8.1,8.1,810.0,"Sold 940 call, trend down, target delta 0.35, delta 0.373"
+2026-04-10,LLYD102694000.U^D26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 939.47 <= strike 940)
+2026-04-13,LLYD172696500.U^D26,SELL,1,2.4,2.4,240.0,"Sold 965 call, trend up, target delta 0.15, delta 0.163"
+2026-04-17,LLYD172696500.U^D26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 927.03 <= strike 965)
+2026-04-20,LLYD242696250.U^D26,SELL,1,2.39,2.39,239.0,"Sold 962.5 call, trend up, target delta 0.15, delta 0.154"
+2026-04-24,LLYD242696250.U^D26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 883.96 <= strike 962.5)
+2026-04-27,LLYE012690000.U^E26,SELL,1,16.0,16.0,1600.0,"Sold 900 call, trend down, target delta 0.35, delta 0.352"
+2026-05-01,LLYE012690000.U^E26,ASSIGN,1,,900.0,0.0,Call in the money at expiry (close 963.33 > strike 900)
+2026-05-01,LLY.N,BUY,100,963.33,963.33,-96333.0,Buy shares at the close to deliver
+2026-05-01,LLY.N,SELL,100,900.0,900.0,90000.0,Deliver shares at strike 900
+2026-05-04,LLYe082610100.U^E26,SELL,1,2.87,2.87,287.0,"Sold 1010 call, trend up, target delta 0.15, delta 0.160"
+2026-05-08,LLYe082610100.U^E26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 948.45 <= strike 1010)
+2026-05-11,LLYe152610100.U^E26,SELL,1,3.0,3.0,300.0,"Sold 1010 call, trend up, target delta 0.15, delta 0.156"
+2026-05-15,LLYe152610100.U^E26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 1004.92 <= strike 1010)
+2026-05-18,LLYe222610300.U^E26,SELL,1,2.05,2.05,205.0,"Sold 1030 call, trend up, target delta 0.15, delta 0.149"
+2026-05-22,LLYe222610300.U^E26,ASSIGN,1,,1030.0,0.0,Call in the money at expiry (close 1065.00 > strike 1030)
+2026-05-22,LLY.N,BUY,100,1065.0,1065.0,-106500.0,Buy shares at the close to deliver
+2026-05-22,LLY.N,SELL,100,1030.0,1030.0,103000.0,Deliver shares at strike 1030
+2026-05-26,LLYe292611050.U^E26,SELL,1,2.76,2.76,276.0,"Sold 1105 call, trend up, target delta 0.15, delta 0.164"
+2026-05-29,LLYe292611050.U^E26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 1105.00 <= strike 1105)
+2026-06-01,LLYf052611400.U^F26,SELL,1,2.72,2.72,272.0,"Sold 1140 call, trend up, target delta 0.15, delta 0.141"
+2026-06-05,LLYf052611400.U^F26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 1131.42 <= strike 1140)
+2026-06-08,LLYf122612100.U^F26,SELL,1,3.55,3.55,355.0,"Sold 1210 call, trend up, target delta 0.15, delta 0.151"
+2026-06-12,LLYf122612100.U^F26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 1133.00 <= strike 1210)
+2026-06-15,LLYf182611750.U^F26,SELL,1,2.47,2.47,247.0,"Sold 1175 call, trend up, target delta 0.15, delta 0.143"
+2026-06-18,LLYf182611750.U^F26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 1098.57 <= strike 1175)
+2026-06-22,LLYf262611250.U^F26,SELL,1,8.45,8.45,845.0,"Sold 1125 call, trend down, target delta 0.35, delta 0.334"
+2026-06-26,LLYf262611250.U^F26,ASSIGN,1,,1125.0,0.0,Call in the money at expiry (close 1208.12 > strike 1125)
+2026-06-26,LLY.N,BUY,100,1208.12,1208.12,-120812.0,Buy shares at the close to deliver
+2026-06-26,LLY.N,SELL,100,1125.0,1125.0,112500.0,Deliver shares at strike 1125
+2026-06-29,LLYg022612800.U^G26,SELL,1,2.51,2.51,251.0,"Sold 1280 call, trend up, target delta 0.15, delta 0.146"
+2026-07-02,LLYg022612800.U^G26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 1213.91 <= strike 1280)
+2026-07-06,LLYg102612600.U^G26,SELL,1,2.82,2.82,282.0,"Sold 1260 call, trend up, target delta 0.15, delta 0.154"
+2026-07-10,LLYg102612600.U^G26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 1188.58 <= strike 1260)
+2026-07-13,LLYg172612350.U^G26,SELL,1,3.35,3.35,335.0,"Sold 1235 call, trend up, target delta 0.15, delta 0.157"
+2026-07-17,LLYg172612350.U^G26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 1179.11 <= strike 1235)
+2026-07-20,LLYg242611925.U^G26,SELL,1,2.61,2.61,261.0,"Sold 1192.5 call, trend up, target delta 0.15, delta 0.160"
+2026-07-24,LLYg242611925.U^G26,ASSIGN,1,,1192.5,0.0,Call in the money at expiry (close 1196.03 > strike 1192.5)
+2026-07-24,LLY.N,BUY,100,1196.03,1196.03,-119603.0,Buy shares at the close to deliver
+2026-07-24,LLY.N,SELL,100,1192.5,1192.5,119250.0,Deliver shares at strike 1192.5
+2026-07-27,LLYg312612450.U^G26,SELL,1,2.75,2.75,275.0,"Sold 1245 call, trend up, target delta 0.15, delta 0.158"
+2026-07-31,LLYg312612450.U^G26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 1148.84 <= strike 1245)
+2026-08-03,LLYh072611650.U^H26,SELL,1,19.4,19.4,1940.0,"Sold 1165 call, trend down, target delta 0.35, delta 0.350"
+2026-08-07,LLYh072611650.U^H26,ASSIGN,1,,1165.0,0.0,Call in the money at expiry (close 1185.71 > strike 1165)
+2026-08-07,LLY.N,BUY,100,1185.71,1185.71,-118571.0,Buy shares at the close to deliver
+2026-08-07,LLY.N,SELL,100,1165.0,1165.0,116500.0,Deliver shares at strike 1165
+2026-08-10,LLYh142612800.U^H26,SELL,1,3.3,3.3,330.0,"Sold 1280 call, trend up, target delta 0.15, delta 0.154"
+2026-08-14,LLYh142612800.U^H26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 1180.16 <= strike 1280)
+2026-08-17,LLYh212612025.U^H26,SELL,1,6.95,6.95,695.0,"Sold 1202.5 call, trend down, target delta 0.35, delta 0.344"
+2026-08-21,LLYh212612025.U^H26,ASSIGN,1,,1202.5,0.0,Call in the money at expiry (close 1255.40 > strike 1202.5)
+2026-08-21,LLY.N,BUY,100,1255.4,1255.4,-125540.0,Buy shares at the close to deliver
+2026-08-21,LLY.N,SELL,100,1202.5,1202.5,120250.0,Deliver shares at strike 1202.5
+2026-08-24,LLYh282612950.U^H26,SELL,1,2.62,2.62,262.0,"Sold 1295 call, trend up, target delta 0.15, delta 0.156"
+2026-08-28,LLYh282612950.U^H26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 1174.61 <= strike 1295)
+2026-08-31,LLYi042611775.U^I26,SELL,1,7.25,7.25,725.0,"Sold 1177.5 call, trend down, target delta 0.35, delta 0.348"
+2026-09-04,LLYi042611775.U^I26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 1149.36 <= strike 1177.5)
+2026-09-08,LLYi112611400.U^I26,SELL,1,7.1,7.1,710.0,"Sold 1140 call, trend down, target delta 0.35, delta 0.337"
+2026-09-11,LLYi112611400.U^I26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 1115.70 <= strike 1140)
+2026-09-14,LLYi182611550.U^I26,SELL,1,7.95,7.95,795.0,"Sold 1155 call, trend down, target delta 0.35, delta 0.354"
+2026-09-18,LLYi182611550.U^I26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 1152.93 <= strike 1155)
+2026-09-18,LLYI182662000.U^I26,SETTLE,1,,532.9300000000001,53293.0,"Long call expired, settled at intrinsic value (close 1152.93 - strike 620)"
+2026-09-21,LLYI172786000.U,BUY,1,385.05,385.05,-38505.0,"Long call 860 exp 2027-09-17, prior-day delta 0.844, filled at ask"
+2026-09-21,LLYi252611800.U^I26,SELL,1,8.75,8.75,875.0,"Sold 1180 call, trend down, target delta 0.35, delta 0.369"
+2026-09-25,LLYi252611800.U^I26,ASSIGN,1,,1180.0,0.0,Call in the money at expiry (close 1183.46 > strike 1180)
+2026-09-25,LLY.N,BUY,100,1183.46,1183.46,-118346.0,Buy shares at the close to deliver
+2026-09-25,LLY.N,SELL,100,1180.0,1180.0,118000.0,Deliver shares at strike 1180
+2026-09-28,LLYj022612350.U^J26,SELL,1,3.0,3.0,300.0,"Sold 1235 call, trend up, target delta 0.15, delta 0.157"
+2026-10-02,LLYj022612350.U^J26,EXPIRE,1,,0.0,0.0,Call out of the money at expiry (close 1142.85 <= strike 1235)

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LLY Poor Man's Covered Call — Hanna Boudara</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="covered-call-style.css">
+<style>
+  /* additions for this page only */
+  .scroll{max-height:560px;overflow-y:auto}
+  td.num,th.num{text-align:right}
+  .side-SETTLE{color:var(--A)}
+  .out-ASSIGNED{color:var(--warn)}
+  .out-EXPIRED{color:var(--ink-faint)}
+  table.plain{white-space:normal}
+  table.plain td:first-child{color:var(--ink)}
+  ol.rules{max-width:72ch;margin:0 0 1rem 1.3rem;font-size:.96rem;color:var(--ink-mid)}
+  ol.rules li{margin-bottom:.7rem;padding-left:.3rem}
+  ol.rules b{color:var(--ink);font-weight:600}
+  .note{font-family:var(--sans);font-size:.8rem;color:var(--ink-faint);max-width:72ch;margin-top:.7rem}
+  .chart-title{font-family:var(--sans);font-size:.9rem;font-weight:500;color:var(--ink);margin-bottom:.5rem}
+  a{color:var(--A)}
+  header a{color:inherit}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+</head>
+<body>
+
+<header>
+  <div class="hi">
+    <div class="wp">FINTECH 535 · POOR MAN'S COVERED CALL BACKTEST</div>
+    <h1 class="site-name">LLY Poor Man's <em>Covered Call</em></h1>
+    <p class="site-tagline">One long-dated call instead of 100 shares, one short call sold every week, on real LSEG option quotes</p>
+  </div>
+  <nav>
+    <a href="#results" class="active">Results</a>
+    <a href="#rules">Rules</a>
+    <a href="#blotter">Blotter</a>
+    <a href="#ledger">Ledger</a>
+    <a href="#writeup">Write-up</a>
+    <a href="https://github.com/hannaboud/website/tree/main/code/pmcc">Code</a>
+    <a href="/">← Hanna Boudara</a>
+  </nav>
+</header>
+
+<main>
+
+  <section id="results">
+    <span class="badge" id="sample-badge">Loading data…</span>
+    <p>A covered call holds 100 shares and sells a call against them. The Poor Man's Covered
+    Call (PMCC) replaces the 100 shares with one deep in-the-money call that has about a year
+    to expiry, and sells the same short call against it. The long call costs about a third of
+    what the shares cost, which is the reason to use it.</p>
+    <p>This page backtests one algorithmic version on Eli Lilly (LLY) from
+    <span data-k="meta.start"></span> to <span data-k="meta.end"></span>, using daily closing
+    option quotes from LSEG, and compares it with buying and holding 100 shares. Both accounts
+    start with the same cash.</p>
+    <div class="stats-row" id="stats-row"></div>
+
+    <div class="table-wrap" style="margin-top:1.8rem">
+      <table id="resultTable">
+        <thead><tr><th></th><th class="num">PMCC</th><th class="num">Buy and hold 100 shares</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="note">Volatility is the annualized standard deviation of daily returns. Sharpe
+    ratio = (annualized return − <span data-k="meta.risk_free" data-f="pct2"></span>) ÷ volatility.
+    Max drawdown is the largest peak-to-trough fall in daily account value. Buy and hold
+    excludes dividends.</p>
+
+    <div class="chart-wrap">
+      <div class="chart-title">Account value, daily</div>
+      <div class="chart-legend">
+        <span><i style="background:#2f5fa8"></i>PMCC</span>
+        <span><i style="background:#a6752c"></i>Buy and hold 100 shares</span>
+      </div>
+      <canvas id="navChart" height="110"></canvas>
+    </div>
+
+    <h3>Where the PMCC's profit came from</h3>
+    <div class="table-wrap">
+      <table id="pnlTable">
+        <thead><tr><th>Source</th><th class="num">Profit / loss</th><th>Detail</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="chart-title">Short call result by week: premium received minus cost when it finished in the money</div>
+      <div class="chart-legend">
+        <span><i style="background:#2f5fa8"></i>Expired worthless (premium kept)</span>
+        <span><i style="background:#b5483f"></i>Finished in the money</span>
+      </div>
+      <canvas id="weekChart" height="90"></canvas>
+    </div>
+  </section>
+
+  <section id="rules">
+    <h2>Rules</h2>
+    <p>Every trade follows from these rules. One option contract covers 100 shares. Two terms
+    are used throughout: the <strong>entry day</strong> is the first trading day of a week
+    (Monday, or Tuesday when Monday is a holiday), and the <strong>expiry day</strong> is the
+    last trading day of the same week (Friday, or Thursday when Friday is a holiday), which is
+    the day that week's listed option expires.</p>
+    <ol class="rules">
+      <li><b>Capital.</b> On <span data-k="meta.start"></span> both accounts start with
+      <span data-k="metrics.strategy.capital" data-f="usd"></span>, the price of 100 LLY shares
+      at that day's close. Buy and hold spends all of it on 100 shares. The PMCC spends
+      <span data-k="metrics.long_call_cost" data-f="usd"></span> on the long call and keeps the
+      rest in cash, which earns <span data-k="meta.cash_rate" data-f="pct2"></span> a year.</li>
+      <li><b>Long call.</b> On the start date, buy one call expiring 18 Sep 2026, the listed
+      expiry closest to 12 months away. The strike is the listed strike whose delta at the
+      previous day's close is closest to <span data-k="meta.leap_delta"></span>, and never
+      below <span data-k="meta.leap_min_delta"></span>. It is bought at the closing ask and
+      held to expiry, where it is settled at its in-the-money amount (close minus strike). On
+      the next trading day a replacement is bought by the same rule, expiring 17 Sep 2027.</li>
+      <li><b>Trend signal.</b> On the trading day before each entry day, compare LLY's close
+      with the average of its last <span data-k="meta.ma_days"></span> closes, that day
+      included. Above the average is an uptrend; at or below is a downtrend.</li>
+      <li><b>Target delta.</b> <span data-k="meta.delta_up"></span> in an uptrend,
+      <span data-k="meta.delta_down"></span> in a downtrend. A lower delta is a strike further
+      above the stock price, which leaves more room for the stock to rise.</li>
+      <li><b>Short call.</b> On the entry day, take every listed call that expires on that
+      week's expiry day and has a bid at the close. Sell one contract of the strike whose
+      delta at that close is closest to the target delta. Delta is the value LSEG reports for
+      the contract that day. The sale is filled at the closing bid.</li>
+      <li><b>Expiry day.</b> If LLY closes at or below the strike, the short call expires
+      worthless. If LLY closes above the strike, the account buys 100 shares in the market at
+      the close and delivers them at the strike, so it is never short stock. The cost is
+      (close − strike) × 100.</li>
+      <li><b>Nothing else.</b> No rolling, no early closing, no stop-loss.</li>
+      <li><b>Daily valuation.</b> Cash, plus the long call at its closing bid, minus the open
+      short call at its closing ask: the price to close each position.</li>
+    </ol>
+  </section>
+
+  <section id="blotter">
+    <h2>Blotter</h2>
+    <p>Every trade booked, <span id="blotterCount"></span> rows. SELL is the weekly short
+    call. EXPIRE is a short call that finished out of the money. ASSIGN is a short call that
+    finished in the money, followed by the share purchase and the delivery at the strike.
+    SETTLE is the long call at its own expiry.</p>
+    <div class="table-wrap scroll">
+      <table id="blotterTable">
+        <thead><tr>
+          <th>Time</th><th>Instrument</th><th>Side</th><th class="num">Qty</th>
+          <th class="num">Limit</th><th class="num">Fill</th><th class="num">Cash Δ</th><th>Notes</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="ledger">
+    <h2>Ledger</h2>
+    <p>One row per week. Cash, long call value and account value are taken at the close of
+    the expiry day, after the short call is resolved. Cash also grows by interest between
+    rows.</p>
+    <div class="table-wrap scroll">
+      <table id="ledgerTable">
+        <thead><tr>
+          <th>Entry day</th><th>Trend</th><th class="num">Target Δ</th><th class="num">Strike</th>
+          <th class="num">Delta</th><th class="num">Premium</th><th>Expiry day</th><th class="num">Close</th>
+          <th>Outcome</th><th class="num">Cost</th><th class="num">Cash</th>
+          <th class="num">Long call</th><th class="num">Account value</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="writeup">
+    <h2>Write-up</h2>
+
+    <h3>What the strategy is for</h3>
+    <p>The PMCC is for someone who wants covered-call exposure to a stock without paying for
+    100 shares. Here the long call cost <span data-k="metrics.long_call_cost" data-f="usd"></span>
+    against <span data-k="metrics.buy_hold.capital" data-f="usd"></span> for the shares. In
+    exchange, the long call has an expiry date, loses time value, and pays no dividends.</p>
+
+    <h3>What happened</h3>
+    <p>The PMCC account returned <span data-k="metrics.strategy.total_return" data-f="pct1"></span>
+    and buy and hold returned <span data-k="metrics.buy_hold.total_return" data-f="pct1"></span>.
+    LLY rose <span data-k="metrics.buy_hold.total_return" data-f="pct1"></span> over the
+    year, and a strategy that sells calls gives up part of a rise like that.</p>
+    <p>The short calls lost money. They collected
+    <span data-k="metrics.premium_collected" data-f="usd"></span> in premium over
+    <span data-k="metrics.calls_sold"></span> weeks, and the
+    <span data-k="metrics.weeks_assigned"></span> weeks that finished in the money cost
+    <span data-k="metrics.assignment_cost" data-f="usd"></span>, a net of
+    <span data-k="metrics.short_leg_net" data-f="usd"></span>. The table below splits this by
+    the trend signal.</p>
+    <div class="table-wrap">
+      <table id="trendTable">
+        <thead><tr><th>Signal</th><th class="num">Target Δ</th><th class="num">Weeks</th>
+        <th class="num">In the money</th><th class="num">Premium</th><th class="num">Cost</th><th class="num">Net</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p style="margin-top:1rem">The PMCC account was less volatile than buy and hold
+    (<span data-k="metrics.strategy.volatility" data-f="pct0"></span> against
+    <span data-k="metrics.buy_hold.volatility" data-f="pct0"></span>) and had a smaller
+    drawdown. That is mostly because about two thirds of the account sat in cash, not because
+    of the options.</p>
+
+    <h3>How much capital it really takes</h3>
+    <p>The long call cost <span data-k="metrics.long_call_cost" data-f="usd"></span>, but the
+    strategy could not have been run on that amount alone. When a short call finishes in the
+    money the cost is paid in cash, while the offsetting gain stays inside the long call. An
+    account funded with only the cost of the long call would have seen its cash fall to
+    <span data-k="metrics.minimum_funding.min_cash" data-f="usd"></span>. On that basis the
+    same trades return <span data-k="metrics.minimum_funding.total_return" data-f="pct1"></span>
+    with volatility of <span data-k="metrics.minimum_funding.volatility" data-f="pct0"></span>
+    and a drawdown of <span data-k="metrics.minimum_funding.max_drawdown" data-f="pct1"></span>,
+    but only by borrowing. That is why both accounts here start with the same cash: the PMCC
+    account's cash never fell below <span data-k="metrics.min_cash" data-f="usd"></span>, and
+    all returns on this page use one capital base.</p>
+
+    <h3>No look-ahead</h3>
+    <p>The trend signal and the long call's strike use the previous trading day's close. The
+    short call's strike is chosen from deltas at the entry day's close and sold at that same
+    close's bid. This assumes the delta seen just before the close is the delta at the close.
+    No data from after a trade is used to make it. Option contracts that had already expired
+    were pulled individually from LSEG by contract code, so the backtest sees the strikes that
+    were listed at the time.</p>
+
+    <h3>Two rules were changed after the first run</h3>
+    <p>The first version had a floor that kept the short strike above the long call's strike
+    plus its price, and it chose the short strike from the previous day's delta. The floor
+    left almost no premium in the weeks after a long call was bought, and the previous day's
+    delta meant three calls were sold with the strike already below the stock price. Both
+    rules were changed after seeing those results, which is a form of hindsight. For
+    reference, the first version returned
+    <span data-k="first_draft.strategy.total_return" data-f="pct1"></span> with a short-call
+    net of <span data-k="first_draft.short_leg_net" data-f="usd"></span>.</p>
+
+    <h3>Limitations</h3>
+    <p>One stock, one year, and a year in which the stock rose strongly. The result says
+    little about flat or falling markets, where selling calls usually does better.</p>
+    <p>Buy and hold excludes LLY's dividends, which were under 1% for the year. The PMCC
+    receives none.</p>
+    <p>All fills are at daily closing quotes for one contract, with no commissions. The long
+    call rarely trades, so its bid and ask are quotes, not trades.</p>
+    <p>Short calls are assumed to be assigned only at expiry. Early assignment is possible
+    for American-style options and is ignored.</p>
+    <p>On an in-the-money expiry day the share purchase is larger than the account's cash.
+    The purchase and the delivery happen at the same close, so only the difference is paid.</p>
+    <p>A few option quotes could not be retrieved from LSEG in May to July 2026 because of
+    dropped requests. Every week still has at least 22 strikes to choose from.</p>
+
+    <h3>Reproduce it</h3>
+    <p>The code and the data it produced are in the
+    <a href="https://github.com/hannaboud/website/tree/main/code/pmcc">repository</a>.
+    <code>04_pull_lly.py</code> pulls the stock and option history from LSEG (it needs an LSEG
+    Workspace login). <code>05_backtest.py</code> runs the backtest from the saved CSV files
+    and needs only pandas. <code>06_build_site_data.py</code> writes the data file this page
+    reads, so every number here comes from the backtest output.</p>
+  </section>
+
+</main>
+
+<footer>FINTECH 535 · Poor Man's Covered Call backtest · <a href="https://github.com/hannaboud/website/tree/main/code/pmcc">Code</a> · <a href="/">Hanna Boudara</a></footer>
+
+<script src="pmcc-book.js"></script>
+<script src="pmcc-render.js"></script>
+</body>
+</html>
