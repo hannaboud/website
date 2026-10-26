@@ -3,140 +3,171 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AAPL Covered-Call Blotter — FINTECH 535</title>
+<title>Hanna Boudara</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root{
+--ink:#14171c;--ink-mid:#454b58;--ink-faint:#8a8f9e;
+--paper:#ede8df;--white:#f5f1ea;--rule:#c8c2b4;--rule-dk:#8a8070;
+--A:#1a3a6e;--Alt:#dce6f5;
+--serif:'IBM Plex Serif',Georgia,serif;
+--sans:'IBM Plex Sans',system-ui,sans-serif;
+--mono:'IBM Plex Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px}
+body{font-family:var(--serif);background:var(--paper);color:var(--ink);line-height:1.72;-webkit-font-smoothing:antialiased;min-height:100vh}
+/* HEADER */
+header{background:var(--ink);color:var(--white)}
+.hi{max-width:1020px;margin:0 auto;padding:2.8rem 2rem 0}
+.wp{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;color:#8a9ab8;margin-bottom:1.1rem}
+.site-name{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:300;line-height:1.2;color:#eef0f5;margin-bottom:.5rem}
+.site-name em{font-style:italic;color:#a8bce0}
+.site-tagline{font-family:var(--sans);font-size:.84rem;color:#8a9ab8;margin-bottom:2.2rem}
+/* NAV */
+nav{max-width:1020px;margin:0 auto;display:flex;gap:0;scrollbar-width:none}
+.tb{font-family:var(--mono);font-size:.71rem;letter-spacing:.04em;color:#6a7a99;background:none;border:none;border-bottom:3px solid transparent;padding:.75rem 1.1rem;cursor:pointer;white-space:nowrap;transition:color .15s,border-color .15s}
+.tb:hover{color:#a8bce0}
+.tb.active{color:#dde5f5;border-bottom-color:#4a7fd4}
+/* MAIN */
+main{max-width:1020px;margin:0 auto;padding:3rem 2rem 7rem}
+.tp{display:none}
+.tp.active{display:block}
+/* TYPE */
+h2{font-size:1.5rem;font-weight:300;border-bottom:2px solid var(--ink);padding-bottom:.5rem;margin-bottom:1.6rem;line-height:1.2}
+h3{font-family:var(--sans);font-size:.98rem;font-weight:500;margin:2.4rem 0 .65rem}
+p{max-width:72ch;margin-bottom:.95rem;font-size:.96rem;color:var(--ink-mid)}
+p strong{color:var(--ink)}
+/* CONTACT LINKS */
+.contact-row{display:flex;gap:1rem;flex-wrap:wrap;margin:2rem 0}
+.contact-btn{
+font-family:var(--mono);font-size:.75rem;letter-spacing:.04em;
+padding:.5rem 1.1rem;border-radius:2px;text-decoration:none;
+display:inline-flex;align-items:center;gap:.5rem;
+transition:opacity .15s;
+}
+.contact-btn:hover{opacity:.8}
+.contact-btn.dark{background:var(--ink);color:var(--white)}
+.contact-btn.outline{background:transparent;color:var(--ink);border:1px solid var(--rule-dk)}
+.contact-btn svg{width:13px;height:13px;flex-shrink:0}
+/* PROJECT CARD */
+.project-card{
+display:block;text-decoration:none;color:inherit;
+border:1px solid var(--rule);background:var(--white);
+padding:1.8rem 2rem;margin-bottom:1.2rem;
+transition:border-color .15s,box-shadow .15s;
+}
+.project-card:hover{border-color:var(--rule-dk);box-shadow:0 2px 12px rgba(0,0,0,0.06)}
+.project-tag{
+font-family:var(--mono);font-size:.66rem;letter-spacing:.08em;
+text-transform:uppercase;color:var(--A);
+display:inline-block;margin-bottom:.7rem;
+}
+.project-title{font-size:1.1rem;font-weight:400;color:var(--ink);margin-bottom:.5rem;line-height:1.3}
+.project-desc{font-size:.88rem;color:var(--ink-mid);line-height:1.65;max-width:60ch;margin-bottom:1rem}
+.project-footer{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+.project-meta{font-family:var(--mono);font-size:.7rem;color:var(--ink-faint)}
+.project-link{font-family:var(--mono);font-size:.72rem;color:var(--A);display:flex;align-items:center;gap:.3rem}
+.project-link svg{width:12px;height:12px;transition:transform .15s}
+.project-card:hover .project-link svg{transform:translateX(3px)}
+/* MORE COMING */
+.more-soon{
+font-family:var(--mono);font-size:.75rem;color:var(--ink-faint);
+letter-spacing:.04em;padding:1.4rem 0;border-top:1px solid var(--rule);
+margin-top:.5rem;
+}
+footer{border-top:1px solid var(--rule-dk);padding:1.8rem;text-align:center;font-family:var(--sans);font-size:.74rem;color:var(--ink-faint)}
+</style>
 </head>
 <body>
-
 <header>
-  <div class="hi">
-    <div class="wp">FINTECH 535 · COVERED-CALL BACKTEST</div>
-    <h1 class="site-name">AAPL Covered-Call <em>Blotter</em></h1>
-    <p class="site-tagline">Delta-targeted weeklies, vol- and loss-adjusted, wait through expiry</p>
-  </div>
-  <nav>
-    <a href="index.html" class="active">Blotter</a>
-    <a href="data.html">Data</a>
-    <a href="#writeup">Write-up</a>
-    <a href="https://github.com/" target="_blank">GitHub</a>
-  </nav>
+<div class="hi">
+<h1 class="site-name">Hanna Boudara</h1>
+<p class="site-tagline">Senior at Duke University · Financial Engineering & Mathematics</p>
+</div>
+<nav>
+<button class="tb active" data-tab="about">About</button>
+<button class="tb" data-tab="projects">Projects & Writing</button>
+</nav>
 </header>
-
 <main>
-
-  <section id="intro">
-    <span class="badge" id="sample-badge">Loading data…</span>
-    <p>Every Monday, if flat, buy 100 AAPL shares at the print and write one Friday-expiring
-    call. The strike is chosen by solving for the listed strike closest to a target delta —
-    the target itself shifts with the current implied-vol regime (further OTM when vol is
-    rich, closer to the money when it's calm) and pulls in further after a losing week, so a
-    stock drop gets more room to recover before the position risks getting capped again.
-    Friday: OTM expires (keep the shares, keep the premium, write the next week's call without
-    re-buying); ITM is assigned (shares sold at the strike, flat, restart Monday).</p>
-    <div class="stats-row" id="stats-row"></div>
-  </section>
-
-  <section id="nav">
-    <h2>NAV, initial &amp; maintenance margin</h2>
-    <p>Reg T account. NAV = cash + stock market value (the short call is closed out by the
-    time each week's mark is taken, so it never carries a separate negative MV into the
-    weekly snapshot). Initial margin is 50% of stock LMV; maintenance is 25%. A covered short
-    call adds $0 to either, since the position isn't naked.</p>
-    <div class="chart-wrap">
-      <div class="chart-legend">
-        <span><i style="background:#1a3a6e"></i>NAV</span>
-        <span><i style="background:#9a3b3b"></i>Initial margin</span>
-        <span><i style="background:#a6752c"></i>Maintenance margin</span>
-      </div>
-      <canvas id="navChart" height="110"></canvas>
-    </div>
-  </section>
-
-  <section id="scatter">
-    <h2>Midpoint assumption</h2>
-    <p>Every fill in this backtest is taken at mid = (BID + ASK) / 2. To justify that, every
-    hourly bar with a real trade print across the strikes actually used is plotted here:
-    TRDPRC_1 (last trade) against mid at that same bar.</p>
-    <div class="chart-wrap">
-      <canvas id="scatterChart" height="110"></canvas>
-    </div>
-  </section>
-
-  <section id="blotter">
-    <h2>Blotter</h2>
-    <p>Every trade actually booked — no working orders, no signal chart standing in for a
-    blotter. Friday OTM is EXPIRE; Friday ITM is ASSIGN on the call plus a STOCK SELL at the
-    strike.</p>
-    <div class="table-wrap">
-      <table id="blotterTable">
-        <thead><tr>
-          <th>Time</th><th>Instrument</th><th>Side</th><th>Qty</th>
-          <th>Fill</th><th>Cash Δ</th><th>Notes</th>
-        </tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </section>
-
-  <section id="ledger">
-    <h2>Ledger</h2>
-    <p>Running position, marked at each week's close. Cash only moves on a blotter event:
-    buying stock, collecting premium, expiring at $0, or assignment at the strike.</p>
-    <div class="table-wrap">
-      <table id="ledgerTable">
-        <thead><tr>
-          <th>Week of</th><th>Shares</th><th>Spot</th><th>Cash</th><th>LMV</th>
-          <th>NAV</th><th>Initial</th><th>Maint.</th><th>Available</th>
-        </tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </section>
-
-  <section id="writeup">
-    <h2>Write-up</h2>
-
-    <h3>Why this stock</h3>
-    <p>AAPL was chosen for liquid weeklies and tight, well-quoted markets, which makes the
-    midpoint fill assumption easier to defend than it would be on a thin name.</p>
-
-    <h3>How the strike is chosen</h3>
-    <p>The strike is picked by targeting a Black-Scholes delta rather than a fixed dollar
-    distance from spot. The target itself is not constant: it slides between a calm-market
-    value and a high-vol value based on where current implied vol sits in its own recent
-    history, and it's pulled down further — capped at a floor so it can't go arbitrarily low —
-    after a week where the stock lost money. A lower target delta means a strike further
-    out of the money, i.e. more room before the position risks being capped again.</p>
-
-    <h3>Wait through expiry</h3>
-    <p>No rolls, no buy-to-close. A written call either expires worthless (shares and premium
-    both kept, next week's call written without re-buying) or is assigned (shares delivered
-    at the strike, position flat, restart the following Monday).</p>
-
-    <h3>Fill assumption</h3>
-    <p>Every fill uses mid = (BID + ASK) / 2 at the order timestamp. The scatter above tests
-    this directly against real trade prints on the strikes actually used in the backtest.</p>
-
-    <h3>Why Reg T, not portfolio margin</h3>
-    <p>Reg T is computable without a broker's PM/SPAN engine and isn't broker-dependent. A
-    book that survives Reg T's margin requirements survives portfolio margin too — the
-    reverse isn't guaranteed.</p>
-
-    <h3>Known limitations</h3>
-    <p>The option leg's daily mark between Monday's write and Friday's resolution is not
-    tracked intraweek — NAV reflects the position's value at each week's close, not a
-    continuous daily mark-to-market of the open short call. The vol-regime signal is also
-    noisier in the earliest weeks of the backtest, before enough implied-vol history has
-    accumulated to make the calm/high-vol comparison statistically meaningful.</p>
-  </section>
-
+<!-- ABOUT -->
+<section id="about" class="tp active">
+<h2>About</h2>
+<p>I'm a senior at Duke University studying Financial Engineering and Mathematics. I'm drawn to the intersection of <strong>finance, technology, and digital assets.</strong></p>
+<h3>Get in touch</h3>
+<div class="contact-row">
+<a class="contact-btn dark" href="https://www.linkedin.com/in/hannaboudara/" target="_blank">
+<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+LinkedIn
+</a>
+<a class="contact-btn outline" href="mailto:hanna.boudara@duke.edu">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+hanna.boudara@duke.edu
+</a>
+</div>
+</section>
+<!-- PROJECTS -->
+<section id="projects" class="tp">
+<h2>Projects & Writing</h2>
+<a class="project-card" href="/covered-call.html">
+<div class="project-tag">Coursework · 2026</div>
+<div class="project-title">AAPL Covered-Call Backtest</div>
+<p class="project-desc">A weekly covered-call strategy backtested on real LSEG tape: strike chosen by targeting a Black-Scholes delta that shifts with the implied-vol regime and pulls in further after a losing week. Full Reg T margin accounting and a 6,500+ point mid-vs-trade validation (R² = 0.999) justify the fill assumption.</p>
+<div class="project-footer">
+<span class="project-meta">Duke University · FinTech 535</span>
+<span class="project-link">View blotter <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+</div>
+</a>
+<a class="project-card" href="/pmcc.html">
+<div class="project-tag">Coursework · 2026</div>
+<div class="project-title">LLY Poor Man's Covered Call Backtest</div>
+<p class="project-desc">A Poor Man's Covered Call on Eli Lilly, backtested over one year on real LSEG option quotes: one deep in-the-money call in place of 100 shares, and a weekly short call whose delta follows a 21-day trend signal. Compared with buying and holding the shares on the same starting cash, with a full blotter and ledger.</p>
+<div class="project-footer">
+<span class="project-meta">Duke University · FinTech 535</span>
+<span class="project-link">View backtest <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+</div>
+</a>
+<a class="project-card" href="/bonds.html">
+<div class="project-tag">Teaching Tool · 2026</div>
+<div class="project-title">Treasury Market Dashboard</div>
+<p class="project-desc">A live dashboard that teaches the U.S. bond market: yields, curve and credit spreads, and inflation expectations, each compared with pre-COVID and long-run averages and explained in plain language. Includes scenario analysis with duration and convexity, and a Monte Carlo simulation of future yields. Data refreshes every weekday.</p>
+<div class="project-footer">
+<span class="project-meta">Duke University · Teaching Assistant</span>
+<span class="project-link">Open dashboard <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+</div>
+</a>
+<a class="project-card" href="/research.html">
+<div class="project-tag">Working Paper · 2026</div>
+<div class="project-title">Rare Earth Price Risk in U.S. Manufacturing</div>
+<p class="project-desc">Do stock markets correctly price rare earth supply chain risk? We find that they don't — the standard equity-based index has a daily correlation of ρ = 0.02 with actual metal prices. Evidence from 29 S&P 500 manufacturers using GJR-GARCH filtered quantile-on-quantile regression.</p>
+<div class="project-footer">
+<span class="project-meta">Duke University · Financial Econometrics</span>
+<span class="project-link">Read paper <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+</div>
+</a>
+<a class="project-card" href="/ebs/">
+<div class="project-tag">Student Organization · 2026</div>
+<div class="project-title">European Business Society Website</div>
+<p class="project-desc">A redesign of the website for the European Business Society at Duke, a student organization I co-founded that runs pro-bono consulting projects for companies in Europe, the US and the Middle East. Built from scratch in HTML, CSS and JavaScript, with an events calendar and a team directory.</p>
+<div class="project-footer">
+<span class="project-meta">Duke University · Co-founder</span>
+<span class="project-link">Visit site <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+</div>
+</a>
+<div class="more-soon">More coming soon.</div>
+</section>
 </main>
-
-<footer>FINTECH 535 · Covered-call backtest · <a href="data.html">Data</a></footer>
-
-<script src="book.js"></script>
-<script src="render.js"></script>
+<footer>© 2026 Hanna Boudara</footer>
+<script>
+document.querySelectorAll('.tb').forEach(btn=>{
+btn.addEventListener('click',()=>{
+document.querySelectorAll('.tb').forEach(b=>b.classList.remove('active'));
+document.querySelectorAll('.tp').forEach(p=>p.classList.remove('active'));
+btn.classList.add('active');
+document.getElementById(btn.dataset.tab).classList.add('active');
+});
+});
+</script>
 </body>
 </html>
