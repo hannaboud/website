@@ -6,7 +6,7 @@
 <title>Break the Chain</title>
 <meta name="theme-color" content="#0B0D11">
 <meta property="og:title" content="Break the Chain">
-<meta property="og:description" content="A hands-on crypto course: blockchain basics, the major coins, a market dashboard, smart contracts and DeFi.">
+<meta property="og:description" content="A hands-on crypto course: blockchain basics, the major coins, a live market dashboard, smart contracts and DeFi.">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='9' width='14' height='14' rx='4' fill='none' stroke='%235B6CF0' stroke-width='3.5'/%3E%3Crect x='15' y='9' width='14' height='14' rx='4' fill='none' stroke='%239AA2B4' stroke-width='3.5'/%3E%3C/svg%3E">
 <style>
@@ -141,6 +141,20 @@ h4 { margin: 0; font-size: 1rem; }
 .snap-grid .v { font-family: var(--display); font-stretch: 110%; font-weight: 780; font-size: 1.35rem; line-height: 1.15; }
 .snap-grid .s { font-size: .8rem; color: var(--muted); }
 .more { font-size: .9rem; font-weight: 600; text-decoration: none; }
+.status {
+  display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px 2px 7px; border-radius: 999px;
+  background: var(--line); color: var(--ink); font-family: var(--mono); font-size: .66rem; font-weight: 600;
+  letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; vertical-align: 1px;
+}
+.status .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex: none; }
+.status.is-live { background: var(--ok-soft); color: var(--ok); }
+.status.is-live .dot { background: var(--ok); animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+#dashAsOf { max-width: 60ch; }
+.tbl td.flash-up { animation: flashUp 1.2s ease-out; }
+.tbl td.flash-down { animation: flashDown 1.2s ease-out; }
+@keyframes flashUp { from { background: var(--ok-soft); color: var(--ok); } to { background: transparent; } }
+@keyframes flashDown { from { background: var(--bad-soft); color: var(--bad); } to { background: transparent; } }
 
 .course-wrap { padding-block: 8px 64px; }
 .section-head { margin-bottom: 20px; }
@@ -550,8 +564,8 @@ footer p { margin: 0; max-width: 80ch; }
           <a class="btn secondary" href="#markets">Open the market dashboard</a>
         </div>
       </div>
-      <aside class="panel snap" aria-label="Market snapshot">
-        <div class="snap-head"><span class="lbl">Market snapshot</span><span class="lbl" id="snapDate"></span></div>
+      <aside class="panel snap" aria-label="Markets">
+        <div class="snap-head"><span class="lbl">Markets</span><span id="snapDate"></span></div>
         <div class="snap-grid" id="snapGrid"></div>
         <a class="more" href="#markets">See the top coins and 12-month chart →</a>
       </aside>
@@ -906,7 +920,7 @@ footer p { margin: 0; max-width: 80ch; }
   <section class="step" id="m-dash">
     <div class="wrap">
       <div class="dash-head">
-        <div><p class="kicker">1 · Dashboard</p><h3 class="step-title">The top 7 coins by market value</h3></div>
+        <div><p class="kicker">1 · Dashboard</p><h3 class="step-title">The biggest coins by market value</h3></div>
         <p class="note" id="dashAsOf"></p>
       </div>
       <div class="kpis" id="kpis"></div>
@@ -915,7 +929,7 @@ footer p { margin: 0; max-width: 80ch; }
           <div class="chart-top">
             <div>
               <h4>What $100 became over 12 months</h4>
-              <p class="note">Each line starts with $100 at the end of October 2025, using month-end prices. Hover or tap for details.</p>
+              <p class="note" id="perfSub"></p>
             </div>
             <div class="legend" id="perfLegend" aria-label="Show or hide coins"></div>
           </div>
@@ -923,7 +937,7 @@ footer p { margin: 0; max-width: 80ch; }
         </div>
         <div class="panel flush tbl-wrap"><table class="tbl market" id="coinTable"></table></div>
       </div>
-      <p class="note foot-note"><b>Typical monthly move</b> is how much the price usually changes from one month to the next (the standard deviation of monthly returns). <b>Worst drop</b> is the biggest fall from a previous high, using month-end prices.</p>
+      <p class="note foot-note"><b>Typical monthly move</b> is how much the price usually changes from one month to the next (the standard deviation of monthly returns). <b>Worst drop</b> is the biggest fall from a previous high, using month-end prices. Market data provided by <a href="https://www.coingecko.com">CoinGecko</a>. Live prices from <a href="https://exchange.coinbase.com">Coinbase</a>.</p>
       <p class="takeaway-line" id="dashTake"></p>
     </div>
   </section>
@@ -1193,7 +1207,7 @@ footer p { margin: 0; max-width: 80ch; }
 <footer>
   <div class="wrap">
     <p>Built by <a href="https://hannaboudara.com">Hanna Boudara</a>.</p>
-    <p><b>About the data.</b> Market figures are a snapshot from October 28, 2026, not a live feed. Prices and market values: <a href="https://coinranking.com/">CoinRanking</a>. Total market value and Bitcoin's share: <a href="https://coincoverage.org/crypto-market-cap">CoinCoverage</a>. Month-end prices: <a href="https://www.statmuse.com/money/ask/btc-price-candles-last-12-months-by-month">StatMuse</a> (Bitcoin) and <a href="https://www.digrin.com/stocks/detail/ETH-USD/price">Digrin</a> (other coins).</p>
+    <p id="dataNote"></p>
     <p>Hashes and signatures are real cryptography computed in your browser. Mining difficulty is kept low so it runs in seconds. Pools, loans and order books are simplified simulations. Nothing here is financial advice.</p>
   </div>
 </footer>
@@ -1348,30 +1362,88 @@ footer p { margin: 0; max-width: 80ch; }
   }
 
   // =========================================================
-  // Market data snapshot (October 28, 2026)
+  // Market data
+  // The page starts from a saved snapshot (October 28, 2026). On the live site it
+  // then loads crypto-data.json, refreshed every 3 hours from CoinGecko by a GitHub
+  // Action, and streams trade prices from Coinbase. If a layer can't be reached,
+  // the page keeps showing the one before it.
   // =========================================================
-  const SNAP = { date: 'October 28, 2026', short: 'Oct 28, 2026', totalCap: 2.75e12, btcDom: 59.5, ethDom: 10.5, vol24: 64.11e9 };
-  const MONTHS = ['Oct 31, 2025', 'Nov 30, 2025', 'Dec 31, 2025', 'Jan 31, 2026', 'Feb 28, 2026', 'Mar 31, 2026', 'Apr 30, 2026', 'May 31, 2026', 'Jun 30, 2026', 'Jul 31, 2026', 'Aug 31, 2026', 'Sep 30, 2026', 'Oct 28, 2026'];
-  const MSHORT = ['Oct ’25', 'Nov', 'Dec', 'Jan ’26', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct 28'];
+  const SNAPSHOT = {
+    updated: '2026-10-28T16:55:00Z',
+    global: { total_market_cap: 2.75e12, total_volume: 64.11e9, btc_dominance: 59.5, eth_dominance: 10.5 },
+    coins: {
+      btc: { price: 81508.45, market_cap: 1.64e12, rank: 1, change_24h: 2.20 },
+      eth: { price: 2370.30, market_cap: 289.62e9, rank: 2, change_24h: 2.49 },
+      usdt: { price: 1.00, market_cap: 181.74e9, rank: 3, change_24h: 0 },
+      bnb: { price: 750.04, market_cap: 98.65e9, rank: 4, change_24h: 1.77 },
+      xrp: { price: 1.33, market_cap: 84.40e9, rank: 5, change_24h: 2.46 },
+      usdc: { price: 1.00, market_cap: 71.24e9, rank: 6, change_24h: -0.03 },
+      sol: { price: 102.68, market_cap: 60.59e9, rank: 7, change_24h: 2.89 },
+      doge: { price: 0.0803, market_cap: 12.56e9, rank: 11, change_24h: 3.99 }
+    },
+    history: {
+      months: ['2025-10-31', '2025-11-30', '2025-12-31', '2026-01-31', '2026-02-28', '2026-03-31', '2026-04-30', '2026-05-31', '2026-06-30', '2026-07-31', '2026-08-31', '2026-09-30'],
+      series: {
+        btc: [109556.16, 90394.31, 87508.83, 78621.12, 66995.86, 68233.31, 76304.32, 73579.69, 58558.86, 62813.75, 78548.63, 83553.85],
+        eth: [3847.08, 2992.11, 2967.04, 2445.09, 1965.05, 2104.71, 2256.25, 2004.34, 1569.58, 1860.35, 2466.82, 2683.68],
+        bnb: [1088.96, 877.58, 863.26, 780.48, 617.25, 617.05, 615.07, 708.58, 545.69, 586.43, 691.02, 768.18],
+        xrp: [2.51, 2.16, 1.84, 1.64, 1.38, 1.34, 1.37, 1.33, 1.04, 1.06, 1.38, 1.49],
+        sol: [187.21, 133.56, 124.48, 105.44, 84.37, 83.11, 83.02, 82.30, 73.52, 72.79, 103, 118]
+      }
+    }
+  };
   const COINS = [
-    { id: 'btc', name: 'Bitcoin', sym: 'BTC', rank: 1, price: 81508.45, cap: 1.64e12, ch24: 2.20, color: 's1',
-      series: [109556.16, 90394.31, 87508.83, 78621.12, 66995.86, 68233.31, 76304.32, 73579.69, 58558.86, 62813.75, 78548.63, 83553.85, 81508.45] },
-    { id: 'eth', name: 'Ethereum', sym: 'ETH', rank: 2, price: 2370.30, cap: 289.62e9, ch24: 2.49, color: 's2',
-      series: [3847.08, 2992.11, 2967.04, 2445.09, 1965.05, 2104.71, 2256.25, 2004.34, 1569.58, 1860.35, 2466.82, 2683.68, 2370.30] },
-    { id: 'usdt', name: 'Tether', sym: 'USDT', rank: 3, price: 1.00, cap: 181.74e9, ch24: 0, stable: true },
-    { id: 'bnb', name: 'BNB', sym: 'BNB', rank: 4, price: 750.04, cap: 98.65e9, ch24: 1.77, color: 's3',
-      series: [1088.96, 877.58, 863.26, 780.48, 617.25, 617.05, 615.07, 708.58, 545.69, 586.43, 691.02, 768.18, 750.04] },
-    { id: 'xrp', name: 'XRP', sym: 'XRP', rank: 5, price: 1.33, cap: 84.40e9, ch24: 2.46, color: 's4',
-      series: [2.51, 2.16, 1.84, 1.64, 1.38, 1.34, 1.37, 1.33, 1.04, 1.06, 1.38, 1.49, 1.33] },
-    { id: 'usdc', name: 'USDC', sym: 'USDC', rank: 6, price: 1.00, cap: 71.24e9, ch24: -0.03, stable: true },
-    { id: 'sol', name: 'Solana', sym: 'SOL', rank: 7, price: 102.68, cap: 60.59e9, ch24: 2.89, color: 's5',
-      series: [187.21, 133.56, 124.48, 105.44, 84.37, 83.11, 83.02, 82.30, 73.52, 72.79, 103, 118, 102.68] }
+    { id: 'btc', name: 'Bitcoin', sym: 'BTC', color: 's1', product: 'BTC-USD' },
+    { id: 'eth', name: 'Ethereum', sym: 'ETH', color: 's2', product: 'ETH-USD' },
+    { id: 'usdt', name: 'Tether', sym: 'USDT', stable: true },
+    { id: 'bnb', name: 'BNB', sym: 'BNB', color: 's3' },
+    { id: 'xrp', name: 'XRP', sym: 'XRP', color: 's4', product: 'XRP-USD' },
+    { id: 'usdc', name: 'USDC', sym: 'USDC', stable: true },
+    { id: 'sol', name: 'Solana', sym: 'SOL', color: 's5', product: 'SOL-USD' },
+    { id: 'doge', name: 'Dogecoin', sym: 'DOGE', product: 'DOGE-USD', offTable: true }
   ];
-  const DOGE = { price: 0.0803, cap: 12.56e9, ch24: 3.99, rank: 11 };
   const COIN = {};
-  COINS.forEach((c) => {
-    COIN[c.id] = c;
-    if (c.series) {
+  const BY_PRODUCT = {};
+  COINS.forEach((c) => { COIN[c.id] = c; if (c.product) BY_PRODUCT[c.product] = c; });
+  const CHART_IDS = ['btc', 'eth', 'bnb', 'xrp', 'sol'];
+  const MARKET = { mode: 'snapshot', updated: SNAPSHOT.updated, global: SNAPSHOT.global, months: [], lastTick: 0, socketOpen: false };
+  let dirty = false, chartDirty = false, chartHover = false;
+
+  function validData(d) {
+    if (!d || typeof d !== 'object' || !d.coins || typeof d.coins !== 'object' || typeof d.updated !== 'string') return false;
+    if (!CHART_IDS.every((id) => d.coins[id] && d.coins[id].price > 0)) return false;
+    const h = d.history;
+    if (!h || !Array.isArray(h.months) || h.months.length < 6 || !h.series) return false;
+    return CHART_IDS.every((id) => Array.isArray(h.series[id]) && h.series[id].length === h.months.length && h.series[id].every((v) => v > 0));
+  }
+  function applyBase(d, mode) {
+    MARKET.mode = mode;
+    MARKET.updated = d.updated;
+    const g = d.global;
+    if (g && g.total_market_cap > 0 && g.btc_dominance > 0) MARKET.global = g;
+    MARKET.months = d.history.months.slice();
+    COINS.forEach((c) => {
+      const x = d.coins[c.id];
+      if (x && x.price > 0) {
+        if (x.rank) c.rank = x.rank;
+        c.supply = x.circulating_supply > 0 ? x.circulating_supply : (x.market_cap > 0 ? x.market_cap / x.price : c.supply);
+        if (c.liveAt) {
+          c.cap = c.price * (c.supply || 0);
+        } else {
+          c.price = x.price;
+          c.ch24 = x.change_24h || 0;
+          c.cap = x.market_cap > 0 ? x.market_cap : c.price * (c.supply || 0);
+        }
+      }
+      const s = d.history.series[c.id];
+      if (s) c.hist = s.slice();
+    });
+    recompute();
+  }
+  function recompute() {
+    COINS.forEach((c) => {
+      if (!c.hist) return;
+      c.series = c.hist.concat([c.price]);
       c.idx = c.series.map((p) => (p / c.series[0]) * 100);
       const r = [];
       for (let i = 1; i < c.series.length; i++) r.push(c.series[i] / c.series[i - 1] - 1);
@@ -1380,10 +1452,47 @@ footer p { margin: 0; max-width: 80ch; }
       let peak = c.series[0], mdd = 0;
       c.series.forEach((p) => { peak = Math.max(peak, p); mdd = Math.min(mdd, p / peak - 1); });
       c.mdd = mdd * 100;
-      c.chg = (c.series[c.series.length - 1] / c.series[0] - 1) * 100;
-    }
-  });
-  const CHART_IDS = ['btc', 'eth', 'bnb', 'xrp', 'sol'];
+      c.chg = (c.price / c.series[0] - 1) * 100;
+    });
+  }
+  applyBase(SNAPSHOT, 'snapshot');
+
+  function isLive() { return MARKET.socketOpen && Date.now() - MARKET.lastTick < 120000; }
+  const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const toDate = (s) => new Date(s.length === 10 ? s + 'T00:00:00Z' : s);
+  const longDate = (d) => MON[d.getUTCMonth()] + ' ' + d.getUTCDate() + ', ' + d.getUTCFullYear();
+  function localStamp(s) {
+    const d = toDate(s);
+    try { return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); } catch (e) { return longDate(d); }
+  }
+  function ago(s) {
+    const sec = Math.max(0, (Date.now() - toDate(s).getTime()) / 1000);
+    if (sec < 90) return 'just now';
+    const m = Math.round(sec / 60);
+    if (m < 60) return m + ' min ago';
+    const h = Math.round(m / 60);
+    if (h < 36) return h + (h === 1 ? ' hour ago' : ' hours ago');
+    const d = Math.round(h / 24);
+    return d + (d === 1 ? ' day ago' : ' days ago');
+  }
+  function chartLabels() {
+    const full = MARKET.months.map((s) => longDate(toDate(s)));
+    const short = MARKET.months.map((s, i) => {
+      const d = toDate(s), m = d.getUTCMonth();
+      return i === 0 || m === 0 ? MON[m] + ' ’' + String(d.getUTCFullYear()).slice(2) : MON[m];
+    });
+    if (isLive()) { full.push('Now (live)'); short.push('Now'); }
+    else { const u = toDate(MARKET.updated); full.push(longDate(u)); short.push(MON[u.getUTCMonth()] + ' ' + u.getUTCDate()); }
+    return { full, short };
+  }
+  function statusShort() {
+    if (isLive()) return 'Live';
+    if (MARKET.mode === 'daily') return 'Updated ' + ago(MARKET.updated);
+    return 'Snapshot · ' + longDate(toDate(MARKET.updated));
+  }
+  function statusPill() {
+    return '<span class="status' + (isLive() ? ' is-live' : '') + '"><span class="dot" aria-hidden="true"></span>' + statusShort() + '</span>';
+  }
 
   function sparkSVG(series, color, w, h) {
     const lo = Math.min.apply(null, series), hi = Math.max.apply(null, series);
@@ -1503,13 +1612,17 @@ footer p { margin: 0; max-width: 80ch; }
   // =========================================================
   // Overview snapshot
   // =========================================================
-  $('snapDate').textContent = SNAP.short;
-  $('snapGrid').innerHTML = [
-    ['Bitcoin', money(COIN.btc.price), delta(COIN.btc.ch24) + ' today'],
-    ['Ethereum', money(COIN.eth.price), delta(COIN.eth.ch24) + ' today'],
-    ['All crypto', big(SNAP.totalCap), 'total market value'],
-    ['Bitcoin’s share', SNAP.btcDom + '%', 'of all crypto value']
-  ].map((r) => '<div><span class="lbl">' + r[0] + '</span><div class="v">' + r[1] + '</div><div class="s">' + r[2] + '</div></div>').join('');
+  function renderOverview() {
+    const g = MARKET.global;
+    $('snapDate').innerHTML = statusPill();
+    $('snapGrid').innerHTML = [
+      ['Bitcoin', money(COIN.btc.price), delta(COIN.btc.ch24) + ' today'],
+      ['Ethereum', money(COIN.eth.price), delta(COIN.eth.ch24) + ' today'],
+      ['All crypto', big(g.total_market_cap), 'total market value'],
+      ['Bitcoin’s share', g.btc_dominance.toFixed(1) + '%', 'of all crypto value']
+    ].map((r) => '<div><span class="lbl">' + r[0] + '</span><div class="v">' + r[1] + '</div><div class="s">' + r[2] + '</div></div>').join('');
+  }
+  renderOverview();
 
   // =========================================================
   // MODULE 1 · Step 1: fingerprints
@@ -2145,18 +2258,23 @@ footer p { margin: 0; max-width: 80ch; }
   let currentCoin = 'btc';
   function priceBox(p) {
     if (p.id === 'stable') {
-      return '<div class="pricebox"><span class="lbl">Snapshot · ' + SNAP.short + '</span><div class="big">$1.00</div>' +
-        '<div class="note">Tether ' + big(COIN.usdt.cap) + ' and USDC ' + big(COIN.usdc.cap) + ' in circulation, #3 and #6 by market value.</div></div>';
+      return '<div class="pricebox"><span class="lbl">' + statusShort() + '</span><div class="big">$1.00</div>' +
+        '<div class="note">Tether ' + big(COIN.usdt.cap) + ' and USDC ' + big(COIN.usdc.cap) + ' in circulation, #' + COIN.usdt.rank + ' and #' + COIN.usdc.rank + ' by market value.</div></div>';
     }
     if (p.id === 'doge') {
-      return '<div class="pricebox"><span class="lbl">Snapshot · ' + SNAP.short + '</span><div class="big">' + money(DOGE.price) + '</div>' +
-        '<div class="note">' + delta(DOGE.ch24) + ' today · market value ' + big(DOGE.cap) + ' · #' + DOGE.rank + ' by market value</div></div>';
+      const d = COIN.doge;
+      return '<div class="pricebox"><span class="lbl">' + statusShort() + '</span><div class="big">' + money(d.price) + '</div>' +
+        '<div class="note">' + delta(d.ch24) + ' today · market value ' + big(d.cap) + ' · #' + d.rank + ' by market value</div></div>';
     }
     const c = COIN[p.id];
-    return '<div class="pricebox"><span class="lbl">Snapshot · ' + SNAP.short + '</span><div class="big">' + money(c.price) + '</div>' +
+    return '<div class="pricebox"><span class="lbl">' + statusShort() + '</span><div class="big">' + money(c.price) + '</div>' +
       '<div class="note">' + delta(c.ch24) + ' today · market value ' + big(c.cap) + ' · #' + c.rank + '</div>' +
       '<div class="spark">' + sparkSVG(c.series, c.color, 260, 56) + '</div>' +
       '<div class="note">12 months: ' + delta(c.chg) + ' <button class="linkbtn" type="button" data-goto="markets:m-dash">See the dashboard</button></div></div>';
+  }
+  function updatePriceBox() {
+    const box = document.querySelector('#coinProfile .pricebox');
+    if (box) box.outerHTML = priceBox(PROF[currentCoin]);
   }
   function renderProfile(id) {
     currentCoin = id;
@@ -2182,6 +2300,7 @@ footer p { margin: 0; max-width: 80ch; }
   }
   $('coinPicker').innerHTML = PROFILES.map((p) => '<button class="pick" type="button" role="tab" data-id="' + p.id + '" aria-selected="false">' + p.name + '</button>').join('');
   qsa('#coinPicker .pick').forEach((b) => b.addEventListener('click', () => renderProfile(b.dataset.id)));
+  onShow.coins = updatePriceBox;
   renderProfile('btc');
   explored.clear();
   explored.add('btc');
@@ -2224,14 +2343,28 @@ footer p { margin: 0; max-width: 80ch; }
   // =========================================================
   // MODULE 3: markets dashboard
   // =========================================================
-  $('dashAsOf').innerHTML = 'Snapshot from <b>' + SNAP.date + '</b>. Prices aren’t live.';
-  const stableCap = COIN.usdt.cap + COIN.usdc.cap;
-  $('kpis').innerHTML = [
-    ['All crypto', big(SNAP.totalCap), 'Total market value'],
-    ['Bitcoin’s share', SNAP.btcDom + '%', 'Ethereum’s share: ' + SNAP.ethDom + '%'],
-    ['Top 2 stablecoins', big(stableCap), 'Tether + USDC in circulation'],
-    ['Traded in 24 hours', big(SNAP.vol24), 'Across all coins']
-  ].map((k) => '<div class="kpi"><span class="lbl">' + k[0] + '</span><div class="v">' + k[1] + '</div><div class="s">' + k[2] + '</div></div>').join('');
+  function renderDashStatus() {
+    let html = statusPill() + ' ';
+    if (isLive()) {
+      html += 'Bitcoin, Ethereum, Solana, XRP and Dogecoin prices update with every trade on Coinbase. ' +
+        (MARKET.mode === 'daily' ? 'Market values and totals from CoinGecko, updated ' + ago(MARKET.updated) + '.' : 'Market totals are from the saved October 28 snapshot.');
+    } else if (MARKET.mode === 'daily') {
+      html += 'Prices and market values from CoinGecko as of <b>' + localStamp(MARKET.updated) + '</b>.';
+    } else {
+      html += 'Live data isn’t reachable here, so this shows a saved snapshot.';
+    }
+    $('dashAsOf').innerHTML = html;
+  }
+  function renderKpis() {
+    const g = MARKET.global;
+    const stableCap = (COIN.usdt.cap || 0) + (COIN.usdc.cap || 0);
+    $('kpis').innerHTML = [
+      ['All crypto', big(g.total_market_cap), 'Total market value'],
+      ['Bitcoin’s share', g.btc_dominance.toFixed(1) + '%', 'Ethereum’s share: ' + g.eth_dominance.toFixed(1) + '%'],
+      ['Top 2 stablecoins', big(stableCap), 'Tether + USDC in circulation'],
+      ['Traded in 24 hours', big(g.total_volume), 'Across all coins']
+    ].map((k) => '<div class="kpi"><span class="lbl">' + k[0] + '</span><div class="v">' + k[1] + '</div><div class="s">' + k[2] + '</div></div>').join('');
+  }
 
   const perfHidden = new Set();
   let perfFocus = null;
@@ -2272,11 +2405,13 @@ footer p { margin: 0; max-width: 80ch; }
     const step = niceStep(hi - lo);
     lo = Math.floor(lo / step) * step;
     hi = Math.ceil(hi / step) * step;
-    const n = MONTHS.length;
+    const L = chartLabels();
+    const n = L.full.length;
+    $('perfSub').textContent = 'Each line starts with $100 on ' + L.full[0] + ' and follows month-end prices to ' + (isLive() ? 'the live price now' : 'the latest price') + '. Hover or tap for details.';
     const iw = Wd - m.l - m.r, ih = H - m.t - m.b;
     const sx = (i) => m.l + (i / (n - 1)) * iw;
     const sy = (v) => m.t + (1 - (v - lo) / (hi - lo)) * ih;
-    let s = '<svg width="' + Wd + '" height="' + H + '" viewBox="0 0 ' + Wd + ' ' + H + '" role="img" aria-label="Line chart of what $100 invested at the end of October 2025 became in each coin by October 28, 2026">';
+    let s = '<svg width="' + Wd + '" height="' + H + '" viewBox="0 0 ' + Wd + ' ' + H + '" role="img" aria-label="Line chart of what $100 invested on ' + L.full[0] + ' became in each coin by ' + L.full[n - 1] + '">';
     for (let v = lo; v <= hi + 0.001; v += step) {
       const y = sy(v).toFixed(1);
       s += '<line x1="' + m.l + '" x2="' + (Wd - m.r) + '" y1="' + y + '" y2="' + y + '" class="' + (v === 100 ? 'g-base' : 'g-line') + '"/>';
@@ -2287,7 +2422,7 @@ footer p { margin: 0; max-width: 80ch; }
       if (i % every !== 0 && i !== n - 1) continue;
       if (narrow && i === n - 2) continue;
       const anchor = i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle';
-      s += '<text x="' + sx(i).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="' + anchor + '" class="g-tick">' + MSHORT[i] + '</text>';
+      s += '<text x="' + sx(i).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="' + anchor + '" class="g-tick">' + L.short[i] + '</text>';
     }
     vis.forEach((c) => {
       const d = c.idx.map((v, i) => (i ? 'L' : 'M') + sx(i).toFixed(1) + ' ' + sy(v).toFixed(1)).join('');
@@ -2321,7 +2456,7 @@ footer p { margin: 0; max-width: 80ch; }
       dotsG.innerHTML = vis.map((c) => '<circle cx="' + x + '" cy="' + sy(c.idx[i]) + '" r="4.5" fill="var(--' + c.color + ')" stroke="var(--card)" stroke-width="2"/>').join('');
       const rows = vis.slice().sort((a, b) => b.idx[i] - a.idx[i]).map((c) =>
         '<div class="t-r"><span class="sw" style="background:var(--' + c.color + ')"></span><b>' + c.sym + '</b><span>$' + c.idx[i].toFixed(0) + '</span><span>' + money(c.series[i]) + '</span></div>').join('');
-      tip.innerHTML = '<div class="t-h">' + MONTHS[i] + '</div>' + rows;
+      tip.innerHTML = '<div class="t-h">' + L.full[i] + '</div>' + rows;
       tip.hidden = false;
       const tw = tip.offsetWidth;
       let left = x + 14;
@@ -2336,21 +2471,52 @@ footer p { margin: 0; max-width: 80ch; }
     hit.addEventListener('pointerleave', hide);
   }
   // Market table
-  $('coinTable').innerHTML =
-    '<thead><tr><th>#</th><th class="l">Coin</th><th>Price</th><th>Market value</th><th>24 hours</th><th>12 months</th><th>Typical<br>monthly move</th><th>Worst drop</th><th>Last 12 months</th></tr></thead><tbody>' +
-    COINS.map((c) => {
-      const sw = c.color ? '<span class="sw" style="background:var(--' + c.color + ')"></span>' : '<span class="sw" style="background:var(--line)"></span>';
-      const tail = c.stable
-        ? '<td><span class="flat">Pegged</span></td><td>≈ 0%</td><td>—</td><td class="l"><span class="note">Holds $1</span></td>'
-        : '<td>' + delta(c.chg) + '</td><td>±' + c.vol.toFixed(1) + '%</td><td><span class="down">' + pct(c.mdd) + '</span></td><td class="l">' + sparkSVG(c.series, c.color, 96, 28) + '</td>';
-      return '<tr data-id="' + c.id + '"><td>' + c.rank + '</td><td class="l"><span class="coin-cell">' + sw + '<b>' + c.name + '</b><span class="sym">' + c.sym + '</span></span></td>' +
-        '<td>' + money(c.price) + '</td><td>' + big(c.cap) + '</td><td>' + delta(c.ch24, 2) + '</td>' + tail + '</tr>';
-    }).join('') + '</tbody>';
-  qsa('#coinTable tbody tr').forEach((tr) => {
-    tr.addEventListener('mouseenter', () => { if (CHART_IDS.includes(tr.dataset.id)) { perfFocus = tr.dataset.id; applyFocus(); } });
-    tr.addEventListener('mouseleave', () => { perfFocus = null; applyFocus(); });
-  });
-  (function takeaway() {
+  function renderCoinTable() {
+    const rows = COINS.filter((c) => !c.offTable).sort((a, b) => (a.rank || 999) - (b.rank || 999));
+    $('coinTable').innerHTML =
+      '<thead><tr><th>#</th><th class="l">Coin</th><th>Price</th><th>Market value</th><th>24 hours</th><th>12 months</th><th>Typical<br>monthly move</th><th>Worst drop</th><th>Last 12 months</th></tr></thead><tbody>' +
+      rows.map((c) => {
+        const sw = c.color ? '<span class="sw" style="background:var(--' + c.color + ')"></span>' : '<span class="sw" style="background:var(--line)"></span>';
+        const tail = c.stable
+          ? '<td><span class="flat">Pegged</span></td><td>≈ 0%</td><td>—</td><td class="l"><span class="note">Holds $1</span></td>'
+          : '<td data-cell="chg">' + delta(c.chg) + '</td><td>±' + c.vol.toFixed(1) + '%</td><td><span class="down">' + pct(c.mdd) + '</span></td><td class="l" data-cell="spark">' + sparkSVG(c.series, c.color, 96, 28) + '</td>';
+        c.shown = c.price;
+        return '<tr data-id="' + c.id + '"><td>' + (c.rank || '—') + '</td><td class="l"><span class="coin-cell">' + sw + '<b>' + c.name + '</b><span class="sym">' + c.sym + '</span></span></td>' +
+          '<td data-cell="price">' + money(c.price) + '</td><td data-cell="cap">' + big(c.cap) + '</td><td data-cell="ch24">' + delta(c.ch24, 2) + '</td>' + tail + '</tr>';
+      }).join('') + '</tbody>';
+    qsa('#coinTable tbody tr').forEach((tr) => {
+      tr.addEventListener('mouseenter', () => { if (CHART_IDS.includes(tr.dataset.id)) { perfFocus = tr.dataset.id; applyFocus(); } });
+      tr.addEventListener('mouseleave', () => { perfFocus = null; applyFocus(); });
+    });
+  }
+  function updateLiveCells() {
+    qsa('#coinTable tbody tr').forEach((tr) => {
+      const c = COIN[tr.dataset.id];
+      if (!c) return;
+      const cell = (k) => tr.querySelector('[data-cell="' + k + '"]');
+      const pc = cell('price');
+      if (pc && c.shown !== c.price) {
+        pc.textContent = money(c.price);
+        if (!reduceMotion) {
+          pc.classList.remove('flash-up', 'flash-down');
+          void pc.offsetWidth;
+          pc.classList.add(c.price > c.shown ? 'flash-up' : 'flash-down');
+        }
+        c.shown = c.price;
+      }
+      if (cell('cap')) cell('cap').textContent = big(c.cap);
+      if (cell('ch24')) cell('ch24').innerHTML = delta(c.ch24, 2);
+      if (cell('chg')) cell('chg').innerHTML = delta(c.chg);
+    });
+  }
+  function refreshSparks() {
+    qsa('#coinTable tbody tr').forEach((tr) => {
+      const c = COIN[tr.dataset.id];
+      const sp = tr.querySelector('[data-cell="spark"]');
+      if (c && sp && c.series) sp.innerHTML = sparkSVG(c.series, c.color, 96, 28);
+    });
+  }
+  function renderTakeaway() {
     const cs = CHART_IDS.map((id) => COIN[id]);
     const best = cs.slice().sort((a, b) => b.chg - a.chg)[0];
     const worst = cs.slice().sort((a, b) => a.chg - b.chg)[0];
@@ -2362,11 +2528,19 @@ footer p { margin: 0; max-width: 80ch; }
       ? 'Bitcoin also had the smallest typical monthly move. Smaller coins usually swing harder in both directions.'
       : calm.name + ' had the smallest typical monthly move.';
     $('dashTake').textContent = t;
-  })();
+  }
+  renderDashStatus();
+  renderKpis();
+  renderCoinTable();
+  renderTakeaway();
   renderLegend();
+  $('perfChart').addEventListener('pointerenter', () => { chartHover = true; });
+  $('perfChart').addEventListener('pointerleave', () => { chartHover = false; });
   let perfRO = null;
   onShow.markets = function () {
+    if (!bookTouched) { book = makeBook(); renderBook(); }
     renderPerf();
+    chartDirty = false;
     if (!perfRO && 'ResizeObserver' in window) {
       let lastW = 0;
       perfRO = new ResizeObserver(() => { const w = $('perfChart').clientWidth; if (w && w !== lastW) { lastW = w; renderPerf(); } });
@@ -2375,13 +2549,14 @@ footer p { margin: 0; max-width: 80ch; }
   };
 
   // ---------- Order book ----------
-  let book = null;
+  let book = null, bookTouched = false;
   function makeBook() {
     const r = rng(42);
     const asks = [], bids = [];
-    let p = 81510;
+    const mid = Math.round(COIN.btc.price / 10) * 10;
+    let p = mid + 10;
     for (let i = 0; i < 14; i++) { asks.push({ price: p, size: +(0.25 + r() * 2.6).toFixed(2) }); p += Math.round(10 + r() * 40); }
-    p = 81500;
+    p = mid;
     for (let i = 0; i < 6; i++) { bids.push({ price: p, size: +(0.25 + r() * 2.6).toFixed(2) }); p -= Math.round(10 + r() * 40); }
     return { asks, bids, start: asks[0].price };
   }
@@ -2439,6 +2614,7 @@ footer p { margin: 0; max-width: 80ch; }
     const size = +$('obSize').value;
     const before = book.asks[0].price;
     const f = previewFill(size);
+    bookTouched = true;
     f.fills.forEach((x) => { book.asks[x.i].size = +(book.asks[x.i].size - x.q).toFixed(4); });
     book.asks = book.asks.filter((l) => l.size > 1e-6);
     const b = $('obBanner');
@@ -2449,7 +2625,7 @@ footer p { margin: 0; max-width: 80ch; }
     markDone('mk-book');
     renderBook();
   });
-  $('obReset').addEventListener('click', () => { book = makeBook(); $('obBanner').className = 'banner'; $('obBanner').innerHTML = ''; renderBook(); });
+  $('obReset').addEventListener('click', () => { bookTouched = false; book = makeBook(); $('obBanner').className = 'banner'; $('obBanner').innerHTML = ''; renderBook(); });
   book = makeBook();
   renderBook();
 
@@ -2638,12 +2814,12 @@ footer p { margin: 0; max-width: 80ch; }
   // =========================================================
   // MODULE 5: DeFi
   // =========================================================
-  const MKT = COIN.eth.price;
+  let MKT = Math.round(COIN.eth.price * 100) / 100;
   const FEE = 0.003;
   const amm = { size: 1000, dir: 'buy', x: 1000, y: 1000 * MKT, lpFees: 0 };
   const ammDirBtns = [$('ammBuy'), $('ammSell')];
   const ammSizeBtns = qsa('#ammSizeSeg button');
-  function ammRecenter() { amm.x = amm.size; amm.y = amm.size * MKT; }
+  function ammRecenter() { MKT = Math.round(COIN.eth.price * 100) / 100; amm.x = amm.size; amm.y = amm.size * MKT; }
   function ammAmount() {
     const v = +$('ammAmt').value / 1000;
     if (amm.dir === 'buy') return Math.round((v * 1.5 * amm.size * MKT) / 1000) * 1000;
@@ -2781,7 +2957,16 @@ footer p { margin: 0; max-width: 80ch; }
 
   // ---------- Lending ----------
   const LTV = 0.75, LT = 0.80, BONUS = 0.05;
-  const lend = { coll: 10, debt: 12000, price: 2370, lost: 0, liqs: [] };
+  const lend = { coll: 10, debt: 0, price: 0, lost: 0, liqs: [] };
+  let lendTouched = false;
+  function lendDefaults() {
+    const p = Math.max(10, Math.round(COIN.eth.price / 10) * 10);
+    const slider = $('lendPrice');
+    slider.min = String(Math.max(10, Math.round((p * 0.25) / 10) * 10));
+    slider.max = String(Math.round((p * 1.7) / 10) * 10);
+    lend.coll = 10; lend.price = p; lend.debt = Math.round((10 * p * 0.5) / 100) * 100; lend.lost = 0; lend.liqs = [];
+  }
+  lendDefaults();
   function hf() { return lend.debt <= 0.5 ? Infinity : (lend.coll * lend.price * LT) / lend.debt; }
   function applyLiq() {
     let n = 0;
@@ -2840,19 +3025,21 @@ footer p { margin: 0; max-width: 80ch; }
     b.innerHTML = msg;
   }
   $('lendBorrow').addEventListener('input', (e) => {
+    lendTouched = true;
     const maxB = lend.coll * lend.price * LTV;
     lend.debt = Math.min(+e.target.value, Math.max(maxB, 0));
     if (+e.target.value > maxB) lend.debt = Math.floor(maxB / 100) * 100;
     applyLiq();
     renderLend();
   });
-  $('lendPrice').addEventListener('input', (e) => { lend.price = +e.target.value; applyLiq(); renderLend(); });
+  $('lendPrice').addEventListener('input', (e) => { lendTouched = true; lend.price = +e.target.value; applyLiq(); renderLend(); });
   let crashing = false;
   $('lendCrash').addEventListener('click', () => {
     if (crashing) return;
     crashing = true;
+    lendTouched = true;
     $('lendCrash').disabled = true;
-    const p0 = lend.price, p1 = Math.max(600, p0 * 0.6), t0 = performance.now(), dur = reduceMotion ? 1 : 1600;
+    const p0 = lend.price, p1 = Math.max(+$('lendPrice').min, p0 * 0.6), t0 = performance.now(), dur = reduceMotion ? 1 : 1600;
     const frame = (t) => {
       const k = clamp((t - t0) / dur, 0, 1);
       lend.price = p0 + (p1 - p0) * (1 - Math.pow(1 - k, 2));
@@ -2865,12 +3052,15 @@ footer p { margin: 0; max-width: 80ch; }
   });
   $('lendReset').addEventListener('click', () => {
     if (crashing) return;
-    lend.coll = 10; lend.debt = 12000; lend.price = 2370; lend.lost = 0; lend.liqs = [];
+    lendDefaults();
+    lendTouched = false;
     renderLend();
   });
   renderLend();
 
   onShow.defi = function () {
+    if (amm.lpFees === 0 && Math.abs(amm.x - amm.size) < 1e-9 && Math.abs(MKT / COIN.eth.price - 1) > 0.0005) ammRecenter();
+    if (!lendTouched && !crashing) { lendDefaults(); renderLend(); }
     renderAmm();
     if (!ammRO && 'ResizeObserver' in window) {
       let lastW = 0;
@@ -2967,10 +3157,137 @@ footer p { margin: 0; max-width: 80ch; }
   renderQuiz();
 
   // =========================================================
+  // Live market data
+  // =========================================================
+  const DATA_URL = 'crypto-data.json';
+  const FEED_URL = 'wss://ws-feed.exchange.coinbase.com';
+  let ws = null, wsFails = 0, wsEverOpen = false, wsTimer = null, lastLive = false;
+
+  function renderDataNote() {
+    const lead = isLive()
+      ? 'Prices are live.'
+      : MARKET.mode === 'daily'
+        ? 'Prices last updated ' + localStamp(MARKET.updated) + '.'
+        : 'Live data isn’t reachable here, so market figures come from a saved snapshot of October 28, 2026.';
+    $('dataNote').innerHTML = '<b>About the data.</b> ' + lead +
+      ' Live prices for Bitcoin, Ethereum, Solana, XRP and Dogecoin stream from <a href="https://exchange.coinbase.com">Coinbase</a>.' +
+      ' Market values, rankings, totals and 12-month history: data provided by <a href="https://www.coingecko.com">CoinGecko</a>, refreshed every 3 hours.' +
+      ' The saved snapshot draws on <a href="https://coinranking.com/">CoinRanking</a>, <a href="https://coincoverage.org/crypto-market-cap">CoinCoverage</a>,' +
+      ' <a href="https://www.statmuse.com/money/ask/btc-price-candles-last-12-months-by-month">StatMuse</a> and <a href="https://www.digrin.com/stocks/detail/ETH-USD/price">Digrin</a>.';
+  }
+  function renderStatusBits() {
+    $('snapDate').innerHTML = statusPill();
+    renderDashStatus();
+    renderDataNote();
+    if (current === 'coins') updatePriceBox();
+  }
+  function refreshChart() {
+    if (current !== 'markets' || chartHover) return;
+    chartDirty = false;
+    renderPerf();
+    renderLegend();
+    renderTakeaway();
+    refreshSparks();
+  }
+  function refreshAll() {
+    recompute();
+    renderOverview();
+    renderKpis();
+    renderCoinTable();
+    renderTakeaway();
+    renderLegend();
+    renderStatusBits();
+    chartDirty = true;
+    refreshChart();
+    if (current === 'coins') updatePriceBox();
+  }
+
+  function loadDaily() {
+    if (!window.fetch || location.protocol === 'file:') return;
+    fetch(DATA_URL + '?t=' + Math.floor(Date.now() / 60000), { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!validData(d)) return;
+        if (MARKET.mode === 'daily' && d.updated === MARKET.updated) return;
+        applyBase(d, 'daily');
+        refreshAll();
+      })
+      .catch(() => { /* keep what we have */ });
+  }
+
+  function connectFeed() {
+    if (!('WebSocket' in window) || ws) return;
+    let sock;
+    try { sock = new WebSocket(FEED_URL); } catch (e) { feedFailed(); return; }
+    ws = sock;
+    sock.onopen = () => {
+      wsEverOpen = true;
+      wsFails = 0;
+      MARKET.socketOpen = true;
+      sock.send(JSON.stringify({ type: 'subscribe', product_ids: Object.keys(BY_PRODUCT), channels: ['ticker'] }));
+    };
+    sock.onmessage = (ev) => {
+      let m;
+      try { m = JSON.parse(ev.data); } catch (e) { return; }
+      if (!m || m.type !== 'ticker') return;
+      const c = BY_PRODUCT[m.product_id];
+      const p = parseFloat(m.price), o = parseFloat(m.open_24h);
+      if (!c || !(p > 0)) return;
+      c.price = p;
+      if (o > 0) c.ch24 = (p / o - 1) * 100;
+      if (c.supply) c.cap = p * c.supply;
+      c.liveAt = MARKET.lastTick = Date.now();
+      dirty = true;
+      chartDirty = true;
+    };
+    sock.onclose = () => {
+      if (ws !== sock) return;
+      ws = null;
+      MARKET.socketOpen = false;
+      feedFailed();
+    };
+    sock.onerror = () => { try { sock.close(); } catch (e) { /* already closed */ } };
+  }
+  function feedFailed() {
+    wsFails++;
+    if (!wsEverOpen && wsFails >= 3) return; // the feed isn't reachable from here, so keep the saved data
+    clearTimeout(wsTimer);
+    wsTimer = setTimeout(() => { if (!document.hidden) connectFeed(); }, Math.min(60000, 1000 * Math.pow(2, wsFails)));
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && !ws && (wsEverOpen || wsFails < 3)) connectFeed();
+  });
+
+  // Repaint numbers at most every 1.5 s, and the chart every 15 s, however fast trades arrive.
+  setInterval(() => {
+    const live = isLive();
+    if (live !== lastLive) {
+      lastLive = live;
+      renderStatusBits();
+      chartDirty = true;
+      refreshChart();
+    }
+    if (!dirty) return;
+    dirty = false;
+    recompute();
+    updateLiveCells();
+    renderOverview();
+    if (current === 'coins') updatePriceBox();
+  }, 1500);
+  setInterval(() => {
+    renderStatusBits();
+    if (chartDirty) refreshChart();
+  }, 15000);
+  setInterval(loadDaily, 10 * 60 * 1000);
+
+  // =========================================================
   // Start
   // =========================================================
   renderProgress();
   route();
+  renderDataNote();
+  loadDaily();
+  connectFeed();
 })();
 </script>
 </body>
