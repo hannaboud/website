@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPY Wheel Backtest — Hanna Boudara</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta name="color-scheme" content="dark">
+<link rel="stylesheet" href="wheel-style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="#top" aria-label="Back to top">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><defs><linearGradient id="bg-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3d8be0"/><stop offset="1" stop-color="#d4609f"/></linearGradient></defs><circle cx="12" cy="12" r="8.5" fill="none" stroke="url(#bg-g)" stroke-width="3" stroke-dasharray="4.2 2.5"/></svg>
+      <span>Wheel</span>
+    </a>
+    <nav aria-label="Sections">
+      <a href="#lesson">Lesson</a>
+      <a href="#results">Results</a>
+      <a href="#greeks">Greeks</a>
+      <a href="#portfolio">Portfolio</a>
+      <a href="#fills">Fills</a>
+      <a href="#weekly">Weekly</a>
+      <a href="#blotter">Blotter</a>
+      <a href="#ledger">Ledger</a>
+      <a href="#writeup">Write-up</a>
+      <a href="wheel-data.html">Data</a>
+    </nav>
+    <a class="home" href="/">Hanna Boudara</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <section id="intro" class="hero">
+    <div class="hero-head">
+      <p class="kicker">Fintech 535 · Wheel strategy backtest</p>
+      <h1>SPY Wheel Backtest</h1>
+      <p class="lede">Cash-secured puts, then covered calls, then puts again · payoffs, Greeks and 52 SPY weeklies on real LSEG quotes</p>
+    </div>
+    <div class="hero-body">
+      <p>A full backtest of the wheel on SPY, from <span data-k="meta.start"></span> to
+    <span data-k="meta.end"></span>, with <span data-k="meta.capital" data-f="usd0"></span> of starting
+    capital: every trade on the blotter, the account at every close, and the Greeks of the position
+    each day. Part 1 explains how the strategy works, using this backtest's own trades. Part 2 states
+    the thesis and tests it. Part 3 looks at the risk the strategy carried, through its Greeks.</p>
+      <span class="badge" id="badge">Loading data…</span>
+    </div>
+    <figure class="ring-fig">
+      <svg id="ring" viewBox="-250 -250 500 500" role="img" aria-label="The 52 weeks of the backtest arranged as a wheel"></svg>
+      <div class="ring-tip" id="ringTip" hidden></div>
+      <figcaption class="ring-key">
+        <span><i class="sw put"></i>Put week</span><span><i class="sw call"></i>Call week</span>
+        <span><i class="mk fill"></i>Put assigned</span><span><i class="mk hollow"></i>Called away</span>
+        <span class="ring-hint">Bar length is the premium collected that week. Hover a week for its trade.</span>
+      </figcaption>
+    </figure>
+  </section>
+  <div class="stats-row" id="stats-row"></div>
+
+  <!-- ===================================================== PART 1: LESSON -->
+  <section id="lesson">
+    <h2><span class="part">Part 1</span>How the wheel works</h2>
+
+    <h3>Two states, two trades</h3>
+    <p>The account is always in one of two states, and each state has exactly one trade. Every week,
+    at the close of its first trading day (usually Monday), it sells one SPY option expiring at the
+    close of the next week's first trading day, so each option is held for one week, weekend included.</p>
+    <div class="wheel-diagram">
+      <div class="wd-state">
+        <div class="wd-title">State A · cash, no shares</div>
+        <div class="wd-trade">Sell 1 <strong>cash-secured put</strong> at the ~<span data-k="meta.target_delta" data-f="dec2"></span>-delta strike</div>
+        <div class="wd-loop">↻ Finishes out of the money: keep the premium, sell another put next week</div>
+      </div>
+      <div class="wd-arrows">
+        <div class="wd-arrow right"><span>Put finishes in the money: <strong>assigned</strong>, buy 100 shares at the strike</span></div>
+        <div class="wd-arrow left"><span>Call finishes in the money: <strong>called away</strong>, sell 100 shares at the strike</span></div>
+      </div>
+      <div class="wd-state">
+        <div class="wd-title">State B · 100 shares</div>
+        <div class="wd-trade">Sell 1 <strong>covered call</strong> at the ~<span data-k="meta.target_delta" data-f="dec2"></span>-delta strike, never below the shares' cost</div>
+        <div class="wd-loop">↻ Finishes out of the money: keep the premium and the shares, sell another call</div>
+      </div>
+    </div>
+
+    <h3>Leg 1: the cash-secured put</h3>
+    <p>Selling a put means taking on an obligation: if SPY closes below the strike <em>K</em> at
+    expiry, the account must buy 100 shares at <em>K</em>. In exchange the buyer pays a premium
+    <em>P</em> up front, which the seller keeps whatever happens. "Cash-secured" means the account
+    holds 100 × <em>K</em> in cash the whole time, so the purchase can always be paid for: no
+    borrowing, no margin call.</p>
+    <div class="formula">P&amp;L at expiry, per contract = 100 × ( P − max(K − S<sub>T</sub>, 0) )
+breakeven = K − P        best case = 100 × P        worst case = 100 × (K − P), if SPY went to 0</div>
+    <p>The seller wins if SPY stays above the breakeven, and loses one-for-one below it, so the
+    premium only cushions a fall. In practice nothing is "lost" at assignment; the account simply
+    owns shares bought at <em>K</em> while SPY trades lower, and moves to State B.</p>
+
+    <h3>Leg 2: the covered call</h3>
+    <p>With 100 shares, the account sells a call: an obligation to sell the shares at <em>K</em> if
+    SPY closes above it at expiry, in exchange for a premium <em>C</em>. "Covered" because the
+    shares to deliver are already owned. Measured from the week's opening price <em>S<sub>0</sub></em>:</p>
+    <div class="formula">P&amp;L at expiry, per contract = 100 × ( (S<sub>T</sub> − S<sub>0</sub>) + C − max(S<sub>T</sub> − K, 0) )
+upside capped at 100 × (K − S<sub>0</sub> + C)        downside = the shares' fall, cushioned by C</div>
+    <p>The call strike is never set below what the shares cost (put strike − put premium), so being
+    called away never locks in a loss on the shares. The price of that rule is visible after a
+    selloff: the nearest call at or above cost can sit far above SPY and pay almost nothing.</p>
+
+    <h3>Payoff diagrams, from this backtest's trades</h3>
+    <p>Pick any week the wheel traded. The solid line is the payoff at expiry; the dashed line is the
+    position's value with the chosen number of days still to go, priced with Black-Scholes at that
+    option's own implied volatility. The dot is where SPY actually closed at expiry and what the
+    position actually made. Tick the box to overlay the other leg at the same strike.</p>
+    <div class="pv-controls">
+      <select id="pfWeek" aria-label="Week"></select>
+      <label class="ctl">Days left <input type="range" id="pfDays" min="0" max="7" step="0.25" value="3"> <span id="pfDaysV"></span></label>
+      <label class="ctl"><input type="checkbox" id="pfParity"> Overlay the other leg at this strike</label>
+    </div>
+    <div class="chart-wrap"><canvas id="payoffChart" height="130"></canvas></div>
+    <div class="pv-grid small" id="pfFacts"></div>
+
+    <h3>Why it is really one trade: put-call parity</h3>
+    <p>For the same strike and expiry, a call and a put are tied together by
+    <code>C − P = S·e<sup>−qT</sup> − K·e<sup>−rT</sup></code>. Rearranged, owning the shares and
+    selling the call has the same payoff as holding cash and selling the put:</p>
+    <div class="formula">S − C  =  K·e<sup>−rT</sup> − P  +  (S − S·e<sup>−qT</sup>)
+covered call      cash-secured put      dividend over the week (cents)</div>
+    <p>Tick the overlay box above and the two lines sit on top of each other. So the wheel never
+    really switches strategies: <strong>it is short one put the whole year.</strong> What changes at
+    assignment is which put. In State A it is an out-of-the-money put (about
+    <span data-k="greeks.by_phase.put phase (cash + short put).pos_delta" data-f="dec0"></span> shares of
+    SPY exposure on average). In State B a <span data-k="meta.target_delta" data-f="dec2"></span>-delta call on 100 shares is the same as a short
+    in-the-money put (about <span data-k="greeks.by_phase.call phase (100 shares + short call).pos_delta" data-f="dec0"></span>
+    shares). The wheel's market exposure more than doubles right after SPY falls through a put strike.</p>
+
+    <h3>The Greeks of a short weekly option</h3>
+    <p>The Greeks measure how the position's value responds to each thing that moves it, here from
+    the seller's side, per contract. The curves use Black-Scholes at a typical setting from this
+    backtest: SPY at <span id="glS"></span>, implied vol <span id="glV"></span>, strike <span id="glK"></span>
+    (<span data-k="meta.target_delta" data-f="dec2"></span> delta with 7 days left). Each line is a different number of days to expiry.</p>
+    <div class="pv-controls"><label class="ctl"><input type="checkbox" id="glCC"> Show the covered call at the same strike instead</label></div>
+    <div class="greek-grid">
+      <div class="chart-wrap"><canvas id="gDelta" height="190"></canvas></div>
+      <div class="chart-wrap"><canvas id="gGamma" height="190"></canvas></div>
+      <div class="chart-wrap"><canvas id="gTheta" height="190"></canvas></div>
+      <div class="chart-wrap"><canvas id="gVega" height="190"></canvas></div>
+    </div>
+    <div class="greek-notes">
+      <p><strong>Delta</strong> (shares of SPY the position behaves like). Positive: the seller of a
+      put is long the market. Far above the strike it is near 0; far below, near 100. Close to expiry
+      the change from 0 to 100 becomes a cliff right at the strike.</p>
+      <p><strong>Gamma</strong> (how much delta changes per $1 in SPY). Always negative for a seller:
+      the position gets longer as SPY falls and shorter as it rises, the wrong way both times. It
+      spikes at the strike as expiry nears: weekly options are mostly a gamma bet.</p>
+      <p><strong>Theta</strong> (dollars earned per day as time passes, all else equal). Positive for
+      the seller, largest at the strike, and accelerating into expiry. This is what the seller is paid.</p>
+      <p><strong>Vega</strong> (dollars per 1-point rise in implied vol). Negative: the seller loses
+      when volatility rises. It shrinks as expiry nears, so a weekly option is far less exposed to
+      vol than to the spot moves that gamma measures.</p>
+      <p>The trade in one sentence: <strong>the wheel collects theta and pays for it in gamma.</strong>
+      It makes money when SPY moves less than the option price implied. Part 3 measures exactly that
+      split on the real positions.</p>
+    </div>
+
+    <h3>One full turn of the wheel, from this backtest</h3>
+    <div id="cycle"></div>
+  </section>
+
+  <!-- ===================================================== PART 2: THESIS + RESULTS -->
+  <section id="results">
+    <h2><span class="part">Part 2</span>Thesis, then the result</h2>
+
+    <h3>The thesis</h3>
+    <p><strong>Why it should make money.</strong> The wheel works like an insurance company. Every week
+    I sell one option on SPY and collect the premium up front: a put while I hold cash, a call while I
+    hold shares. At 0.25 delta, each option starts with approximately a 25% chance of finishing in the
+    money, so most weeks it expires worthless and I keep the whole premium. But winning most weeks is
+    not what makes it profitable, because when an option does finish in the money, the payout is usually
+    bigger than the premium. What actually makes money is when the volatility implied by option prices
+    is higher than the volatility SPY actually delivers. Theta is the premium I earn every day, gamma is
+    the claims I pay when SPY moves, and the wheel works when the first is bigger than the second.</p>
+    <p><strong>What it should beat.</strong> I expect a better Sharpe ratio than buying and holding SPY,
+    but not necessarily a higher return. The wheel holds less than 100 shares' worth of exposure most of
+    the time, which should lower volatility, while the premiums add income. The upside is capped: in a
+    strong rally I only keep the premium and the gain up to the strike, so it should lag SPY in a big up
+    year. It can beat SPY's return when the market goes sideways or drifts down, especially if it moves
+    less than options priced in. Big swings hurt it, because they trigger payouts and whipsaw: assigned
+    after a drop, then called away on the bounce. That is what I saw with IBM in my
+    <a href="/covered-call-regime.html">covered-call regime analysis</a>.</p>
+    <p><strong>What would prove it wrong.</strong> Two results would contradict this thesis:</p>
+    <ol class="tests">
+      <li>The options pay out more than they collect over the year, so the option leg loses money. That
+      would mean implied volatility was not above realized.</li>
+      <li>The wheel's Sharpe ratio comes in at or below SPY's.</li>
+    </ol>
+    <p>A weaker test: in a year when SPY rises strongly, the wheel should not beat it on return. If it
+    does, the cap cost less than expected, and I need to explain why. Either way, one year can be
+    consistent with this thesis but cannot prove it: a Sharpe ratio estimated from one year is uncertain
+    by roughly ±1.</p>
+
+    <h3>What happened</h3>
+    <div class="table-wrap"><table class="cmp" id="cmpTable"><thead></thead><tbody></tbody></table></div>
+    <p class="note">Same <span data-k="meta.capital" data-f="usd0"></span> start for every column. SPY 100 sh
+    holds the same maximum share count as the wheel, with the rest in cash. SPY all-in holds as
+    many whole shares as the capital buys. Both earn the same interest on cash as the wheel
+    (<span data-k="meta.cash_rate" data-f="pct1"></span> a year) and reinvest their dividends in SPY on
+    the pay date. Sharpe = (annualized return − risk-free) / annualized volatility; risk-free = the
+    same <span data-k="metrics.risk_free" data-f="pct1"></span> cash rate.</p>
+
+    <div class="verdict" id="verdict"></div>
+
+    <h3>Where the money came from</h3>
+    <div class="two-col">
+      <div class="table-wrap"><table class="cmp" id="decompTable"><tbody></tbody></table></div>
+      <div class="table-wrap"><table class="cmp" id="vrpTable"><tbody></tbody></table></div>
+    </div>
+    <p class="note">Option leg = premium received (after commissions) minus what each option paid out at
+    expiry: (strike − close) on an assigned put, (close − strike) on a call that was called away.
+    Stock = the gain or loss on shares while held, from the assignment close. Implied vs realized
+    compares like with like: each option's implied variance over its own life (vol backed out of
+    the closing mid at sale) against SPY's realized variance over the same days, both annualized on
+    a 252-trading-day clock.</p>
+
+    <div class="chart-wrap">
+      <div class="chart-legend"><span><i class="sw wheel"></i>Wheel NAV</span>
+        <span><i class="sw bench"></i>SPY 100 sh + cash</span>
+        <span><i class="sw bench dashed"></i>SPY all-in</span>
+        <label><input type="checkbox" id="showInit"> Reg T initial</label>
+        <label><input type="checkbox" id="showMaint"> Reg T maintenance</label></div>
+      <canvas id="navChart" height="120"></canvas>
+    </div>
+    <p class="note">Daily NAV at the close: cash, accrued interest, dividends receivable, shares at the
+    close, minus the cost of buying back the open option at its mid. Filled markers: puts assigned.
+    Hollow: shares called away.</p>
+  </section>
+
+  <!-- ===================================================== PART 3: GREEKS -->
+  <section id="greeks">
+    <h2><span class="part">Part 3</span>The Greeks of the actual position</h2>
+    <p>Every close an option was open, its implied volatility is backed out of the closing mid with
+    Black-Scholes (time = calendar days to the 4:00 pm expiry, r = 3-month T-bill, q =
+    <span data-k="meta.dividend_yield" data-f="pct2"></span> SPY dividend yield), and the Greeks
+    follow from it. Position Greeks add the 100 shares when held.</p>
+
+    <h3>Market exposure: position delta</h3>
+    <div class="chart-wrap"><canvas id="spyMini" height="24"></canvas><canvas id="posDelta" height="105"></canvas></div>
+    <p class="note">Shares of SPY the account behaves like. Put phase in blue, call phase in pink; SPY
+    in the strip above. The jumps are assignments: exposure rises right after SPY falls through a put
+    strike and drops after a call-away, which is the short-put-the-whole-time view from Part 1.</p>
+
+    <div class="two-col">
+      <div class="chart-wrap"><canvas id="posTV" height="200"></canvas></div>
+      <div class="chart-wrap"><canvas id="posGamma" height="200"></canvas></div>
+    </div>
+
+    <h3>P&amp;L attribution: theta earned vs gamma paid</h3>
+    <p>Each day the open option is repriced in steps from one close to the next: first one day
+    passes (theta), then SPY moves to its new close (the straight-line part is delta, the curvature
+    left over is gamma), then implied vol moves (vega). Because the vol is implied from the actual
+    quotes, the steps add up to the actual change in the option's price. The sale itself adds the
+    difference between the fill and the closing mid, plus commission.</p>
+    <div class="chart-wrap"><canvas id="attrChart" height="120"></canvas></div>
+    <div class="two-col">
+      <div class="table-wrap"><table class="cmp" id="attrTable"><tbody></tbody></table></div>
+      <div id="attrText"></div>
+    </div>
+
+    <h3>Checking the model against LSEG</h3>
+    <div class="two-col">
+      <div class="chart-wrap"><canvas id="deltaCheck" height="210"></canvas></div>
+      <div>
+        <p>The Black-Scholes delta computed here matches LSEG's own DELTA field on
+        <span data-k="greeks.model_check.n" data-f="int"></span> near-the-money quotes: R² =
+        <span data-k="greeks.model_check.delta_r2" data-f="dec4"></span>, median difference
+        <span data-k="greeks.model_check.delta_median_abs_diff" data-f="dec4"></span>.</p>
+        <p>LSEG's IMP_VOLT field is <em>not</em> used. Repricing the closing mid with it misses, and
+        the vol implied from the mid is higher than LSEG's by a ratio that shrinks with time to
+        expiry:</p>
+        <div class="table-wrap"><table class="cmp" id="clockTable"><tbody></tbody></table></div>
+        <p class="note">That pattern is what an extra ≈ <span data-k="greeks.model_check.lseg_clock_extra_days" data-f="dec2"></span>
+        day on LSEG's clock would produce (time counted from earlier in the trading day). Harmless for
+        a 3-month option, it understates a weekly option's implied vol by 5–30%, so comparing it with
+        realized vol would overstate the volatility risk premium.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="portfolio">
+    <h2>Portfolio on any date</h2>
+    <p>Pick a trading day to see exactly what the account held at that day's close: cash, shares,
+    the open put or call and what it would cost to buy back, collateral, Reg T requirement, the
+    position's Greeks, and the trades booked that day.</p>
+    <div class="pv-controls">
+      <button id="pvPrev" aria-label="Previous day">◀</button>
+      <input type="range" id="pvRange" min="0" max="0" value="0" aria-label="Date">
+      <button id="pvNext" aria-label="Next day">▶</button>
+      <span class="pv-date" id="pvDate"></span>
+      <select id="pvJump" aria-label="Jump to an event"></select>
+    </div>
+    <div class="pv-grid" id="pvGrid"></div>
+    <div class="pv-sub">Trades booked this day</div>
+    <div class="table-wrap"><table id="pvTrades"><thead><tr><th>Instrument</th><th>Side</th><th>Qty</th><th>Fill</th><th>Cash Δ</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section id="fills">
+    <h2>Fill assumption, and the data behind it</h2>
+    <p><strong>Assumption:</strong> every option is sold at the <strong>closing mid</strong>,
+    (bid + ask) / 2, of the day it is sold, minus a <span data-k="meta.commission" data-f="usd2"></span>
+    commission, and open options are valued at the <strong>mid</strong>. Shares change hands only
+    through assignment, at the strike.</p>
+    <p><strong>Why it is safe for SPY.</strong> Across <span data-k="fill.quotes.n" data-f="int"></span>
+    daily quotes on near-the-money weeklies (|delta| 0.15 to 0.45), the median spread is
+    <span data-k="fill.quotes.spread.median" data-f="cents"></span>, and on the
+    <span data-k="fill.sold.n" data-f="int"></span> options the wheel actually sold it is
+    <span data-k="fill.sold.spread.median" data-f="cents"></span>, about
+    <span data-k="fill.sold.spread_pct_premium.median" data-f="pct1"></span> of the premium. Selling at
+    the bid instead of mid would have cost <span data-k="fill.sold.bid_vs_mid_cost" data-f="usd0"></span> over the
+    whole year, against <span data-k="fill.sold.premium_at_mid" data-f="usd0"></span> of premium at mid.</p>
+    <p><strong>Why mid and not the bid.</strong> The day's last trade (TRDPRC_1) printed at the
+    middle of the spread on median (position <span data-k="fill.trades.loc_median" data-f="dec2"></span>,
+    where 0 = bid and 1 = ask), and mid explains trade prices with R² =
+    <span data-k="fill.trades.regression.r2" data-f="dec4"></span> (slope
+    <span data-k="fill.trades.regression.slope" data-f="dec3"></span>), so options really do trade
+    around the mid.</p>
+    <div class="two-col">
+      <div class="chart-wrap"><canvas id="locChart" height="200"></canvas></div>
+      <div class="chart-wrap"><canvas id="scatterChart" height="200"></canvas></div>
+    </div>
+    <p class="note">Caveat: daily bars pair the day's <em>last</em> trade with the <em>closing</em> quote,
+    which are not simultaneous, so some prints fall outside the closing bid and ask
+    (<span data-k="fill.trades.below_bid" data-f="pct1"></span> below the bid,
+    <span data-k="fill.trades.above_ask" data-f="pct1"></span> above the ask). Prints repeated from the
+    previous day (no trade that day) were dropped.</p>
+  </section>
+
+  <section id="weekly">
+    <h2>Week by week</h2>
+    <p>One row per option sold: the phase of the wheel, the strike rule's inputs, what was collected,
+    how it ended, and whether SPY moved more or less than the option's price implied.</p>
+    <div class="table-wrap tall">
+      <table id="weeklyTable"><thead><tr>
+        <th>Week of</th><th>Phase</th><th>Spot</th><th>Floor</th><th>Strike</th><th>Delta</th>
+        <th>Bid / Ask</th><th>Premium</th><th>Outcome</th><th>Close at exp.</th><th>Payout</th><th>Option P&amp;L</th>
+        <th>Implied move</th><th>Realized move</th>
+      </tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+
+  <section id="blotter">
+    <h2>Blotter</h2>
+    <p>Every cash movement and every trade, in order: the starting deposit, each option sold, each
+    expiry and assignment, every share purchase and sale at the strike, dividends on their pay date,
+    and monthly interest. The Cash Δ column adds up to the ending cash to the cent. There are no
+    rolls: every option is held to expiry by rule.</p>
+    <div class="filters" id="blotterFilters"></div>
+    <div class="table-wrap tall">
+      <table id="blotterTable"><thead><tr>
+        <th>Time</th><th>Instrument</th><th>Side</th><th>Qty</th><th>Limit</th><th>Fill</th><th>Cash Δ</th><th>Notes</th>
+      </tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+
+  <section id="ledger">
+    <h2>Ledger</h2>
+    <p>The account at every close. Reg T: initial requirement = 50% of the stock's market value plus
+    the full strike of a short put (cash-secured); maintenance = 25% plus the same collateral; a
+    covered call adds nothing. Available = NAV − initial. Excess = NAV − maintenance. Free cash =
+    cash not tied up securing a put. Δ = position delta in shares; Θ = theta in $ per day.</p>
+    <div class="table-wrap tall">
+      <table id="ledgerTable"><thead><tr>
+        <th>Date</th><th>SPY</th><th>Cash</th><th>Shares</th><th>Stock MV</th><th>Short put</th><th>Short call</th>
+        <th>Opt. value</th><th>Div. rec.</th><th>NAV</th><th>Collateral</th><th>Free cash</th>
+        <th>Initial</th><th>Maint.</th><th>Available</th><th>Excess</th><th>Δ</th><th>Θ $/d</th>
+      </tr></thead><tbody></tbody></table>
+    </div>
+    <p class="note" id="regtNote"></p>
+  </section>
+
+  <section id="writeup">
+    <h2>Write-up</h2>
+
+    <h3>Why SPY</h3>
+    <p>The wheel only makes sense on something you are happy to own after a put is assigned, and an
+    index fund removes single-company risk. SPY options are also the most heavily traded in the US
+    market, so the fill assumption is easy to defend (see Fills).</p>
+
+    <h3>How the strike is chosen</h3>
+    <p>The strike is the listed strike whose delta, at the close the option is sold, is closest to
+    <span data-k="meta.target_delta" data-f="dec2"></span>. Delta is roughly the market's probability
+    that the option finishes in the money, so a fixed delta takes the same amount of risk every week
+    whether volatility is high or low; a fixed percentage out of the money would not. 0.25 keeps the
+    risk moderate: closer to the money pays more but gets assigned more; further out pays too little
+    to matter. On the one entry close where LSEG had no deltas (Oct 12, 2026, Columbus Day), the delta
+    is computed with Black-Scholes from that close's mid.</p>
+
+    <h3>The cost-basis floor on calls</h3>
+    <p>After assignment, calls are never written below what the shares cost (put strike minus put
+    premium), so a call-away never locks in a loss on the shares. The cost is visible in the weekly
+    table: after a drop the nearest call at or above cost basis is far out of the money and pays very
+    little, so the wheel can sit on shares for weeks collecting almost nothing until SPY recovers.</p>
+
+    <h3>No rolls, no early closes</h3>
+    <p>Every option runs to expiry. Rolling or buying back early is a second, discretionary decision
+    layered on the wheel; leaving it out keeps the test about the wheel itself and keeps every blotter
+    row tied to a rule.</p>
+
+    <h3>Early assignment and dividends</h3>
+    <p>SPY options are American-style and SPY pays a quarterly dividend. On the day before an
+    ex-dividend date, a call holder who is in the money gains by exercising early when the dividend is
+    worth more than the call's remaining time value. The backtest leaves this out: options are assigned
+    only at expiry. This year it would not have mattered, because on the eve of every ex-dividend date
+    either no call was open or the open call was out of the money. Shares held into the ex-date earn the
+    dividend, carried as a receivable until the pay date. Dividends used: <span id="divList"></span></p>
+
+    <h3>Cash, interest and Reg T</h3>
+    <p>Every put is fully cash-secured: the account holds the whole strike in cash, which is why the
+    starting capital is <span data-k="meta.capital" data-f="usd0"></span> (SPY's highest close in the
+    year was near $779, so one put needed up to about $78,000). Cash earns a flat
+    <span data-k="meta.cash_rate" data-f="pct1"></span> a year, accrued daily and credited monthly, because a broker pays interest on cash collateral and leaving
+    it out would understate a strategy that is mostly cash. Reg T is used rather than portfolio margin
+    because it is a fixed, published formula; no position here uses leverage.</p>
+
+    <h3>How the Greeks are computed</h3>
+    <p>Black-Scholes-Merton with a continuous dividend yield. Implied vol is solved from each closing
+    mid (bisection), with time measured in calendar days to the 4:00 pm expiry over 365. The P&amp;L
+    attribution reprices the option one step at a time (time, then spot, then vol), so its pieces add
+    up to the actual change in the quote. On <span id="residDays"></span> the closing option quote sat
+    below the lowest price Black-Scholes allows (S·e<sup>−qT</sup> − K·e<sup>−rT</sup> for a call)
+    against SPY's close (SPY options keep trading 15 minutes after the shares close), so no volatility
+    can reprice it; that is nearly all of the residual.</p>
+
+    <h3>Limitations</h3>
+    <p>Marks are daily closes; nothing between closes is seen. Assignment is decided on the closing
+    price; after-hours moves that change a holder's exercise decision are ignored. Black-Scholes
+    assumes constant volatility and no jumps, so the Greeks are local, model-based measures, not exact.
+    One year is a short sample: the standard error of a Sharpe ratio estimated from one year is roughly
+    1, so the comparison is evidence, not proof. Taxes and assignment fees are ignored, and cash
+    earns a flat rate all year.</p>
+  </section>
+
+</main>
+
+<footer><span>Fintech 535 · Wheel backtest</span><a href="wheel-data.html">Data</a><a href="/">Hanna Boudara</a></footer>
+
+<script src="wheel-book.js"></script>
+<script src="wheel-render.js"></script>
+</body>
+</html>

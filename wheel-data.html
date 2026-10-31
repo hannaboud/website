@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data — SPY Wheel Backtest — Hanna Boudara</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta name="color-scheme" content="dark">
+<link rel="stylesheet" href="wheel-style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="wheel.html" aria-label="Back to the backtest">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><defs><linearGradient id="bg-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3d8be0"/><stop offset="1" stop-color="#d4609f"/></linearGradient></defs><circle cx="12" cy="12" r="8.5" fill="none" stroke="url(#bg-g)" stroke-width="3" stroke-dasharray="4.2 2.5"/></svg>
+      <span>Wheel</span>
+    </a>
+    <nav aria-label="Pages">
+      <a href="wheel.html">Backtest</a>
+      <a href="wheel-data.html" class="active" aria-current="page">Data</a>
+    </nav>
+    <a class="home" href="/">Hanna Boudara</a>
+  </div>
+</header>
+<main>
+  <section>
+    <h2><span class="part">Local LSEG pull · not graded</span>Data</h2>
+    <p>The option quotes behind this backtest come from LSEG Workspace, pulled locally with
+    <code>01_pull_spy.py</code>: daily bid, ask, last trade, delta and implied volatility for
+    every SPY weekly put and call near the money, one contract at a time, for 52 weeks. On
+    GitHub Pages there is no Workspace session to connect to, so this page stays disconnected.
+    Everything on the backtest page is static, baked into <code>wheel-book.js</code> ahead of time.</p>
+    <div class="disconnect-box">
+      <div class="glyph" aria-hidden="true"></div>
+      <h3>Data connection required</h3>
+    </div>
+  </section>
+</main>
+<footer><span>Fintech 535 · Wheel backtest</span><a href="wheel.html">Backtest</a><a href="/">Hanna Boudara</a></footer>
+</body>
+</html>
