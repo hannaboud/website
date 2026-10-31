@@ -410,23 +410,17 @@
     ['Vega: implied vol changes', AT.vega], ['Commissions', AT.commission], ['Residual', AT.residual],
     ['<strong>Option leg, actual</strong>', AT.actual],
   ].map(([l, v]) => `<tr><td>${l}</td><td class="${cls(v)}">${f(v, 'usd0')}</td></tr>`).join('');
-  const keep = AT.theta ? (AT.theta + AT.gamma) / AT.theta : null;
-  $('attrText').innerHTML = `<p>Over the year the short options earned <strong>${f(AT.theta, 'usd0')}</strong> from time decay and gave back
-    <strong>${f(-AT.gamma, 'usd0')}</strong> to the curvature of SPY's moves, keeping ${f(keep, 'pct1')} of theta. That trade-off is the
-    volatility risk premium measured directly: it is positive when SPY moves less than the options priced in.</p>
-    <p>Delta (${f(AT.delta, 'usd0')}) is the options' share of SPY's direction, and the main reason the result depends on the path SPY took.
-    Vega (${f(AT.vega, 'usd0')}, about ${Math.round(100 * Math.abs(AT.vega / AT.gamma))}% the size of gamma) ${AT.vega >= 0
-      ? 'was a gain: on balance implied vol fell while the options were open, which helps a seller.'
-      : 'was a loss: on balance implied vol rose while the options were open.'}</p>`;
+  const tg = AT.theta + AT.gamma, usd = v => f(Math.abs(v), 'usd0');
+  $('attrText').innerHTML = `<p>Over the year, the passing of time earned the short options <strong>${usd(AT.theta)}</strong>
+    (theta). SPY's moves cost them <strong>${usd(AT.gamma)}</strong> (gamma). ${tg < 0
+      ? `That is more than time earned, so on these two alone the options lost ${usd(tg)}.`
+      : `So on these two alone the options kept ${usd(tg)}.`}</p>
+    <p>The other two pieces: implied volatility ${AT.vega >= 0
+      ? `fell while the options were open, which made them cheaper to buy back, a gain of ${usd(AT.vega)} for the seller (vega)`
+      : `rose while the options were open, which made them more expensive to buy back, a loss of ${usd(AT.vega)} for the seller (vega)`},
+    and SPY's overall direction ${AT.delta >= 0 ? 'added' : 'cost'} ${usd(AT.delta)} (delta). After ${usd(AT.commission)} of commissions${Math.abs(AT.residual) >= 1 ? `, and ${usd(AT.residual)} the model could not split (one day, explained in the Write-up)` : ''},
+    the options finished ${AT.actual >= 0 ? 'up' : 'down'} <strong>${usd(AT.actual)}</strong> for the year.</p>`;
 
-  const mc = G.model_check;
-  lazy('deltaCheck', () => new Chart($('deltaCheck'), { data: { datasets: [
-    { type: 'scatter', label: 'Quotes', data: mc.delta_scatter.map(p => ({ x: p.lseg, y: p.bs })), backgroundColor: 'rgba(61, 139, 224, 0.35)', pointRadius: 2 },
-    { type: 'line', label: 'y = x', data: [{ x: -1, y: -1 }, { x: 1, y: 1 }], borderColor: T.ink3, borderWidth: 1, borderDash: [4, 4], pointRadius: 0 }] },
-    options: { responsive: true, plugins: { title: { display: true, text: `Black-Scholes delta vs LSEG DELTA · R² ${f(mc.delta_r2, 'dec4')}` }, legend: { display: false } },
-      scales: { x: { type: 'linear', min: -1, max: 1, title: { display: true, text: 'LSEG DELTA' } }, y: { min: -1, max: 1, title: { display: true, text: 'computed here' } } } } }));
-  $('clockTable').querySelector('tbody').innerHTML = '<tr><td>Calendar days to expiry</td>' + Object.keys(mc.lseg_iv_ratio_by_days).map(k => `<td>${k}</td>`).join('') + '</tr>' +
-    '<tr><td>Vol implied from mid ÷ LSEG IMP_VOLT</td>' + Object.values(mc.lseg_iv_ratio_by_days).map(v => `<td>${f(v, 'dec2')}</td>`).join('') + '</tr>';
   const residDays = AC.map((r, i) => [r.date, i ? r.residual - AC[i - 1].residual : r.residual]).filter(([, v]) => Math.abs(v) > 1);
   $('residDays').textContent = residDays.length ? `${residDays.length} day${residDays.length > 1 ? 's' : ''} (${residDays.map(([d, v]) => `${d}, ${f(v, 'usd0')}`).join('; ')})` : 'no day';
 

@@ -218,12 +218,6 @@ covered call      cash-secured put      dividend over the week (cents)</div>
       <div class="table-wrap"><table class="cmp" id="decompTable"><tbody></tbody></table></div>
       <div class="table-wrap"><table class="cmp" id="vrpTable"><tbody></tbody></table></div>
     </div>
-    <p class="note">Option leg = premium received (after commissions) minus what each option paid out at
-    expiry: (strike − close) on an assigned put, (close − strike) on a call that was called away.
-    Stock = the gain or loss on shares while held, from the assignment close. Implied vs realized
-    compares like with like: each option's implied variance over its own life (vol backed out of
-    the closing mid at sale) against SPY's realized variance over the same days, both annualized on
-    a 252-trading-day clock.</p>
 
     <div class="chart-wrap">
       <div class="chart-legend"><span><i class="sw wheel"></i>Wheel NAV</span>
@@ -258,34 +252,24 @@ covered call      cash-secured put      dividend over the week (cents)</div>
     </div>
 
     <h3>P&amp;L attribution: theta earned vs gamma paid</h3>
-    <p>Each day the open option is repriced in steps from one close to the next: first one day
-    passes (theta), then SPY moves to its new close (the straight-line part is delta, the curvature
-    left over is gamma), then implied vol moves (vega). Because the vol is implied from the actual
-    quotes, the steps add up to the actual change in the option's price. The sale itself adds the
-    difference between the fill and the closing mid, plus commission.</p>
+    <p>From one close to the next, four things change the price of the option the account is short.
+    The chart splits each day's gain or loss between them:</p>
+    <ul class="tests">
+      <li><strong>Time (theta).</strong> With one day less to expiry, the option is worth a little
+      less. The seller earns that every day.</li>
+      <li><strong>Direction (delta).</strong> SPY going up or down. A short put gains when SPY rises; a
+      covered call gains on the shares.</li>
+      <li><strong>Size of the move (gamma).</strong> Big moves cost the seller more than the direction
+      alone suggests, whichever way SPY goes. These are the insurance claims.</li>
+      <li><strong>Implied volatility (vega).</strong> When the market prices in less volatility, the
+      option gets cheaper and the seller gains; when it prices in more, the seller loses.</li>
+    </ul>
+    <p>The four are measured one after the other with Black-Scholes, so together they add up to almost
+    exactly what the option's price actually did. The commission paid at each sale is shown separately.</p>
     <div class="chart-wrap"><canvas id="attrChart" height="120"></canvas></div>
     <div class="two-col">
       <div class="table-wrap"><table class="cmp" id="attrTable"><tbody></tbody></table></div>
       <div id="attrText"></div>
-    </div>
-
-    <h3>Checking the model against LSEG</h3>
-    <div class="two-col">
-      <div class="chart-wrap"><canvas id="deltaCheck" height="210"></canvas></div>
-      <div>
-        <p>The Black-Scholes delta computed here matches LSEG's own DELTA field on
-        <span data-k="greeks.model_check.n" data-f="int"></span> near-the-money quotes: R² =
-        <span data-k="greeks.model_check.delta_r2" data-f="dec4"></span>, median difference
-        <span data-k="greeks.model_check.delta_median_abs_diff" data-f="dec4"></span>.</p>
-        <p>LSEG's IMP_VOLT field is <em>not</em> used. Repricing the closing mid with it misses, and
-        the vol implied from the mid is higher than LSEG's by a ratio that shrinks with time to
-        expiry:</p>
-        <div class="table-wrap"><table class="cmp" id="clockTable"><tbody></tbody></table></div>
-        <p class="note">That pattern is what an extra ≈ <span data-k="greeks.model_check.lseg_clock_extra_days" data-f="dec2"></span>
-        day on LSEG's clock would produce (time counted from earlier in the trading day). Harmless for
-        a 3-month option, it understates a weekly option's implied vol by 5–30%, so comparing it with
-        realized vol would overstate the volatility risk premium.</p>
-      </div>
     </div>
   </section>
 
@@ -310,8 +294,9 @@ covered call      cash-secured put      dividend over the week (cents)</div>
     <h2>Fill assumption, and the data behind it</h2>
     <p><strong>Assumption:</strong> every option is sold at the <strong>closing mid</strong>,
     (bid + ask) / 2, of the day it is sold, minus a <span data-k="meta.commission" data-f="usd2"></span>
-    commission, and open options are valued at the <strong>mid</strong>. Shares change hands only
-    through assignment, at the strike.</p>
+    commission per contract, which is the market convention for options at US retail brokers. Open
+    options are valued at the <strong>mid</strong>. Shares change hands only through assignment, at
+    the strike.</p>
     <p><strong>Why it is safe for SPY.</strong> Across <span data-k="fill.quotes.n" data-f="int"></span>
     daily quotes on near-the-money weeklies (|delta| 0.15 to 0.45), the median spread is
     <span data-k="fill.quotes.spread.median" data-f="cents"></span>, and on the
