@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>RoyaltyChain</title>
+<meta name="description" content="RoyaltyChain: a permissioned blockchain that pays every rights holder their share of a stream automatically, settled in USDC. A team whitepaper.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800&family=Instrument+Sans:wdth,wght@75..100,400..700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+img{max-width:100%}[hidden]{display:none!important}
+/* Layout: a ledger. Sticky top bar; hero = name + thesis beside a live (simulated) block feed; every section is a
+   "block" whose header carries its number, the previous block's hash and its own SHA-256. Deep indigo ground,
+   violet for chain structure, gold for money (USDC) moving, status mint/coral only for valid/rejected. */
+:root{
+  color-scheme:dark;
+  --bg:#0b0a16;--bg-2:#0f0d1f;--surface:#15132c;--surface-2:#1d1a3a;--surface-3:#26224a;
+  --line:#2a2650;--line-2:#3d3872;
+  --text:#eeebff;--text-2:#bdb7e0;--text-3:#8f89b8;
+  --violet:#a493ff;--violet-2:#7b66f5;--violet-soft:rgba(164,147,255,.14);
+  --gold:#f6c453;--gold-soft:rgba(246,196,83,.14);--on-gold:#1b1405;
+  --usdc:#5aa0ee;
+  --ok:#5fd6a0;--ok-soft:rgba(95,214,160,.13);--bad:#ff7b88;--bad-soft:rgba(255,123,136,.13);
+  --focus:#f6c453;
+  --display:'Unbounded','Arial Black',system-ui,sans-serif;
+  --body:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none !important;transition:none !important}}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4,p,ul,ol,dl,dd,figure{margin:0;padding:0}
+a{color:var(--violet)}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.wrap{max-width:1160px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+@media (min-width:760px){.wrap{padding-left:max(36px, env(safe-area-inset-left, 0px));padding-right:max(36px, env(safe-area-inset-right, 0px))}}
+.mono{font-family:var(--mono)}
+.num{font-variant-numeric:tabular-nums}
+.eyebrow{font-family:var(--mono);font-size:.72rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--violet)}
+.gold{color:var(--gold)}
+
+/* ---------- TOP BAR ---------- */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top, 0px);z-index:10;background:var(--bg)}
+.top{position:sticky;top:env(safe-area-inset-top, 0px);z-index:9;background:rgba(11,10,22,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:20px;padding-block:12px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);font-family:var(--display);font-weight:700;font-size:.95rem;letter-spacing:-.01em;white-space:nowrap}
+.logo svg{width:26px;height:26px;flex:none}
+.top nav{display:flex;gap:4px;margin-left:auto;overflow-x:auto;scrollbar-width:none;min-width:0}
+.top nav::-webkit-scrollbar{display:none}
+.top nav a{font-family:var(--mono);font-size:.74rem;color:var(--text-3);text-decoration:none;padding:6px 10px;border-radius:6px;white-space:nowrap}
+.top nav a:hover{color:var(--text);background:var(--surface)}
+.top .home{font-family:var(--mono);font-size:.74rem;color:var(--on-gold);background:var(--gold);text-decoration:none;padding:7px 12px;border-radius:6px;white-space:nowrap;font-weight:600}
+@media (max-width:900px){.top nav{display:none}.top .home{margin-left:auto}}
+
+/* ---------- HERO ---------- */
+.hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line);
+  background:radial-gradient(60% 80% at 85% 10%,rgba(123,102,245,.22),transparent 70%),radial-gradient(40% 60% at 0% 100%,rgba(246,196,83,.07),transparent 70%),var(--bg)}
+.hero::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:56px 56px;
+  -webkit-mask-image:radial-gradient(70% 70% at 70% 30%,#000,transparent 75%);mask-image:radial-gradient(70% 70% at 70% 30%,#000,transparent 75%)}
+.hero .wrap{position:relative;z-index:1;padding-block:clamp(44px,7vw,84px) clamp(40px,6vw,72px)}
+.hero h1{font-family:var(--display);font-weight:800;font-size:clamp(1.9rem,8.2vw,5.4rem);line-height:1;letter-spacing:-.03em;margin:14px 0 0;overflow-wrap:anywhere}
+.hero h1 span{color:var(--violet)}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:clamp(28px,5vw,60px);align-items:start;margin-top:clamp(22px,3vw,34px)}
+@media (max-width:900px){.hero-grid{grid-template-columns:minmax(0,1fr)}}
+.thesis{font-size:clamp(1.18rem,2.1vw,1.5rem);line-height:1.42;color:var(--text);max-width:30ch;text-wrap:balance}
+.thesis em{font-style:normal;color:var(--gold)}
+.hero-sub{color:var(--text-2);margin-top:16px;max-width:52ch}
+.ctas{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.82rem;font-weight:600;text-decoration:none;padding:11px 16px;border-radius:8px;border:1px solid var(--line-2);color:var(--text);background:var(--surface);cursor:pointer;transition:background .15s,border-color .15s}
+.btn:hover{border-color:var(--violet);background:var(--surface-2)}
+.btn.primary{background:var(--gold);color:var(--on-gold);border-color:var(--gold)}
+.btn.primary:hover{background:#ffd577;border-color:#ffd577}
+.btn svg{width:15px;height:15px}
+
+.feed{background:rgba(21,19,44,.82);border:1px solid var(--line-2);border-radius:14px;padding:14px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.feed-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:2px 4px 12px;border-bottom:1px solid var(--line);margin-bottom:10px}
+.feed-h b{font-family:var(--mono);font-size:.72rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text-2)}
+.live{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:.68rem;color:var(--ok)}
+.live i{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 rgba(95,214,160,.6);animation:pulse 1.8s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(95,214,160,.55)}70%{box-shadow:0 0 0 8px rgba(95,214,160,0)}100%{box-shadow:0 0 0 0 rgba(95,214,160,0)}}
+.feed ol{list-style:none;display:grid;gap:8px}
+.blkrow{background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:6px;animation:drop .5s ease-out}
+@keyframes drop{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+.blkrow .r1{display:flex;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:.74rem;color:var(--text-3)}
+.blkrow .r1 b{color:var(--violet);font-weight:600}
+.blkrow .r2{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+.blkrow .what{font-size:.9rem;color:var(--text)}
+.blkrow .amt{font-family:var(--mono);font-size:.9rem;color:var(--gold);font-variant-numeric:tabular-nums}
+.blkrow .split{display:flex;height:6px;border-radius:3px;overflow:hidden;gap:2px}
+.blkrow .split i{display:block;height:100%}
+.blkrow .hash{font-family:var(--mono);font-size:.68rem;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.feed-note{font-family:var(--mono);font-size:.66rem;color:var(--text-3);margin-top:10px;padding:0 4px}
+
+.stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:clamp(36px,5vw,56px)}
+@media (max-width:900px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stats > div:last-child{grid-column:1/-1}}
+.stats > div{background:var(--bg-2);padding:18px 18px 16px;display:grid;gap:6px;align-content:start}
+.stats .n{font-family:var(--display);font-weight:600;font-size:clamp(1.25rem,2.4vw,1.7rem);line-height:1.1;font-variant-numeric:tabular-nums;color:var(--text)}
+.stats .n.g{color:var(--gold)}
+.stats .l{font-size:.84rem;color:var(--text-3);line-height:1.4}
+
+/* ---------- BLOCK SECTIONS ---------- */
+.blk{padding-block:clamp(64px,8vw,104px);border-bottom:1px solid var(--line);scroll-margin-top:60px}
+.blk:nth-of-type(even){background:var(--bg-2)}
+.blk-meta{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;font-family:var(--mono);font-size:.7rem;color:var(--text-3);margin-bottom:18px}
+.blk-meta .no{color:var(--bg);background:var(--violet);padding:3px 8px;border-radius:4px;font-weight:600;letter-spacing:.06em}
+.blk-meta .h{display:inline-flex;gap:6px;min-width:0;max-width:100%}
+.blk-meta .h b{color:var(--text-2);font-weight:500}
+.blk-meta .h span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+h2{font-family:var(--display);font-weight:700;font-size:clamp(1.6rem,3.8vw,2.7rem);line-height:1.1;letter-spacing:-.02em;max-width:22ch;text-wrap:balance}
+.intro{font-size:1.1rem;color:var(--text-2);max-width:62ch;margin-top:18px}
+.blk p{max-width:66ch;color:var(--text-2);margin-bottom:14px}
+.blk p strong{color:var(--text);font-weight:600}
+h3{font-family:var(--display);font-weight:600;font-size:1.12rem;letter-spacing:-.01em;margin:48px 0 12px;color:var(--text);text-wrap:balance}
+.sub-intro{color:var(--text-2);max-width:62ch;margin-bottom:16px}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px 22px;min-width:0}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+@media (max-width:980px){.grid4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:860px){.grid3{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:640px){.grid2,.grid4{grid-template-columns:minmax(0,1fr)}}
+.card h4{font-family:var(--display);font-weight:600;font-size:1rem;color:var(--text);margin-bottom:8px;line-height:1.3}
+.card p{font-size:.94rem;margin-bottom:0}
+.card .k{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);display:block;margin-bottom:8px}
+
+.seg{display:inline-flex;flex-wrap:wrap;gap:4px;padding:4px;border:1px solid var(--line-2);border-radius:10px;background:var(--bg-2);margin-bottom:16px}
+.seg button{font-family:var(--mono);font-size:.78rem;font-weight:500;background:transparent;color:var(--text-2);border:0;border-radius:7px;padding:8px 13px;cursor:pointer;min-height:36px}
+.seg button:hover{color:var(--text);background:var(--surface-2)}
+.seg button[aria-pressed="true"]{background:var(--violet);color:var(--bg)}
+
+/* ---------- ROYALTY LANES ---------- */
+.lanes{display:grid;gap:12px}
+.lane{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:grid;grid-template-columns:200px minmax(0,1fr);gap:16px;align-items:center;transition:opacity .25s,border-color .25s}
+@media (max-width:760px){.lane{grid-template-columns:minmax(0,1fr);gap:10px}}
+.lane-h b{display:block;font-family:var(--display);font-weight:600;font-size:.98rem}
+.lane-h span{display:block;font-size:.78rem;color:var(--text-3);line-height:1.4;margin-top:2px}
+.lane .path{list-style:none;display:flex;flex-wrap:wrap;gap:8px 0;align-items:center}
+.lane .path li{font-family:var(--mono);font-size:.76rem;color:var(--text);background:var(--surface-2);border:1px solid var(--line-2);border-radius:999px;padding:5px 11px;white-space:nowrap}
+.lane .path li + li{margin-left:26px;position:relative}
+.lane .path li + li::before{content:"";position:absolute;left:-22px;top:50%;width:16px;height:1.5px;background:var(--violet)}
+.lane .path li + li::after{content:"";position:absolute;left:-10px;top:calc(50% - 3.5px);border:4px solid transparent;border-left:5px solid var(--violet);border-right:0}
+.lane .path li.end{background:var(--gold-soft);border-color:rgba(246,196,83,.5);color:var(--gold)}
+.lane.off{opacity:.32;border-style:dashed}
+.lane .tag{font-family:var(--mono);font-size:.66rem;color:var(--text-3);margin-left:auto}
+.lanes-sum{display:flex;align-items:baseline;gap:12px;margin-top:14px;font-family:var(--mono);font-size:.82rem;color:var(--text-2)}
+.lanes-sum b{font-family:var(--display);font-size:1.5rem;color:var(--gold);font-weight:700}
+
+/* ---------- HOPS ---------- */
+.hops{display:grid;gap:14px}
+.hop-track{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.hop-track .hd{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline;margin-bottom:12px}
+.hop-track .hd b{font-family:var(--display);font-weight:600;font-size:.98rem}
+.hop-track .hd span{font-family:var(--mono);font-size:.76rem;color:var(--text-3)}
+.hop-track .hd span.t{color:var(--gold)}
+.hop-row{list-style:none;display:flex;flex-wrap:wrap;gap:8px 0;align-items:center}
+.hop-row li{font-family:var(--mono);font-size:.74rem;color:var(--text-2);border:1px solid var(--line-2);border-radius:8px;padding:7px 10px;background:var(--bg-2);transition:background .2s,color .2s,border-color .2s;white-space:nowrap}
+.hop-row li + li{margin-left:22px;position:relative}
+.hop-row li + li::before{content:"";position:absolute;left:-18px;top:50%;width:14px;height:1.5px;background:var(--line-2)}
+.hop-row li.at{background:var(--gold);color:var(--on-gold);border-color:var(--gold)}
+.hop-row li.done{color:var(--text);border-color:var(--violet)}
+
+/* ---------- CHARTS ---------- */
+.chart{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 18px 12px;position:relative;min-width:0}
+.chart-h{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline;margin-bottom:8px}
+.chart-h b{font-family:var(--display);font-weight:600;font-size:.95rem}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:.7rem;color:var(--text-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.scroll-x{overflow-x:auto;overflow-y:hidden}
+.scroll-x svg{min-width:600px}
+.ax{font-family:var(--mono);font-size:10px;fill:var(--text-3)}
+.gridl{stroke:var(--line);stroke-width:1}
+.tip{position:absolute;pointer-events:none;background:var(--surface-3);border:1px solid var(--line-2);border-radius:8px;padding:8px 10px;font-family:var(--mono);font-size:.72rem;color:var(--text);line-height:1.5;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:3}
+.tip b{color:var(--violet)}
+.src{font-family:var(--mono);font-size:.66rem;color:var(--text-3);margin-top:8px}
+.hbar{display:grid;grid-template-columns:8.5rem minmax(0,1fr) 4.6rem;gap:12px;align-items:center;padding:7px 0}
+.hbar .k{font-size:.9rem;color:var(--text)}
+.hbar .tr{height:14px;position:relative}
+.hbar .tr i{position:absolute;left:0;top:0;bottom:0;background:var(--gold);border-radius:0 4px 4px 0}
+.hbar .v{font-family:var(--mono);font-size:.84rem;text-align:right;color:var(--gold);font-variant-numeric:tabular-nums}
+@media (max-width:520px){.hbar{grid-template-columns:6.4rem minmax(0,1fr) 3.8rem;gap:8px}}
+
+.overclaim{display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-family:var(--mono);font-size:1rem;margin-top:12px}
+.overclaim .p{background:var(--surface-2);border:1px solid var(--line-2);border-radius:8px;padding:8px 12px}
+.overclaim .p small{display:block;font-size:.62rem;color:var(--text-3)}
+.overclaim .eqs{font-size:1.1rem;color:var(--text-3)}
+.overclaim .res{background:var(--bad-soft);color:var(--bad);border:1px solid rgba(255,123,136,.45);border-radius:8px;padding:8px 12px;font-weight:600}
+
+/* ---------- COMPARISON TABLE ---------- */
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:.9rem;min-width:640px}
+th,td{text-align:left;padding:13px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{font-family:var(--mono);font-size:.7rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);background:var(--bg-2)}
+thead th.pick{color:var(--violet)}
+tbody tr:last-child td{border-bottom:0}
+td:first-child{font-family:var(--display);font-weight:600;font-size:.84rem;color:var(--text);white-space:nowrap}
+td.pub{color:var(--text-3)}
+td.pick{color:var(--text);background:var(--violet-soft)}
+td.why{color:var(--text-2);font-size:.86rem}
+
+/* channels */
+.chan{display:grid;gap:12px}
+.chan .nodes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:640px){.chan .nodes{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.node{font-family:var(--mono);font-size:.76rem;text-align:center;padding:9px 8px;border-radius:999px;border:1px solid var(--violet);color:var(--text);background:var(--violet-soft)}
+.ledger{border:1px solid var(--violet);border-radius:12px;background:var(--surface);padding:16px 18px}
+.ledger b{font-family:var(--display);font-weight:600;font-size:.95rem;display:block;margin-bottom:8px}
+.ledger ul{list-style:none;display:flex;flex-wrap:wrap;gap:8px}
+.ledger li{font-family:var(--mono);font-size:.74rem;color:var(--text-2);background:var(--bg-2);border:1px solid var(--line);border-radius:6px;padding:5px 9px}
+.private{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:640px){.private{grid-template-columns:minmax(0,1fr)}}
+.priv{border:1px dashed var(--line-2);border-radius:12px;padding:14px 16px;background:var(--bg-2)}
+.priv .pair{font-family:var(--mono);font-size:.8rem;color:var(--text)}
+.priv .pair i{font-style:normal;color:var(--violet);padding:0 6px}
+.priv p{font-size:.86rem;margin:6px 0 0}
+.priv .fp{font-family:var(--mono);font-size:.68rem;color:var(--text-3);margin-top:8px}
+.updown{font-family:var(--mono);font-size:.7rem;color:var(--text-3);text-align:center}
+
+/* three-way link */
+.link3{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr);gap:10px;align-items:center}
+@media (max-width:760px){.link3{grid-template-columns:minmax(0,1fr)}.link3 .lk{transform:rotate(90deg);justify-self:center}}
+.idbox{background:var(--surface);border:1px solid var(--line-2);border-radius:12px;padding:14px 16px;min-width:0}
+.idbox .k{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3)}
+.idbox .v{font-family:var(--mono);font-size:.92rem;color:var(--text);margin:4px 0 2px;overflow-wrap:anywhere}
+.idbox .d{font-size:.8rem;color:var(--text-3)}
+.idbox.c{border-color:var(--violet);background:var(--violet-soft)}
+.lk{font-family:var(--mono);color:var(--violet);font-size:1.1rem}
+
+/* ---------- USDC ---------- */
+.peg{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:16px;align-items:stretch}
+@media (max-width:860px){.peg{grid-template-columns:minmax(0,1fr)}}
+.peg-big{background:linear-gradient(140deg,rgba(90,160,238,.18),rgba(21,19,44,1) 60%);border:1px solid rgba(90,160,238,.45);border-radius:12px;padding:24px;display:grid;gap:10px;align-content:center}
+.peg-big .eq{font-family:var(--display);font-weight:700;font-size:clamp(1.6rem,4vw,2.4rem);letter-spacing:-.02em;color:var(--text)}
+.peg-big .eq span{color:var(--usdc)}
+.peg-big p{margin:0;color:var(--text-2);font-size:.95rem}
+.route{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px 22px;display:grid;gap:14px}
+.route .cities{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center}
+.route .city{font-family:var(--mono);font-size:.8rem;color:var(--text)}
+.route .city small{display:block;color:var(--text-3);font-size:.66rem}
+.route .wire{height:2px;background:linear-gradient(90deg,var(--usdc),var(--gold));position:relative;border-radius:2px}
+.route .wire i{position:absolute;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--gold);box-shadow:0 0 12px var(--gold);left:0;animation:fly 3.2s ease-in-out infinite}
+@keyframes fly{0%{left:0}60%,100%{left:calc(100% - 10px)}}
+.route ul{list-style:none;display:grid;gap:8px}
+.route li{font-size:.92rem;color:var(--text-2);padding-left:18px;position:relative}
+.route li::before{content:"";position:absolute;left:0;top:.6em;width:8px;height:8px;border-radius:2px;background:var(--usdc)}
+
+/* ---------- ARCHITECTURE ---------- */
+.layers{display:grid;gap:10px}
+.layer{display:grid;grid-template-columns:150px minmax(0,1fr) minmax(0,1fr);gap:20px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--violet);border-radius:12px;padding:18px 20px;align-items:start}
+.layer:nth-child(2){border-left-color:var(--gold)}
+.layer:nth-child(3){border-left-color:var(--usdc)}
+@media (max-width:860px){.layer{grid-template-columns:minmax(0,1fr);gap:10px}}
+.layer .lno{font-family:var(--mono);font-size:.7rem;color:var(--text-3);letter-spacing:.08em}
+.layer .lno b{display:block;font-family:var(--display);font-size:1rem;color:var(--text);letter-spacing:-.01em;margin-top:4px;font-weight:600}
+.layer p{margin:0;font-size:.93rem}
+.layer ul{list-style:none;display:grid;gap:6px}
+.layer li{font-family:var(--mono);font-size:.76rem;color:var(--text-2);background:var(--bg-2);border:1px solid var(--line);border-radius:6px;padding:6px 9px}
+pre.api{margin:0;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto;font-family:var(--mono);font-size:.74rem;line-height:1.7;color:var(--text-2)}
+pre.api .m{color:var(--gold)}
+pre.api .c{color:var(--text-3)}
+
+.steps{list-style:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;counter-reset:s}
+@media (max-width:980px){.steps{grid-template-columns:minmax(0,1fr)}}
+.steps li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:8px;align-content:start;counter-increment:s;position:relative}
+.steps li::before{content:"0" counter(s);font-family:var(--mono);font-size:.72rem;color:var(--violet);font-weight:600}
+.steps b{font-family:var(--display);font-weight:600;font-size:.95rem}
+.steps p{font-size:.86rem;margin:0}
+.chip{justify-self:start;font-family:var(--mono);font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;padding:3px 7px;border-radius:4px}
+.chip.new{background:var(--violet-soft);color:var(--violet);border:1px solid rgba(164,147,255,.45)}
+.chip.same{background:transparent;color:var(--text-3);border:1px solid var(--line-2)}
+.note{border:1px solid rgba(246,196,83,.4);background:var(--gold-soft);border-radius:12px;padding:16px 18px;margin-top:16px}
+.note b{color:var(--gold);font-family:var(--display);font-weight:600;font-size:.92rem;display:block;margin-bottom:4px}
+.note p{margin:0;color:var(--text);font-size:.94rem;max-width:none}
+
+/* ---------- SIMULATOR ---------- */
+.sim{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:16px;align-items:start}
+@media (max-width:900px){.sim{grid-template-columns:minmax(0,1fr)}}
+.sim .card{padding:18px}
+.presets{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.presets button{font-family:var(--mono);font-size:.72rem;background:var(--bg-2);color:var(--text-2);border:1px solid var(--line-2);border-radius:6px;padding:6px 10px;cursor:pointer}
+.presets button:hover{border-color:var(--violet);color:var(--text)}
+.holders{display:grid;gap:8px}
+.holder{display:grid;grid-template-columns:minmax(0,1fr) 92px;gap:8px}
+.holder input{width:100%;font-family:var(--mono);font-size:.82rem;color:var(--text);background:var(--bg-2);border:1px solid var(--line-2);border-radius:8px;padding:9px 10px;min-width:0}
+.holder input:focus{outline:none;border-color:var(--violet)}
+.holder .pct{position:relative}
+.holder .pct input{padding-right:24px;text-align:right}
+.holder .pct span{position:absolute;right:9px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:.8rem;color:var(--text-3)}
+.sumline{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:12px 0 16px;font-family:var(--mono);font-size:.82rem;color:var(--text-2)}
+.pill{font-family:var(--mono);font-size:.74rem;font-weight:600;padding:4px 9px;border-radius:999px}
+.pill.ok{background:var(--ok-soft);color:var(--ok);border:1px solid rgba(95,214,160,.45)}
+.pill.bad{background:var(--bad-soft);color:var(--bad);border:1px solid rgba(255,123,136,.45)}
+.field{display:grid;gap:6px;margin-bottom:14px}
+.field label{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3)}
+.field .in{position:relative}
+.field input{width:100%;font-family:var(--mono);font-size:.95rem;color:var(--gold);background:var(--bg-2);border:1px solid var(--line-2);border-radius:8px;padding:10px 64px 10px 12px}
+.field input:focus{outline:none;border-color:var(--gold)}
+.field .in span{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:.78rem;color:var(--usdc)}
+.acts{display:flex;flex-wrap:wrap;gap:8px}
+.out-h{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.out-h b{font-family:var(--display);font-weight:600;font-size:.95rem}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;font-family:var(--mono);font-size:.74rem;margin-bottom:14px}
+.kv dt{color:var(--text-3)}
+.kv dd{color:var(--text);overflow-wrap:anywhere}
+.payouts{display:grid;gap:8px}
+.payout{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.payout .who{font-size:.9rem;color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.payout .amt{font-family:var(--mono);font-size:.9rem;color:var(--gold);text-align:right;font-variant-numeric:tabular-nums}
+.payout .w{font-family:var(--mono);font-size:.66rem;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.payout .bar{grid-column:1/-1;height:5px;background:var(--surface-3);border-radius:3px;overflow:hidden}
+.payout .bar i{display:block;height:100%;background:var(--gold);border-radius:3px;width:0;transition:width .7s ease-out}
+.rejected{border:1px solid rgba(255,123,136,.45);background:var(--bad-soft);border-radius:10px;padding:14px 16px;color:var(--text)}
+.rejected b{color:var(--bad);font-family:var(--display);font-weight:600;display:block;margin-bottom:4px}
+.rejected p{margin:0;font-size:.9rem;color:var(--text-2)}
+.cmp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+.cmp div{border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:.84rem;color:var(--text-2)}
+.cmp div b{display:block;font-family:var(--mono);font-size:.9rem;color:var(--text)}
+.cmp div.now b{color:var(--ok)}
+
+/* ---------- USERS & REVENUE ---------- */
+.users{list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;counter-reset:u}
+@media (max-width:980px){.users{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:600px){.users{grid-template-columns:minmax(0,1fr)}}
+.users li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:grid;grid-template-rows:auto auto auto 1fr;gap:8px;counter-increment:u}
+.users .pr{font-family:var(--mono);font-size:.68rem;color:var(--text-3);letter-spacing:.08em}
+.users .pr::before{content:"PRIORITY " counter(u)}
+.users b{font-family:var(--display);font-weight:600;font-size:1rem;line-height:1.3}
+.users .fig{font-family:var(--display);font-weight:700;font-size:1.6rem;color:var(--gold);line-height:1.1;font-variant-numeric:tabular-nums}
+.users .fig small{display:block;font-family:var(--body);font-weight:400;font-size:.78rem;color:var(--text-3);margin-top:4px;line-height:1.35}
+.users p{font-size:.88rem;margin:0}
+.costs{width:100%;min-width:0}
+.costs td{font-size:.88rem}
+.costs td:first-child{font-family:var(--body);font-weight:500;white-space:normal}
+.costs td.r{text-align:right;font-family:var(--mono);color:var(--gold);white-space:nowrap}
+.costs tr.tot td{font-weight:600;color:var(--text);background:var(--bg-2)}
+.costs tr.tot td.r{color:var(--gold)}
+.tiers .row{display:grid;grid-template-columns:minmax(0,13rem) minmax(0,1fr);gap:14px;align-items:center;padding:8px 0}
+@media (max-width:640px){.tiers .row{grid-template-columns:minmax(0,1fr);gap:4px}}
+.tiers .nm{font-size:.88rem;color:var(--text);line-height:1.3}
+.tiers .nm small{display:block;font-family:var(--mono);font-size:.68rem;color:var(--text-3)}
+.tiers .tr{position:relative;height:22px;background:repeating-linear-gradient(90deg,transparent 0,transparent calc(20% - 1px),var(--line) calc(20% - 1px),var(--line) 20%)}
+.tiers .tr i{position:absolute;top:3px;bottom:3px;background:var(--violet);border-radius:4px}
+.tiers .tr span{position:absolute;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:.7rem;color:var(--text);white-space:nowrap}
+.tiers .axis{display:grid;grid-template-columns:minmax(0,13rem) minmax(0,1fr);gap:14px;font-family:var(--mono);font-size:.64rem;color:var(--text-3);margin-top:4px}
+.tiers .axis div{display:flex;justify-content:space-between}
+@media (max-width:640px){.tiers .axis{grid-template-columns:minmax(0,1fr)}.tiers .axis > span{display:none}}
+
+/* ---------- SOURCES & FOOTER ---------- */
+.sources{columns:2 320px;column-gap:28px;list-style:none;font-size:.84rem}
+.sources li{break-inside:avoid;padding:8px 0;border-bottom:1px solid var(--line);color:var(--text-3)}
+.sources a{color:var(--text-2);text-decoration-color:var(--line-2);text-underline-offset:3px}
+.sources a:hover{color:var(--violet)}
+footer{padding-block:34px 44px}
+footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:center;font-family:var(--mono);font-size:.74rem;color:var(--text-3)}
+footer a{color:var(--gold);text-decoration:none}
+footer a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="RoyaltyChain, back to top">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="9" width="12" height="14" rx="3" fill="none" stroke="#a493ff" stroke-width="2"/><rect x="18" y="9" width="12" height="14" rx="3" fill="none" stroke="#f6c453" stroke-width="2"/><path d="M14 16h4" stroke="#bdb7e0" stroke-width="2"/><path d="M6 19v-4M8 19v-6M10 19v-3" stroke="#a493ff" stroke-width="1.6" stroke-linecap="round"/><circle cx="24" cy="16" r="2.6" fill="#f6c453"/></svg>
+      RoyaltyChain
+    </a>
+    <nav aria-label="Sections">
+      <a href="#problem">Problem</a>
+      <a href="#solution">Solution</a>
+      <a href="#settlement">Settlement</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#simulator">Try it</a>
+      <a href="#users">Users</a>
+      <a href="#revenue">Revenue</a>
+    </nav>
+    <a class="home" href="https://hannaboudara.com/">hannaboudara.com</a>
+  </div>
+</header>
+
+<section class="hero" id="top">
+  <div class="wrap">
+    <span class="eyebrow">Team whitepaper · Blockchain · 2026</span>
+    <h1>Royalty<span>Chain</span></h1>
+    <div class="hero-grid">
+      <div>
+        <p class="thesis">Every stream should pay everyone who made the song. Today that money can take <em>two to three years</em> to arrive, and some of it never does.</p>
+        <p class="hero-sub">RoyaltyChain is a permissioned blockchain that becomes the music industry's single, shared record of who owns each song. When a streaming platform pays out, a smart contract splits the money and pays every rights holder at once, in USDC.</p>
+        <div class="ctas">
+          <a class="btn primary" href="#simulator">Try the split contract <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="btn" href="#problem">Why royalties get lost</a>
+        </div>
+      </div>
+      <div class="feed" aria-label="Simulated ledger feed">
+        <div class="feed-h"><b>Ledger</b><span class="live"><i></i>simulated</span></div>
+        <ol id="feed"></ol>
+        <p class="feed-note">Example settlements on a demo network, not real payments.</p>
+      </div>
+    </div>
+    <div class="stats">
+      <div><span class="n num">$29.6B</span><span class="l">global recorded music revenue in 2024</span></div>
+      <div><span class="n num">$20.4B</span><span class="l">of it from streaming</span></div>
+      <div><span class="n g num">$424M</span><span class="l">in unmatched US royalties, the "black box"</span></div>
+      <div><span class="n num">20%+</span><span class="l">of streaming royalties estimated missing, unmatched or delayed</span></div>
+      <div><span class="n num">2–3 yrs</span><span class="l">for some payments to reach the songwriter</span></div>
+    </div>
+  </div>
+</section>
+
+<main>
+
+<section class="blk" id="problem">
+  <div class="wrap">
+    <div class="blk-meta"><span class="no">BLOCK 01</span><span class="h"><b>prev</b><span>0x0000000000000000000000000000000000000000000000000000000000000000</span></span><span class="h"><b>hash</b><span>0x9f7da4c1f3a44a63bcae6483bd638ade313aa115d2a167af7e48c3b8b5a2d05f</span></span></div>
+    <h2>Streaming rebuilt the music industry. The payment plumbing didn't change.</h2>
+    <p class="intro">Recorded music revenue fell for 15 years, then streaming brought it back to a record. In 2025, Spotify alone paid the music industry more than $11 billion. Getting that money to the right people is where the system breaks.</p>
+
+    <div class="chart" id="rev-chart" style="margin-top:28px">
+      <div class="chart-h"><b>Global recorded music revenue, 1999–2024</b>
+        <div class="legend"><span><i style="background:var(--violet)"></i>Streaming</span><span><i style="background:var(--surface-3);border:1px solid var(--line-2)"></i>Physical, downloads and other</span></div>
+      </div>
+      <div class="scroll-x"><svg id="rev-svg" viewBox="0 0 760 300" role="img" aria-label="Bar chart: revenue fell from 21.9 billion dollars in 1999 to 12.9 billion in 2014, then rose to 29.6 billion in 2024, with streaming at 20.4 billion."></svg></div>
+      <p class="src">US$ billions · Source: IFPI Global Music Report</p>
+    </div>
+
+    <h3>One stream triggers three royalties</h3>
+    <p class="sub-intro">A song carries two copyrights: the composition (lyrics and melody, owned by the songwriter and publisher) and the master recording (usually owned by the label). Each one pays out through its own organizations, and none of these pipelines talk to each other.</p>
+    <div class="seg" role="group" aria-label="Choose how the song is played">
+      <button type="button" id="mode-stream" data-mode="stream" aria-pressed="true">A stream on Spotify</button>
+      <button type="button" id="mode-live" data-mode="live" aria-pressed="false">A band covers it live</button>
+    </div>
+    <div class="lanes" id="lanes">
+      <div class="lane" data-kind="mech">
+        <div class="lane-h"><b>Mechanical</b><span>Composition · paid when the song is copied or streamed on demand</span></div>
+        <ol class="path"><li>Streaming platform</li><li>MLC</li><li>Publisher</li><li class="end">Songwriter</li></ol>
+      </div>
+      <div class="lane" data-kind="perf">
+        <div class="lane-h"><b>Performance</b><span>Composition · paid when the song is played publicly</span></div>
+        <ol class="path"><li id="perf-src">Streaming platform</li><li>PRO (ASCAP, BMI)</li><li>Publisher</li><li class="end">Songwriter</li></ol>
+      </div>
+      <div class="lane" data-kind="rec">
+        <div class="lane-h"><b>Recording</b><span>Master recording · paid when that specific recording is used</span></div>
+        <ol class="path"><li>Streaming platform</li><li>Distributor</li><li>Label</li><li class="end">Artist</li></ol>
+      </div>
+    </div>
+    <div class="lanes-sum" aria-live="polite"><b id="lane-n">3</b><span id="lane-t">royalties, three separate pipelines, one stream</span></div>
+
+    <h3>Where the money gets stuck</h3>
+    <div class="grid2">
+      <div class="card">
+        <span class="k">Delays</span>
+        <h4>Every intermediary takes its share before passing the money on</h4>
+        <p>Abroad it gets worse. Here is the path when a British songwriter is streamed in Japan.</p>
+      </div>
+      <div class="card">
+        <span class="k">Conflicting data</span>
+        <h4>Separate databases disagree about who owns the song</h4>
+        <p>When ownership claims add up to more than 100%, the system freezes every payment on that song until the dispute is settled. Writers often never find out why their royalties stopped.</p>
+        <div class="overclaim" aria-label="60 plus 30 plus 20 equals 110 percent, payments frozen">
+          <span class="p">60%<small>publisher 1</small></span><span class="eqs">+</span><span class="p">30%<small>publisher 2</small></span><span class="eqs">+</span><span class="p">20%<small>publisher 3</small></span><span class="eqs">=</span><span class="res">110% · frozen</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hops" style="margin-top:16px">
+      <div class="hop-track">
+        <div class="hd"><b>Today</b><span id="t-today">5 handoffs · up to 2–3 years</span></div>
+        <ol class="hop-row" id="hops-today"><li>Stream in Japan</li><li>JASRAC</li><li>UK society</li><li>Sub-publisher</li><li>Home publisher</li><li>Songwriter</li></ol>
+      </div>
+      <div class="hop-track">
+        <div class="hd"><b>With RoyaltyChain</b><span id="t-rc">1 contract · minutes</span></div>
+        <ol class="hop-row" id="hops-rc"><li>Stream in Japan</li><li>Smart contract</li><li>Songwriter wallet</li></ol>
+      </div>
+      <div><button type="button" class="btn" id="send">Send a royalty payment <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
+    </div>
+
+    <h3>The black box</h3>
+    <p class="sub-intro">Royalties nobody can match to an owner pile up. In the US, streaming services handed $424 million of them to the Mechanical Licensing Collective (MLC). If the MLC can't match them within two years, it can hand the rest to publishers by market share, so the money goes to the biggest publishers instead of the people who wrote the songs. Independent songwriters, who can't register in every system, lose the most.</p>
+    <div class="chart" style="max-width:760px">
+      <div class="chart-h"><b>Historical unmatched royalties sent to the MLC</b><span class="legend">US$ millions</span></div>
+      <div id="bb"></div>
+      <p class="src">Source: MLC, 2021. "Other services" is the remainder of the $424M total.</p>
+    </div>
+  </div>
+</section>
+
+<section class="blk" id="solution">
+  <div class="wrap">
+    <div class="blk-meta"><span class="no">BLOCK 02</span><span class="h"><b>prev</b><span>0x9f7da4c1f3a44a63bcae6483bd638ade313aa115d2a167af7e48c3b8b5a2d05f</span></span><span class="h"><b>hash</b><span>0xac5ef48d829fe5bd144d4a92048245d75f7280391bfddf7d4e276a4e72509438</span></span></div>
+    <h2>One shared, tamper-proof record of who owns every song</h2>
+    <p class="intro">RoyaltyChain doesn't replace Spotify, Apple Music or any other platform. It replaces the ownership database underneath them, the layer where today's disputes and delays start.</p>
+
+    <div class="grid3" style="margin-top:28px">
+      <div class="card"><span class="k">Why not a central database?</span><h4>The industry has tried that</h4><p>Shared registries like the Global Repertoire Database collapsed over one question: who controls the data. On a blockchain no single party owns the ledger, and no one can change a confirmed record alone.</p></div>
+      <div class="card"><span class="k">Why blockchain</span><h4>Nobody trusts anybody</h4><p>Labels don't trust publishers, publishers don't trust societies, and songwriters don't trust any of them. No single intermediary is accepted by everyone, so trust is replaced by cryptographic proof.</p></div>
+      <div class="card"><span class="k">Who runs it</span><h4>Every player is an equal node</h4><p>Labels, publishers, collecting societies and platforms each run a node with the same copy of the ledger. Smart contracts execute exactly as written and can't be lobbied or delayed.</p></div>
+    </div>
+
+    <h3>Why a permissioned chain, not Ethereum</h3>
+    <p class="sub-intro">Royalties are a regulated financial flow full of confidential contracts, so a public chain is ruled out. RoyaltyChain runs on Hyperledger Fabric.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th></th><th>Ethereum (public)</th><th class="pick">Hyperledger Fabric (permissioned)</th><th>Why it matters for royalties</th></tr></thead>
+        <tbody>
+          <tr><td>Identity</td><td class="pub">Anonymous wallets</td><td class="pick">Verified cryptographic identities</td><td class="why">Societies and platforms must follow KYC and anti-money-laundering rules. They can't legally pay an anonymous wallet.</td></tr>
+          <tr><td>Confidentiality</td><td class="pub">Every transaction is public</td><td class="pick">Channels and private data</td><td class="why">Record deals are confidential. A public chain would show every advance and royalty rate to competitors.</td></tr>
+          <tr><td>Privacy law</td><td class="pub">Data can never be deleted</td><td class="pick">Personal terms kept off the shared ledger</td><td class="why">GDPR gives people the right to have their data erased. Fines reach €20 million or 4% of global revenue.</td></tr>
+          <tr><td>Transaction cost</td><td class="pub">Gas fees priced in ETH, which vary</td><td class="pick">No native token, fixed infrastructure costs</td><td class="why">No speculation, and costs a finance team can budget.</td></tr>
+          <tr><td>Throughput</td><td class="pub">About 15–30 transactions per second</td><td class="pick">Thousands per second, run in parallel</td><td class="why">Spotify has over 750 million users and tens of billions of streams a month.</td></tr>
+          <tr><td>Smart contracts</td><td class="pub">Solidity only</td><td class="pick">Go, Java, Node.js</td><td class="why">Any engineer can read them. RoyaltyChain's chaincode is written in Go, which gives the same result on every node.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Shared ownership, private deals</h3>
+    <p class="sub-intro">Fabric's channels and private data let everyone read who owns a song, while the deal terms behind it stay between the two parties who signed it. The shared ledger stores only a cryptographic fingerprint of the private data, so the network can prove a payment was correct without seeing why.</p>
+    <div class="chan">
+      <div class="nodes"><span class="node">Streaming platform</span><span class="node">Label</span><span class="node">Publisher</span><span class="node">MLC</span></div>
+      <div class="updown">every node reads and verifies ↓</div>
+      <div class="ledger"><b>Shared ledger · every node holds an identical copy</b>
+        <ul><li>ISRC ↔ ISWC link</li><li>Ownership percentages</li><li>Completed payments</li><li>Timestamps</li></ul>
+      </div>
+      <div class="updown">↑ only a fingerprint is shared</div>
+      <div class="private">
+        <div class="priv"><div class="pair">Label <i>↔</i> Artist</div><p>Advances, royalty rates, recoupment terms</p><div class="fp">private data · visible to these two only</div></div>
+        <div class="priv"><div class="pair">Label <i>↔</i> Publisher</div><p>Deal terms, sub-publishing agreements</p><div class="fp">private data · visible to these two only</div></div>
+      </div>
+    </div>
+
+    <h3>Connecting the recording to the song</h3>
+    <p class="sub-intro">Today recordings are identified by ISRC codes and compositions by ISWC codes, in separate databases run by different companies. Spotify knows exactly which recording is playing but can't reliably tell who wrote it. RoyaltyChain stores a permanent three-way link, using DDEX, the data standard platforms and publishers already exchange.</p>
+    <div class="link3">
+      <div class="idbox"><div class="k">ISRC · recording</div><div class="v">US-XY1-26-00042</div><div class="d">What the platform plays</div></div>
+      <span class="lk" aria-hidden="true">⇄</span>
+      <div class="idbox"><div class="k">ISWC · composition</div><div class="v">T-345.246.800-1</div><div class="d">Who wrote it</div></div>
+      <span class="lk" aria-hidden="true">⇄</span>
+      <div class="idbox c"><div class="k">Smart contract</div><div class="v" id="link-addr">0x7f3c…a91e</div><div class="d">Who gets paid, and how much</div></div>
+    </div>
+    <p class="src" style="margin-top:8px">Example identifiers.</p>
+  </div>
+</section>
+
+<section class="blk" id="settlement">
+  <div class="wrap">
+    <div class="blk-meta"><span class="no">BLOCK 03</span><span class="h"><b>prev</b><span>0xac5ef48d829fe5bd144d4a92048245d75f7280391bfddf7d4e276a4e72509438</span></span><span class="h"><b>hash</b><span>0x6fdcef16c496769711212845eda89030fdb1fb5f01f296d311b2560fa0138b58</span></span></div>
+    <h2>Payments settle in USDC, a dollar stablecoin</h2>
+    <p class="intro">Splitting ownership is only useful if the money that arrives is real and stable. RoyaltyChain pays out in USDC, so songwriters anywhere can use it without exposure to crypto prices.</p>
+    <div class="peg" style="margin-top:28px">
+      <div class="peg-big">
+        <div class="eq">1 <span>USDC</span> = $1</div>
+        <p>Issued by Circle under US money transmission licenses, fully backed by dollar reserves and audited by independent accounting firms. The royalty is fixed in dollars at the moment it's paid, so there's no foreign exchange risk.</p>
+      </div>
+      <div class="route">
+        <div class="cities">
+          <span class="city">New York<small>publisher wallet</small></span>
+          <span class="wire" aria-hidden="true"><i></i></span>
+          <span class="city" style="text-align:right">Tokyo<small>songwriter wallet</small></span>
+        </div>
+        <ul>
+          <li>Arrives in seconds, 24/7, with no correspondent banks in between</li>
+          <li>Costs next to nothing per transfer</li>
+          <li>Converted to local currency at withdrawal through banking partners, the way Wise or Payoneer work today</li>
+          <li>Answers the "crypto speculation" objection: every USDC has a real dollar behind it</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="blk" id="architecture">
+  <div class="wrap">
+    <div class="blk-meta"><span class="no">BLOCK 04</span><span class="h"><b>prev</b><span>0x6fdcef16c496769711212845eda89030fdb1fb5f01f296d311b2560fa0138b58</span></span><span class="h"><b>hash</b><span>0xbe3259ef02c68b0730dd6050a035f39b64b692536ad16234a2171a1132371576</span></span></div>
+    <h2>Three layers, two API calls</h2>
+    <p class="intro">For a streaming platform, using RoyaltyChain looks like using any other API vendor. All the blockchain work happens underneath.</p>
+
+    <div class="layers" style="margin-top:28px">
+      <div class="layer">
+        <div class="lno">LAYER 1<b>Song registry</b></div>
+        <p>When a song is created, every rights holder deploys one smart contract together. Once deployed it can't be changed unless all parties sign, and every transfer stays on the ledger.</p>
+        <ul><li>Hash of the song's metadata, its unique fingerprint</li><li>Every rights holder's verified wallet</li><li>Every ownership percentage</li><li>The ISRC ↔ ISWC link</li></ul>
+      </div>
+      <div class="layer">
+        <div class="lno">LAYER 2<b>Contract execution</b></div>
+        <p>When a platform submits a royalty pool, the contract reads its ownership rules and pays every wallet in a single transaction.</p>
+        <ul><li>Simultaneous payout to all holders</li><li>Timestamped and permanent</li><li>An audit trail anyone can verify</li></ul>
+      </div>
+      <div class="layer">
+        <div class="lno">LAYER 3<b>API bridge</b></div>
+        <p>Two endpoints in standard REST and GraphQL, speaking DDEX, so no platform has to reformat its data.</p>
+<pre class="api"><span class="c"># 1. on upload: look up the song's contract</span>
+<span class="m">GET</span>  /songs/{isrc}  → contract address
+<span class="c"># 2. each period: send the royalty pool</span>
+<span class="m">POST</span> /contracts/{address}/pool</pre>
+      </div>
+    </div>
+
+    <h3>A song's life on RoyaltyChain</h3>
+    <ol class="steps">
+      <li><span class="chip new">New</span><b>Registration</b><p>Before release, all rights holders register their wallets and agreed percentages. If they don't add up to exactly 100%, registration is rejected before any money is at stake.</p></li>
+      <li><span class="chip new">New</span><b>Platform upload</b><p>The song goes up with its ISRC as usual. The platform makes one extra API call and stores the contract address.</p></li>
+      <li><span class="chip same">Unchanged</span><b>Streaming</b><p>Listeners stream. The platform counts plays exactly as it does today.</p></li>
+      <li><span class="chip same">Unchanged</span><b>Royalty calculation</b><p>At the end of each month, the platform computes the song's royalty pool with its existing model.</p></li>
+      <li><span class="chip new">New</span><b>Settlement</b><p>The pool goes to the song's contract, which pays every wallet at once. Everyone is paid within minutes, with a full audit trail.</p></li>
+    </ol>
+    <div class="note">
+      <b>The US exception</b>
+      <p>Under the Music Modernization Act of 2018, platforms in the US must pay mechanical royalties to the MLC, not to rights holders directly. There, RoyaltyChain is the ownership registry the MLC queries to resolve splits instantly, instead of searching its own incomplete database. The money still flows through the MLC, by law.</p>
+    </div>
+
+    <div class="grid2" style="margin-top:16px">
+      <div class="card"><span class="k">Mechanical royalties</span><h4>The main use case</h4><p>Outside the US, platforms send the mechanical royalty pool straight to the contract, which pays every wallet with no intermediary.</p></div>
+      <div class="card"><span class="k">Performance royalties</span><h4>PROs stay, the disputes go</h4><p>ASCAP, BMI, SACEM and GEMA keep collecting under their blanket licenses. Because every society reads ownership from the same record, the matching step that takes international payments 2–3 years disappears. In the US these royalties split 50/50 between writers and publishers, and independent writers who are their own publisher get both halves in one wallet.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="blk" id="simulator">
+  <div class="wrap">
+    <div class="blk-meta"><span class="no">BLOCK 05</span><span class="h"><b>prev</b><span>0xbe3259ef02c68b0730dd6050a035f39b64b692536ad16234a2171a1132371576</span></span><span class="h"><b>hash</b><span>0x020d4ec6481efb53945cd4dc0d40fb9f737d7814d019ead4c57ffd16412517ce</span></span></div>
+    <h2>Try the split contract</h2>
+    <p class="intro">Register a song's rights holders, then settle a month of royalties. The contract only deploys if the shares add up to exactly 100%. The hashes and addresses are real SHA-256 computed in your browser, on a demo network.</p>
+
+    <div class="sim" style="margin-top:28px">
+      <div class="card">
+        <div class="presets" role="group" aria-label="Example splits">
+          <button type="button" id="p-valid">Valid split</button>
+          <button type="button" id="p-over">Overclaim, 110%</button>
+          <button type="button" id="p-indie">Independent writer</button>
+        </div>
+        <div class="holders" id="holders"></div>
+        <div class="sumline"><span>Total shares</span><span class="pill ok" id="sum">100%</span></div>
+        <div class="field">
+          <label for="pool">Royalty pool this month</label>
+          <div class="in"><input id="pool" type="number" min="0" step="0.01" value="12500" inputmode="decimal"><span>USDC</span></div>
+        </div>
+        <div class="acts">
+          <button type="button" class="btn" id="register">Register song</button>
+          <button type="button" class="btn primary" id="settle">Settle royalty pool</button>
+        </div>
+      </div>
+      <div class="card" aria-live="polite">
+        <div class="out-h"><b>Contract</b><span class="pill ok" id="status">Deployed</span></div>
+        <dl class="kv" id="kv">
+          <dt>Song</dt><dd>ISRC US-XY1-26-00042</dd>
+          <dt>Contract</dt><dd id="o-addr">computing…</dd>
+          <dt>Last tx</dt><dd id="o-tx">–</dd>
+        </dl>
+        <div id="o-body"></div>
+        <div class="cmp">
+          <div><b>Up to 2–3 years</b>Today, through 4–5 intermediaries</div>
+          <div class="now"><b>1 transaction</b>With RoyaltyChain, paid within minutes</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="blk" id="value">
+  <div class="wrap">
+    <div class="blk-meta"><span class="no">BLOCK 06</span><span class="h"><b>prev</b><span>0x020d4ec6481efb53945cd4dc0d40fb9f737d7814d019ead4c57ffd16412517ce</span></span><span class="h"><b>hash</b><span>0xc19d49412f3af80585ed335ca6d88d96921ccc803d34a32309663d3fa0dbb80a</span></span></div>
+    <h2>Value goes to creators instead of leaking along the chain</h2>
+    <p class="intro">Today value is taken at every intermediary, and the creator gets the rest late. With RoyaltyChain, money moves from the platform to the creator at settlement, and intermediaries keep their service fees but not the float. Every new song registered makes the shared database more useful to everyone on it.</p>
+    <div class="grid4" style="margin-top:28px">
+      <div class="card"><span class="k">Songwriters</span><h4>Paid in minutes, not 18–24 months</h4><p>Real-time visibility into what each song earned on each platform in each country, and no need to register territory by territory.</p></div>
+      <div class="card"><span class="k">Streaming platforms</span><h4>Cheaper, auditable payouts</h4><p>Smart contracts handle every transaction for a fraction of what third-party processing costs today.</p></div>
+      <div class="card"><span class="k">Publishers</span><h4>One ledger to query</h4><p>No more reconciling statements from dozens of societies, and protection against false overclaims, since ownership is verified at registration.</p></div>
+      <div class="card"><span class="k">Labels</span><h4>Fewer frozen songs</h4><p>Ownership signed by every party at release leaves nothing to dispute later, which cuts legal costs and makes catalog valuations easier to defend.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="blk" id="users">
+  <div class="wrap">
+    <div class="blk-meta"><span class="no">BLOCK 07</span><span class="h"><b>prev</b><span>0xc19d49412f3af80585ed335ca6d88d96921ccc803d34a32309663d3fa0dbb80a</span></span><span class="h"><b>hash</b><span>0xc2685533d3807d22dec11e5716a28e267a5d5404b54af83656e9d2a4acc9df8b</span></span></div>
+    <h2>Who we onboard, and in what order</h2>
+    <p class="intro">Everyone from the biggest label to a session musician uses the same platform. Adoption has a chicken-and-egg problem, though: labels need platforms' revenue data, and platforms need labels on board to see the benefit. So we start with the platforms, beginning with a free pilot at one of the 20 major streaming services.</p>
+    <ol class="users" style="margin-top:28px">
+      <li><span class="pr"></span><b>Streaming platforms</b><span class="fig">~$300M<small>in legal settlements over historically unmatched royalties</small></span><p>Spotify lists estimating royalties and identifying song ownership among its key risks, and the MLC has announced audits of Spotify, Apple Music and others for 2021–2023. Our pitch is regulatory relief: timestamped, immutable records.</p></li>
+      <li><span class="pr"></span><b>Major labels</b><span class="fig">$10–30M<small>yearly savings from a 1–3% efficiency gain</small></span><p>Universal's publishing arm earned $1.37B from streaming in 2024 at a 22% EBITDA margin, so 78 cents of each dollar is cost. Labels can also promise artists consistent payment within minutes.</p></li>
+      <li><span class="pr"></span><b>Independents and societies</b><span class="fig">36.09%<small>independent market share in Q1 2024, above Universal's 29.35%</small></span><p>Independent labels, self-released artists and collecting societies worldwide. Independents lose the most today: without a registered publisher entity, their publishing royalties vanish into the black box.</p></li>
+      <li><span class="pr"></span><b>Songwriters and crew</b><span class="fig">Free<small>included through their organizations</small></span><p>They don't pay, but they vote, can upload their own copy of a contract to check it against the label's, and get paid straight to their own wallets.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="blk" id="revenue">
+  <div class="wrap">
+    <div class="blk-meta"><span class="no">BLOCK 08</span><span class="h"><b>prev</b><span>0xc2685533d3807d22dec11e5716a28e267a5d5404b54af83656e9d2a4acc9df8b</span></span><span class="h"><b>hash</b><span>0x458ef9016f123c2f0863739608a0fd62f4454809b22b609bd7af7030d07562e0</span></span></div>
+    <h2>A tiered subscription, not a fee per transaction</h2>
+    <p class="intro">The industry processes tens of billions of streams a year. Per-transaction pricing would swing with outside events and make it easy for clients to leave the moment a competitor appears. A tiered yearly subscription is stable for both sides.</p>
+
+    <div class="grid2" style="margin-top:28px;align-items:start">
+      <div>
+        <h3 style="margin-top:0">Operating costs</h3>
+        <div class="table-wrap">
+          <table class="costs">
+            <tbody>
+              <tr><td>Core engineering, 5 engineers (Go chaincode, APIs, DevOps)</td><td class="r">$0.8–1.2M</td></tr>
+              <tr><td>Support and onboarding, 3 specialists</td><td class="r">$0.5M</td></tr>
+              <tr><td>Legal and compliance (KYC/AML, GDPR)</td><td class="r">$150–250K</td></tr>
+              <tr><td>Cloud for the ordering service, certificate authority and API</td><td class="r">$40–80K</td></tr>
+              <tr><td>DDEX membership</td><td class="r">$3K</td></tr>
+              <tr class="tot"><td>Total per year</td><td class="r">≈ $1.5–2.0M</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="src" style="margin-top:10px">Each institution runs and pays for its own node (about $12–24K a year in cloud costs), as in other enterprise blockchain consortia. RoyaltyChain never holds client funds, which keeps compliance costs low.</p>
+      </div>
+      <div>
+        <h3 style="margin-top:0">Subscription tiers, per year</h3>
+        <div class="chart tiers" id="tiers"></div>
+        <p class="src" style="margin-top:10px">Benchmarked against Curve Royalty Systems ($10–60K a year for mid-market labels) and FinTech SaaS enterprise contracts (median up to $890K). Tiers are a first draft.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="blk" id="sources">
+  <div class="wrap">
+    <div class="blk-meta"><span class="no">BLOCK 09</span><span class="h"><b>prev</b><span>0x458ef9016f123c2f0863739608a0fd62f4454809b22b609bd7af7030d07562e0</span></span><span class="h"><b>hash</b><span>0xb288be0f0cced59b69c0cd78ab330ba5c95af18abcd04f25c85250fc3f24b84d</span></span></div>
+    <h2>Selected sources</h2>
+    <p class="intro" style="margin-bottom:24px">Each block header above shows the SHA-256 hash of that section's title and the previous block's hash, the same way blocks link on a chain.</p>
+    <ul class="sources">
+      <li><a href="https://www.ifpi.org/resources/">IFPI · Global Music Report 2024</a></li>
+      <li><a href="https://loudandclear.byspotify.com/">Spotify · Loud &amp; Clear, 2025</a></li>
+      <li><a href="https://www.musicbusinessworldwide.com/where-are-the-missing-song-royalties-2/">Music Business Worldwide · Where are the missing song royalties? (2019)</a></li>
+      <li><a href="https://www.nmpa.org/spotify-apple-and-others-pay-424-38m-in-historical-unmatched-royalties-to-mechanical-licensing-collective/">NMPA · $424.38M in historical unmatched royalties paid to the MLC (2021)</a></li>
+      <li><a href="https://www.themlc.com/historical-unmatched-royalties">The MLC · Historical unmatched royalties</a></li>
+      <li><a href="https://hyperledger-fabric.readthedocs.io/en/release-2.5/whatis.html">Hyperledger Fabric 2.5 documentation · Introduction</a></li>
+      <li><a href="https://secureprivacy.ai/blog/blockchain-immutability-vs-gdpr-article-17-right-to-be-forgotten">Secure Privacy · Blockchain immutability and GDPR Article 17 (2025)</a></li>
+      <li><a href="https://www.musicbusinessworldwide.com/the-mlc-issues-notices-of-intent-to-audit-spotify-and-other-dsps-to-verify-the-accuracy-of-their-royalty-payments/">Music Business Worldwide · The MLC's audit notices to Spotify and other DSPs (2024)</a></li>
+      <li><a href="https://www.prnewswire.com/news-releases/universal-music-group-nv-reports-financial-results-for-the-fourth-quarter-and-full-year-ended-december-31-2024-302394721.html">Universal Music Group · Full-year 2024 results</a></li>
+      <li><a href="https://www.iaomusic.org/new-report-reveals-artists-are-let-down-by-legislators/">International Artist Organisation · Streams &amp; Dreams (2024)</a></li>
+      <li><a href="https://www.hypebot.com/hypebot/2015/08/the-failure-of-the-global-repertoire-database-effort-draft.html">Hypebot · The failure of the Global Repertoire Database (2015)</a></li>
+      <li><a href="https://ddex.net/membership/">DDEX · Membership</a></li>
+      <li><a href="https://chainlaunch.dev/tools/fabric-cost-calculator/aws">ChainLaunch · Fabric hosting cost calculator for AWS</a></li>
+      <li><a href="https://www.curveroyaltysystems.com/">Curve Royalty Systems</a></li>
+      <li><a href="https://www.getmonetizely.com/articles/saas-pricing-benchmark-study-2025-key-insights-from-100-companies-analyzed">Monetizely · SaaS pricing benchmark study 2025</a></li>
+      <li><a href="https://www.bls.gov/ooh/computer-and-information-technology/software-developers.htm">US Bureau of Labor Statistics · Software developers</a></li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>RoyaltyChain · team whitepaper · Duke University · 2026</span>
+    <a href="https://hannaboudara.com/">← hannaboudara.com</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var SVGNS='http://www.w3.org/2000/svg';
+  function el(tag,attrs,parent){var e=document.createElementNS(SVGNS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+  function fmt(n,d){return n.toLocaleString('en-US',{minimumFractionDigits:d==null?2:d,maximumFractionDigits:d==null?2:d});}
+
+  /* ---------- SHA-256 (Web Crypto, with a JS fallback) ---------- */
+  function sha256js(ascii){
+    function rr(v,a){return (v>>>a)|(v<<(32-a));}
+    var mp=Math.pow,maxWord=mp(2,32),result='',words=[],bitLen=ascii.length*8,hash=[],k=[],primeCounter=0,isComposite={};
+    for(var c=2;primeCounter<64;c++){if(!isComposite[c]){for(var i=0;i<313;i+=c)isComposite[i]=c;hash[primeCounter]=(mp(c,.5)*maxWord)|0;k[primeCounter++]=(mp(c,1/3)*maxWord)|0;}}
+    hash=hash.slice(0,8);ascii+='\x80';while(ascii.length%64-56)ascii+='\x00';
+    for(i=0;i<ascii.length;i++){var j=ascii.charCodeAt(i);words[i>>2]|=j<<((3-i)%4)*8;}
+    words[words.length]=((bitLen/maxWord)|0);words[words.length]=(bitLen);
+    for(j=0;j<words.length;){var w=words.slice(j,j+=16),oldHash=hash;hash=hash.slice(0,8);
+      for(i=0;i<64;i++){var w15=w[i-15],w2=w[i-2],a=hash[0],e=hash[4];
+        var t1=hash[7]+(rr(e,6)^rr(e,11)^rr(e,25))+((e&hash[5])^((~e)&hash[6]))+k[i]+(w[i]=(i<16)?w[i]:(w[i-16]+(rr(w15,7)^rr(w15,18)^(w15>>>3))+w[i-7]+(rr(w2,17)^rr(w2,19)^(w2>>>10)))|0);
+        var t2=(rr(a,2)^rr(a,13)^rr(a,22))+((a&hash[1])^(a&hash[2])^(hash[1]&hash[2]));
+        hash=[(t1+t2)|0].concat(hash);hash[4]=(hash[4]+t1)|0;}
+      for(i=0;i<8;i++)hash[i]=(hash[i]+oldHash[i])|0;}
+    for(i=0;i<8;i++)for(j=3;j+1;j--){var b=(hash[i]>>(j*8))&255;result+=((b<16)?0:'')+b.toString(16);}
+    return result;
+  }
+  function sha256(text){
+    try{
+      if(window.crypto&&crypto.subtle&&window.TextEncoder){
+        return crypto.subtle.digest('SHA-256',new TextEncoder().encode(text)).then(function(buf){
+          return Array.prototype.map.call(new Uint8Array(buf),function(b){return ('0'+b.toString(16)).slice(-2);}).join('');
+        }).catch(function(){return sha256js(unescape(encodeURIComponent(text)));});
+      }
+    }catch(e){}
+    return Promise.resolve(sha256js(unescape(encodeURIComponent(text))));
+  }
+  function short(h,n){return '0x'+h.slice(0,n||6)+'…'+h.slice(-4);}
+
+  /* ---------- Hero ledger feed (simulated) ---------- */
+  var feed=document.getElementById('feed');
+  var kinds=[['Settlement','violet'],['Registration','gold'],['Settlement','violet'],['Lookup','usdc']];
+  var palette=['#a493ff','#f6c453','#5aa0ee','#5fd6a0','#ff9ec4'];
+  var height=18402, seed=7;
+  function rnd(){seed=(seed*9301+49297)%233280;return seed/233280;}
+  function addBlock(){
+    height++;
+    var n=2+Math.floor(rnd()*4), parts=[], left=100;
+    for(var i=0;i<n-1;i++){var p=Math.max(5,Math.round(rnd()*left*0.6));parts.push(p);left-=p;} parts.push(left);
+    var amt=500+rnd()*14000, isReg=rnd()<0.25;
+    var li=document.createElement('li'); li.className='blkrow';
+    var now=new Date(); var ts=now.toTimeString().slice(0,8);
+    li.innerHTML='<div class="r1"><span>block <b>#'+fmt(height,0)+'</b></span><span>'+ts+'</span></div>'+
+      '<div class="r2"><span class="what">'+(isReg?'Song registered · '+n+' rights holders':'Royalty pool split · '+n+' wallets')+'</span>'+
+      (isReg?'<span class="amt" style="color:var(--violet)">shares = 100%</span>':'<span class="amt">'+fmt(amt)+' USDC</span>')+'</div>'+
+      '<div class="split">'+parts.map(function(p,i){return '<i style="width:'+p+'%;background:'+palette[i%palette.length]+'"></i>';}).join('')+'</div>'+
+      '<div class="hash">computing hash…</div>';
+    feed.insertBefore(li,feed.firstChild);
+    sha256('block'+height+'|'+amt+'|'+parts.join(',')).then(function(h){li.querySelector('.hash').textContent='tx 0x'+h;});
+    while(feed.children.length>3) feed.removeChild(feed.lastChild);
+  }
+  for(var b=0;b<3;b++) addBlock();
+  if(!reduce) setInterval(function(){ if(!document.hidden) addBlock(); },3400);
+
+  /* ---------- Revenue chart (IFPI) ---------- */
+  var years=[],y0=1999; for(var y=1999;y<=2024;y++) years.push(y);
+  var revTotal=[21.9,20.6,21.8,20.4,18.9,18.9,18.4,17.8,16.6,15.3,14.3,13.6,13.5,13.5,13.3,12.9,13.3,14.5,15.6,17.2,18.5,19.8,23.5,25.6,28.2,29.6];
+  var revStream=[0,0,0,0,0,0,0.1,0.1,0.2,0.3,0.4,0.4,0.6,0.9,1.3,1.8,2.6,4.4,6.2,8.7,10.6,12.6,15.5,17.3,19.0,20.4];
+  (function(){
+    var svg=document.getElementById('rev-svg'), W=760,H=300,L=34,R=8,T=14,B=26, iw=W-L-R, ih=H-T-B, max=30;
+    var bw=iw/years.length, gap=Math.max(3,bw*0.22);
+    function Y(v){return T+ih-(v/max)*ih;}
+    [0,10,20,30].forEach(function(t){el('line',{x1:L,x2:W-R,y1:Y(t),y2:Y(t),class:'gridl'},svg);var tx=el('text',{x:L-8,y:Y(t)+3,'text-anchor':'end',class:'ax'},svg);tx.textContent=t;});
+    var tip=document.createElement('div'); tip.className='tip'; tip.hidden=true; document.getElementById('rev-chart').appendChild(tip);
+    years.forEach(function(yr,i){
+      var x=L+i*bw+gap/2, w=bw-gap, s=revStream[i], o=revTotal[i]-s;
+      var g=el('g',{tabindex:0,role:'img','aria-label':yr+': total $'+revTotal[i]+'B, streaming $'+s+'B'},svg);
+      if(s>0) el('rect',{x:x,y:Y(s),width:w,height:Math.max(0,Y(0)-Y(s)),fill:'var(--violet)',rx:0},g);
+      var oy=Y(s+o), oh=Y(s)-Y(s+o)-(s>0?2:0);
+      el('path',{d:'M'+x+','+(oy+oh)+'V'+(oy+3)+'q0,-3 3,-3h'+(w-6)+'q3,0 3,3V'+(oy+oh)+'z',fill:'var(--surface-3)',stroke:'var(--line-2)','stroke-width':1},g);
+      el('rect',{x:L+i*bw,y:T,width:bw,height:ih,fill:'transparent'},g);
+      if((yr-1999)%5===0||yr===2024){var t=el('text',{x:x+w/2,y:H-8,'text-anchor':'middle',class:'ax'},svg);t.textContent=yr;}
+      function show(ev){
+        tip.hidden=false; tip.innerHTML='<b>'+yr+'</b><br>Total $'+revTotal[i].toFixed(1)+'B<br>Streaming $'+s.toFixed(1)+'B · '+Math.round(s/revTotal[i]*100)+'%';
+        var box=svg.getBoundingClientRect(), host=document.getElementById('rev-chart').getBoundingClientRect();
+        var px=(x+w/2)/W*box.width+box.left-host.left, py=Y(revTotal[i])/H*box.height+box.top-host.top;
+        var tw=tip.offsetWidth; tip.style.left=Math.min(Math.max(8,px-tw/2),host.width-tw-8)+'px'; tip.style.top=Math.max(4,py-tip.offsetHeight-10)+'px';
+        g.style.opacity=1;
+      }
+      g.addEventListener('mouseenter',show); g.addEventListener('focus',show);
+      g.addEventListener('mouseleave',function(){tip.hidden=true;}); g.addEventListener('blur',function(){tip.hidden=true;});
+    });
+    var lx=L+(years.length-1)*bw+bw/2;
+    var a=el('text',{x:lx-bw/2-4,y:Y(29.6)-8,'text-anchor':'end',class:'ax',style:'fill:var(--text);font-size:11px'},svg); a.textContent='$29.6B · streaming $20.4B';
+    var lo=el('text',{x:L+15*bw+bw/2,y:Y(12.9)-8,'text-anchor':'middle',class:'ax',style:'fill:var(--text-2)'},svg); lo.textContent='low: $12.9B (2014)';
+  })();
+
+  /* ---------- Black box bars ---------- */
+  (function(){
+    var rows=[['Apple Music',163],['Spotify',152],['Amazon',42],['Other services',67]], host=document.getElementById('bb');
+    host.innerHTML=rows.map(function(r){return '<div class="hbar"><span class="k">'+r[0]+'</span><span class="tr"><i style="width:'+(r[1]/163*100)+'%"></i></span><span class="v">$'+r[1]+'M</span></div>';}).join('');
+  })();
+
+  /* ---------- Royalty lanes toggle ---------- */
+  (function(){
+    var lanes=document.querySelectorAll('.lane'), src=document.getElementById('perf-src'), n=document.getElementById('lane-n'), t=document.getElementById('lane-t');
+    function set(mode){
+      document.querySelectorAll('[data-mode]').forEach(function(b){b.setAttribute('aria-pressed',String(b.getAttribute('data-mode')===mode));});
+      lanes.forEach(function(l){l.classList.toggle('off',mode==='live'&&l.getAttribute('data-kind')!=='perf');});
+      src.textContent=mode==='live'?'Venue blanket license':'Streaming platform';
+      n.textContent=mode==='live'?'1':'3';
+      t.textContent=mode==='live'?'royalty: nothing is copied and no recording is used, so only performance pays':'royalties, three separate pipelines, one stream';
+    }
+    document.querySelectorAll('[data-mode]').forEach(function(b){b.addEventListener('click',function(){set(b.getAttribute('data-mode'));});});
+  })();
+
+  /* ---------- Hop animation ---------- */
+  (function(){
+    var btn=document.getElementById('send'), today=document.querySelectorAll('#hops-today li'), rc=document.querySelectorAll('#hops-rc li'), timers=[];
+    function run(list,step,done){
+      list.forEach(function(li){li.classList.remove('at','done');});
+      list.forEach(function(li,i){timers.push(setTimeout(function(){ if(i>0) list[i-1].classList.replace('at','done'); li.classList.add('at'); if(i===list.length-1&&done) done(); }, reduce?0:i*step));});
+    }
+    function go(){ timers.forEach(clearTimeout); timers=[]; run(Array.prototype.slice.call(rc),220); run(Array.prototype.slice.call(today),650); }
+    btn.addEventListener('click',go);
+    today[today.length-1].classList.add('at'); rc[rc.length-1].classList.add('at');
+    for(var i=0;i<today.length-1;i++) today[i].classList.add('done'); for(i=0;i<rc.length-1;i++) rc[i].classList.add('done');
+  })();
+
+  /* ---------- Three-way link address ---------- */
+  sha256('US-XY1-26-00042|T-345.246.800-1').then(function(h){document.getElementById('link-addr').textContent='0x'+h.slice(0,40);});
+
+  /* ---------- Split contract simulator ---------- */
+  var presets={
+    valid:[['Songwriter (lyrics)',30],['Songwriter (music)',20],['Publisher A',30],['Publisher B',20]],
+    over:[['Publisher A',60],['Publisher B',30],['Publisher C',20]],
+    indie:[['Songwriter (writer share)',50],['Songwriter (publisher share)',50]]
+  };
+  var holdersEl=document.getElementById('holders'), sumEl=document.getElementById('sum'), poolEl=document.getElementById('pool'),
+      statusEl=document.getElementById('status'), addrEl=document.getElementById('o-addr'), txEl=document.getElementById('o-tx'), body=document.getElementById('o-body');
+  var deployed=null;
+  function load(name){
+    var rows=presets[name]; holdersEl.innerHTML='';
+    for(var i=0;i<4;i++){
+      var r=rows[i]||['',0], d=document.createElement('div'); d.className='holder';
+      d.innerHTML='<input id="h-name-'+i+'" aria-label="Rights holder '+(i+1)+' name" placeholder="Rights holder '+(i+1)+'" value="'+r[0]+'">'+
+                  '<span class="pct"><input id="h-pct-'+i+'" type="number" min="0" max="100" step="0.5" inputmode="decimal" aria-label="Rights holder '+(i+1)+' share" value="'+(r[0]?r[1]:'')+'"><span>%</span></span>';
+      holdersEl.appendChild(d);
+    }
+    holdersEl.querySelectorAll('input').forEach(function(inp){inp.addEventListener('input',function(){updateSum();});});
+    updateSum(); register(true);
+  }
+  function rows(){
+    var out=[];
+    for(var i=0;i<4;i++){var n=document.getElementById('h-name-'+i).value.trim(), p=parseFloat(document.getElementById('h-pct-'+i).value);
+      if(n||(!isNaN(p)&&p>0)) out.push({name:n||('Rights holder '+(i+1)),pct:isNaN(p)?0:p});}
+    return out;
+  }
+  function total(){return Math.round(rows().reduce(function(a,r){return a+r.pct;},0)*100)/100;}
+  function updateSum(){
+    var t=total(); sumEl.textContent=t+'%'; sumEl.className='pill '+(t===100?'ok':'bad');
+    if(deployed && JSON.stringify(rows())!==deployed.key){ statusEl.textContent='Not registered'; statusEl.className='pill bad'; }
+  }
+  function register(andSettle){
+    var rs=rows(), t=total();
+    if(t!==100||!rs.length){
+      deployed=null; statusEl.textContent='Rejected'; statusEl.className='pill bad'; addrEl.textContent='not deployed'; txEl.textContent='–';
+      body.innerHTML='<div class="rejected"><b>Registration rejected: shares add up to '+t+'%</b><p>The contract only deploys when every rights holder agrees on shares that total exactly 100%. Overclaims are stopped here, before any money is paid, instead of freezing the song for months later.</p></div>';
+      return Promise.resolve(false);
+    }
+    var key=JSON.stringify(rs);
+    return sha256('register|US-XY1-26-00042|'+key).then(function(h){
+      return Promise.all(rs.map(function(r){return sha256('wallet|'+r.name);})).then(function(ws){
+        deployed={key:key,rows:rs,addr:'0x'+h.slice(0,40),wallets:ws.map(function(w){return '0x'+w.slice(0,40);})};
+        statusEl.textContent='Deployed'; statusEl.className='pill ok'; addrEl.textContent=deployed.addr; txEl.textContent='–';
+        body.innerHTML='<p style="margin:0;font-size:.9rem;color:var(--text-2)">Registered. Now settle a royalty pool to pay every wallet at once.</p>';
+        if(andSettle) return settle();
+        return true;
+      });
+    });
+  }
+  function settle(){
+    if(!deployed || JSON.stringify(rows())!==deployed.key) return register(true);
+    var pool=Math.max(0,parseFloat(poolEl.value)||0), rs=deployed.rows;
+    var cents=Math.round(pool*100), paid=0;
+    var amts=rs.map(function(r,i){ var c=(i===rs.length-1)?cents-paid:Math.floor(cents*r.pct/100); paid+=c; return c/100; });
+    return sha256('settle|'+deployed.addr+'|'+pool+'|'+Date.now()).then(function(h){
+      txEl.textContent='0x'+h;
+      body.innerHTML='<div class="payouts">'+rs.map(function(r,i){
+        return '<div class="payout"><span class="who">'+r.name.replace(/</g,'&lt;')+' · '+r.pct+'%</span><span class="amt">'+fmt(amts[i])+' USDC</span>'+
+               '<span class="w">'+short(deployed.wallets[i].slice(2),8)+'</span><span></span><span class="bar"><i data-w="'+r.pct+'"></i></span></div>';
+      }).join('')+'</div>';
+      requestAnimationFrame(function(){ body.querySelectorAll('.bar i').forEach(function(b){b.style.width=b.getAttribute('data-w')+'%';}); });
+      return true;
+    });
+  }
+  document.getElementById('register').addEventListener('click',function(){register(false);});
+  document.getElementById('settle').addEventListener('click',function(){settle();});
+  document.getElementById('p-valid').addEventListener('click',function(){load('valid');});
+  document.getElementById('p-over').addEventListener('click',function(){load('over');});
+  document.getElementById('p-indie').addEventListener('click',function(){load('indie');});
+  load('valid');
+
+  /* ---------- Subscription tiers range chart ---------- */
+  (function(){
+    var tiers=[['Streaming platforms','Tier 1 · Spotify, Apple Music, Amazon Music',1.5,2.5],['Major labels','Tier 2 · publishing divisions',0.8,1.5],['PROs and societies','Tier 3 · ASCAP, BMI, PRS, SACEM, JASRAC',0.2,0.5],['Independents','Tier 4 · indie labels, mid-size publishers',0.06,0.2]];
+    var max=2.5, host=document.getElementById('tiers');
+    function lab(v){return v>=1?('$'+v+'M'):('$'+Math.round(v*1000)+'K');}
+    host.innerHTML=tiers.map(function(t){
+      var l=t[2]/max*100, w=(t[3]-t[2])/max*100, txt=lab(t[2])+'–'+lab(t[3]), leftSide=(t[3]/max)>0.62;
+      return '<div class="row"><span class="nm">'+t[0]+'<small>'+t[1]+'</small></span><span class="tr"><i style="left:'+l+'%;width:'+Math.max(w,0.8)+'%"></i>'+
+        '<span style="'+(leftSide?('right:calc('+(100-l)+'% + 6px)'):('left:calc('+(l+w)+'% + 6px)'))+'">'+txt+'</span></span></div>';
+    }).join('')+'<div class="axis"><span></span><div><span>$0</span><span>$0.5M</span><span>$1M</span><span>$1.5M</span><span>$2M</span><span>$2.5M</span></div></div>';
+  })();
+})();
+</script>
+</body>
+</html>
