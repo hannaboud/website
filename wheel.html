@@ -369,62 +369,33 @@ covered call      cash-secured put      dividend over the week (cents)</div>
     <h2>Write-up</h2>
 
     <h3>Why SPY</h3>
-    <p>The wheel only makes sense on something you are happy to own after a put is assigned, and an
-    index fund removes single-company risk. SPY options are also the most heavily traded in the US
-    market, so the fill assumption is easy to defend (see Fills).</p>
+    <p>The wheel is used when people are happy to hold the asset after a put is assigned. I chose SPY
+    because it takes away the risk that comes with a single company, and in most cases it is hard to
+    argue that someone would not be happy to hold some shares of SPY. SPY options are also heavily
+    traded, so the fill assumption is easy to defend.</p>
 
     <h3>How the strike is chosen</h3>
-    <p>The strike is the listed strike whose delta, at the close the option is sold, is closest to
-    <span data-k="meta.target_delta" data-f="dec2"></span>. Delta is roughly the market's probability
-    that the option finishes in the money, so a fixed delta takes the same amount of risk every week
-    whether volatility is high or low; a fixed percentage out of the money would not. 0.25 keeps the
-    risk moderate: closer to the money pays more but gets assigned more; further out pays too little
-    to matter. On the one entry close where LSEG had no deltas (Oct 12, 2026, Columbus Day), the delta
-    is computed with Black-Scholes from that close's mid.</p>
+    <p>The strike is the listed strike whose delta is the closest to
+    <span data-k="meta.target_delta" data-f="dec2"></span> when the option is sold. Delta is approximately
+    the market's probability of the option finishing in the money, and I wanted this probability to be
+    under 30%, because I am risk averse in this strategy.</p>
 
     <h3>The cost-basis floor on calls</h3>
-    <p>After assignment, calls are never written below what the shares cost (put strike minus put
-    premium), so a call-away never locks in a loss on the shares. The cost is visible in the weekly
-    table: after a drop the nearest call at or above cost basis is far out of the money and pays very
-    little, so the wheel can sit on shares for weeks collecting almost nothing until SPY recovers.</p>
+    <p>After being assigned, calls cannot be written below what the shares cost, so being called away
+    never locks in a loss on the shares themselves. The cost of this rule is visible in the weekly
+    table: after a drop, the nearest call at or above the cost basis is far out of the money and pays
+    very little, so the wheel can sit on shares for weeks collecting almost nothing until SPY
+    recovers.</p>
 
     <h3>No rolls, no early closes</h3>
-    <p>Every option runs to expiry. Rolling or buying back early is a second, discretionary decision
-    layered on the wheel; leaving it out keeps the test about the wheel itself and keeps every blotter
-    row tied to a rule.</p>
-
-    <h3>Early assignment and dividends</h3>
-    <p>SPY options are American-style and SPY pays a quarterly dividend. On the day before an
-    ex-dividend date, a call holder who is in the money gains by exercising early when the dividend is
-    worth more than the call's remaining time value. The backtest leaves this out: options are assigned
-    only at expiry. This year it would not have mattered, because on the eve of every ex-dividend date
-    either no call was open or the open call was out of the money. Shares held into the ex-date earn the
-    dividend, carried as a receivable until the pay date. Dividends used: <span id="divList"></span></p>
+    <p>Every option runs to expiry.</p>
 
     <h3>Cash, interest and Reg T</h3>
-    <p>Every put is fully cash-secured: the account holds the whole strike in cash, which is why the
-    starting capital is <span data-k="meta.capital" data-f="usd0"></span> (SPY's highest close in the
-    year was near $779, so one put needed up to about $78,000). Cash earns a flat
-    <span data-k="meta.cash_rate" data-f="pct1"></span> a year, accrued daily and credited monthly, because a broker pays interest on cash collateral and leaving
-    it out would understate a strategy that is mostly cash. Reg T is used rather than portfolio margin
-    because it is a fixed, published formula; no position here uses leverage.</p>
-
-    <h3>How the Greeks are computed</h3>
-    <p>Black-Scholes-Merton with a continuous dividend yield. Implied vol is solved from each closing
-    mid (bisection), with time measured in calendar days to the 4:00 pm expiry over 365. The P&amp;L
-    attribution reprices the option one step at a time (time, then spot, then vol), so its pieces add
-    up to the actual change in the quote. On <span id="residDays"></span> the closing option quote sat
-    below the lowest price Black-Scholes allows (S·e<sup>−qT</sup> − K·e<sup>−rT</sup> for a call)
-    against SPY's close (SPY options keep trading 15 minutes after the shares close), so no volatility
-    can reprice it; that is nearly all of the residual.</p>
-
-    <h3>Limitations</h3>
-    <p>Marks are daily closes; nothing between closes is seen. Assignment is decided on the closing
-    price; after-hours moves that change a holder's exercise decision are ignored. Black-Scholes
-    assumes constant volatility and no jumps, so the Greeks are local, model-based measures, not exact.
-    One year is a short sample: the standard error of a Sharpe ratio estimated from one year is roughly
-    1, so the comparison is evidence, not proof. Taxes and assignment fees are ignored, and cash
-    earns a flat rate all year.</p>
+    <p>Every put is cash-secured: the account holds the whole strike in cash, which is why the starting
+    capital is <span data-k="meta.capital" data-f="usd0"></span> (SPY's highest close in the year was near
+    $779, so one put needed up to about $78,000). Cash earns a flat
+    <span data-k="meta.cash_rate" data-f="pct1"></span> a year, the risk-free rate. Reg T is used rather
+    than portfolio margin because no position here uses leverage.</p>
   </section>
 
 </main>

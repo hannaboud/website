@@ -418,11 +418,9 @@
     <p>The other two pieces: implied volatility ${AT.vega >= 0
       ? `fell while the options were open, which made them cheaper to buy back, a gain of ${usd(AT.vega)} for the seller (vega)`
       : `rose while the options were open, which made them more expensive to buy back, a loss of ${usd(AT.vega)} for the seller (vega)`},
-    and SPY's overall direction ${AT.delta >= 0 ? 'added' : 'cost'} ${usd(AT.delta)} (delta). After ${usd(AT.commission)} of commissions${Math.abs(AT.residual) >= 1 ? `, and ${usd(AT.residual)} the model could not split (one day, explained in the Write-up)` : ''},
+    and SPY's overall direction ${AT.delta >= 0 ? 'added' : 'cost'} ${usd(AT.delta)} (delta). After ${usd(AT.commission)} of commissions${Math.abs(AT.residual) >= 1 ? `, and ${usd(AT.residual)} the model could not split` : ''},
     the options finished ${AT.actual >= 0 ? 'up' : 'down'} <strong>${usd(AT.actual)}</strong> for the year.</p>`;
 
-  const residDays = AC.map((r, i) => [r.date, i ? r.residual - AC[i - 1].residual : r.residual]).filter(([, v]) => Math.abs(v) > 1);
-  $('residDays').textContent = residDays.length ? `${residDays.length} day${residDays.length > 1 ? 's' : ''} (${residDays.map(([d, v]) => `${d}, ${f(v, 'usd0')}`).join('; ')})` : 'no day';
 
   // ================================================================= PORTFOLIO VIEWER
   const byDate = {};
@@ -522,5 +520,4 @@
     }, { rootMargin: '-40% 0px -55% 0px' });
     Object.keys(byId).forEach(id => { const sec = document.getElementById(id); if (sec) spy.observe(sec); });
   }
-  $('divList').textContent = D.dividends.map(d => `ex ${d.ex_date}, $${Number(d.amount).toFixed(4)}, paid ${d.pay_date} (${d.source})`).join('; ') + '.';
 })();
