@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scheduler Agent — Hanna Boudara</title>
+<meta name="description" content="Ask an AI agent how much a scheduler saves by moving flexible AI work in a data center into cheaper hours, using a year of Virginia and Texas electricity prices.">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* Same tokens and fonts as hannaboudara.com */
+:root{
+  --ink:#14171c;--ink-mid:#454b58;--ink-faint:#8a8f9e;
+  --paper:#ede8df;--white:#f5f1ea;--rule:#c8c2b4;--rule-dk:#8a8070;
+  --A:#1a3a6e;--Alt:#dce6f5;
+  --serif:'IBM Plex Serif',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px}
+body{font-family:var(--serif);background:var(--paper);color:var(--ink);line-height:1.72;-webkit-font-smoothing:antialiased;min-height:100vh}
+header{background:var(--ink);color:var(--white)}
+.hi{max-width:1020px;margin:0 auto;padding:2.8rem 2rem 0}
+.wp{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;color:#8a9ab8;margin-bottom:1.1rem}
+.site-name{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:300;line-height:1.2;color:#eef0f5;margin-bottom:.5rem}
+.site-name em{font-style:italic;color:#a8bce0}
+.site-tagline{font-family:var(--sans);font-size:.84rem;color:#8a9ab8;margin-bottom:2.2rem}
+nav{max-width:1020px;margin:0 auto;display:flex;gap:0;overflow-x:auto;scrollbar-width:none}
+nav a{font-family:var(--mono);font-size:.71rem;letter-spacing:.04em;color:#6a7a99;text-decoration:none;
+  border-bottom:3px solid transparent;padding:.75rem 1.1rem;white-space:nowrap;transition:color .15s,border-color .15s}
+nav a:hover{color:#a8bce0}
+nav a.active{color:#dde5f5;border-bottom-color:#4a7fd4}
+main{max-width:1020px;margin:0 auto;padding:3rem 2rem 7rem}
+section{margin-bottom:3.2rem}
+h2{font-size:1.5rem;font-weight:300;border-bottom:2px solid var(--ink);padding-bottom:.5rem;margin-bottom:1.6rem;line-height:1.2}
+h3{font-family:var(--sans);font-size:.98rem;font-weight:500;margin:2.4rem 0 .65rem}
+p{max-width:72ch;margin-bottom:.95rem;font-size:.96rem;color:var(--ink-mid)}
+p strong{color:var(--ink)}
+ul{max-width:72ch;margin:0 0 1rem 1.2rem;font-size:.96rem;color:var(--ink-mid)}
+li{margin-bottom:.45rem}
+li strong{color:var(--ink)}
+.badge{display:inline-block;font-family:var(--mono);font-size:.68rem;letter-spacing:.06em;
+  color:var(--ink-faint);border:1px solid var(--rule);padding:.3rem .7rem;margin-bottom:1.2rem}
+.stats-row{display:flex;gap:2.2rem;flex-wrap:wrap;margin:1.6rem 0 .4rem}
+.stat{min-width:140px}
+.stat .num{font-family:var(--serif);font-weight:300;font-size:1.7rem;color:var(--ink)}
+.stat .lbl{font-family:var(--sans);font-size:.74rem;color:var(--ink-faint);margin-top:.15rem;max-width:22ch}
+.app-frame{border:1px solid var(--rule);background:var(--white);margin-top:1rem}
+.app-frame iframe{display:block;width:100%;height:760px;border:0}
+.app-note{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.6rem;
+  font-family:var(--mono);font-size:.72rem;color:var(--ink-faint);margin-top:.7rem}
+.app-note a{color:var(--A);text-decoration:none}
+.app-note a:hover{text-decoration:underline}
+.steps{counter-reset:step;list-style:none;margin-left:0}
+.steps li{counter-increment:step;position:relative;padding-left:2rem}
+.steps li::before{content:counter(step);position:absolute;left:0;top:.1rem;font-family:var(--mono);
+  font-size:.72rem;color:var(--A);border:1px solid var(--rule-dk);width:1.35rem;height:1.35rem;
+  display:flex;align-items:center;justify-content:center;border-radius:50%}
+footer{border-top:1px solid var(--rule-dk);padding:1.8rem;text-align:center;font-family:var(--sans);font-size:.74rem;color:var(--ink-faint)}
+footer a{color:var(--ink-faint)}
+@media (max-width:640px){.app-frame iframe{height:640px}main{padding:2rem 1rem 5rem}.hi{padding:2rem 1rem 0}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hi">
+    <div class="wp">SENIOR RESEARCH · DUKE UNIVERSITY</div>
+    <h1 class="site-name">Scheduler <em>Agent</em></h1>
+    <p class="site-tagline">Cutting a data center's power bill by moving flexible AI work into cheaper hours</p>
+  </div>
+  <nav>
+    <a href="#try" class="active">Try the agent</a>
+    <a href="#project">The project</a>
+    <a href="#how">How the agent works</a>
+    <a href="/">← Hanna Boudara</a>
+  </nav>
+</header>
+
+<main>
+
+  <section id="try">
+    <span class="badge">LIVE DEMO · DATA: NOV 2025 – OCT 2026</span>
+    <p>Ask a question in plain English, for example <strong>“How much did the scheduler save in
+    Virginia over the year?”</strong>, <strong>“What happened during the January 2026 winter
+    storm?”</strong> or <strong>“Which season saves the most in Texas?”</strong> Under each answer,
+    open <em>How this was answered</em> to see which tools the agent used.</p>
+    <div class="app-frame">
+      <iframe src="https://scheduler-agent-twdxydzkfud4dqhcubspov.streamlit.app/?embed=true"
+              title="Scheduler Agent chat" loading="lazy" allow="clipboard-write"></iframe>
+    </div>
+    <div class="app-note">
+      <span>If the demo has been idle it may need about 30 seconds to wake up.</span>
+      <a href="https://scheduler-agent-twdxydzkfud4dqhcubspov.streamlit.app/" target="_blank" rel="noreferrer">Open in a new tab →</a>
+    </div>
+  </section>
+
+  <section id="project">
+    <h2>The project</h2>
+    <p>A data center runs two kinds of AI work. <strong>Always-on work</strong>, like answering
+    chatbot requests, has to run the moment it arrives. <strong>Flexible work</strong>, like batch
+    jobs, can wait, as long as it finishes before its deadline. Electricity prices change every
+    hour, so flexible work that waits for cheaper hours costs less.</p>
+    <p>The scheduler is a linear program. Each week it plans when to run the flexible work using
+    day-ahead prices, which are published in advance, and then pays the real-time prices that
+    actually happened. I tested it on a 1&nbsp;MW data center block over 48 weeks of hourly prices
+    in two markets: Virginia (PJM, Dominion zone) and Texas (ERCOT, North hub), and compared it
+    with simpler rules: running work immediately, running it at a fixed time of night, planning on
+    typical prices from the past four weeks, and a perfect-hindsight upper bound.</p>
+    <div class="stats-row">
+      <div class="stat"><div class="num">$70,083</div><div class="lbl">saved in Virginia over the year (38.6% of the flexible work's power cost)</div></div>
+      <div class="stat"><div class="num">$23,024</div><div class="lbl">saved in Texas over the year (34.8%)</div></div>
+      <div class="stat"><div class="num">24 hours</div><div class="lbl">deadline for these results; the agent also covers 6 to 168 hours</div></div>
+    </div>
+  </section>
+
+  <section id="how">
+    <h2>How the agent works</h2>
+    <p>The agent is Claude (Anthropic's model) running in a loop I wrote by hand, so every step can
+    be explained. It never answers from memory. To answer a question it:</p>
+    <ul class="steps">
+      <li><strong>Calls tools</strong> that look up precomputed weekly results: yearly and seasonal
+      totals, single weeks such as the winter storm, and the best fixed time-of-day window.</li>
+      <li><strong>Uses a calculator tool</strong> for every difference or percentage, instead of
+      doing arithmetic itself.</li>
+      <li><strong>Passes a number check</strong> before you see the answer: code confirms that every
+      number in it appears in a tool result. If one doesn't, the agent gets one chance to fix it.</li>
+    </ul>
+    <h3>Tested before it went online</h3>
+    <p>I wrote 30 questions whose correct answers are computed directly from the results files,
+    including two it should decline (a market and a month that aren't in the data). The agent
+    scored <strong>30/30</strong> on accuracy, exact match and grounding.</p>
+    <h3>What it can and can't see</h3>
+    <p>The website only has the precomputed weekly results. The raw hourly price data never leaves
+    my laptop, and a privacy guard in the code rejects any tool result that isn't a single number
+    or a short label, so a price series can't be sent anywhere. Each visitor has a spending limit,
+    and the demo has a monthly budget.</p>
+  </section>
+
+</main>
+
+<footer>Senior research · Scheduler Agent · <a href="/">Hanna Boudara</a></footer>
+
+</body>
+</html>
