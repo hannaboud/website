@@ -1,0 +1,48 @@
+name: Nightly volatility orders
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 03:00 UTC = 10pm EST / 11pm EDT, every night (same as the course's nightly refresh)
+    - cron: "0 3 * * *"
+
+concurrency:
+  group: nightly-orders
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  orders:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install lseg-data pandas exchange_calendars
+
+      - name: Update the IV vs RV signal
+        env:
+          LSEG_APP_KEY: ${{ secrets.LSEG_APP_KEY }}
+          LSEG_USERNAME: ${{ secrets.LSEG_USERNAME }}
+          LSEG_PASSWORD: ${{ secrets.LSEG_PASSWORD }}
+        run: python vol_signal.py
+
+      - name: Write open orders
+        run: python vol_orders.py
+
+      - name: Commit and push
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update open orders"
+          file_pattern: |
+            open_orders.json
+            mkt/open_orders.json
+            data/vol_history.csv
