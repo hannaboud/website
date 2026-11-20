@@ -19,13 +19,25 @@
   --serif: 'Newsreader', Georgia, 'Times New Roman', serif;
   --sans: 'Inter', system-ui, -apple-system, sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+  --c-iv: #b5482b;
+  --c-rv: #3b6ea8;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --paper: #1a1916; --ink: #ece8df; --ink-2: #bdb7aa; --ink-3: #8a857b;
     --rule: #33302a; --accent: #e07a5c; --code-bg: #24221e;
+    --c-iv: #d0603f; --c-rv: #4f86d1;
   }
 }
+figure.chart { margin: 2em 0 1.2em; }
+figure.chart figcaption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; align-items: baseline; margin-bottom: 10px; }
+figure.chart .ct { font-family: var(--sans); font-size: .9rem; font-weight: 600; }
+figure.chart .legend { font-family: var(--sans); font-size: .78rem; color: var(--ink-2); display: flex; gap: 14px; flex-wrap: wrap; }
+figure.chart .legend span { display: inline-flex; align-items: center; gap: 6px; }
+figure.chart .legend i { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+figure.chart .legend i.dash { background: repeating-linear-gradient(90deg, var(--ink-3) 0 4px, transparent 4px 7px); }
+figure.chart .canvas { position: relative; height: 260px; }
+.note { font-family: var(--sans); font-size: .8rem; color: var(--ink-3); }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   background: var(--paper); color: var(--ink);
@@ -93,7 +105,7 @@ footer a { color: var(--ink-3); }
 <header class="top">
   <div class="wrap">
     <a href="/">Hanna Boudara</a>
-    <a href="https://github.com/hannaboud/website/blob/main/vol_orders.py">Code on GitHub</a>
+    <a href="#where">Latest numbers</a>
   </div>
 </header>
 
@@ -138,10 +150,10 @@ footer a { color: var(--ink-3); }
   <p>There's a matching one for the put. For a buy signal, <code>SHT</code> just becomes <code>BUY</code>.</p>
 
   <h2>How it runs on its own</h2>
-  <p>I set this up the same way as Professor Vestal's nightly refresh. Every night at 10pm, a GitHub Action wakes up and logs in to LSEG with my credentials, which are stored as GitHub secrets. It then runs two scripts. The first, <a href="https://github.com/hannaboud/website/blob/main/vol_signal.py"><code>vol_signal.py</code></a>, adds the newest day to my volatility history. The second, <a href="https://github.com/hannaboud/website/blob/main/vol_orders.py"><code>vol_orders.py</code></a>, reads the latest signal and my positions and writes <code>open_orders.json</code>. Then it commits everything back to my repo.</p>
+  <p>I set this up the same way as Professor Vestal's nightly refresh. Every night at 10pm, a GitHub Action wakes up and logs in to LSEG with my credentials, which are stored as GitHub secrets. It then runs two scripts. The first, <code>vol_signal.py</code>, adds the newest day to my volatility history. The second, <code>vol_orders.py</code>, reads the latest signal and my positions and writes <code>open_orders.json</code>. Then it commits everything back to my repo.</p>
   <p>For stock prices I use the course server's <code>price_history.json</code>, so my algorithm works off the same data Sanji does. That file only goes back to September 22, though, which isn't enough for a three-month z-score. So I filled in the earlier dates with closing prices from LSEG. I double-checked that the two sources agree, and they both have MSFT at $508.29 on November 18.</p>
 
-  <h2>Where things stand</h2>
+  <h2 id="where">Where things stand</h2>
   <div class="figures">
     <div><div class="k">Implied vol</div><div class="v">34.6%</div></div>
     <div><div class="k">Realized vol</div><div class="v">36.9%</div></div>
@@ -150,19 +162,101 @@ footer a { color: var(--ink-3); }
   </div>
   <p>As of November 19, MSFT's one-week implied vol was 34.6% and its realized vol was 36.9%. So options were actually a little cheap, but only slightly: the z-score was −0.32, nowhere near −2. Over the last couple of months the z-score has stayed between about −0.5 and +1.8, so the algorithm hasn't traded yet. That's on purpose. It's only supposed to act when things get really out of line.</p>
 
-  <h2>What I'd still like to improve</h2>
-  <p>There are a few limits I ran into. Sanji doesn't support delta-based strikes yet, so I use at-the-money strikes and calculate deltas myself. The positions file format hasn't been published yet, so my script reads it loosely for now. The order spec also doesn't say what happens to a long option at expiry, which I'd want to know before buying straddles. And the size is real: 100 short straddles is about $5 million of Microsoft exposure, so a big move could hurt, and Sanji doesn't check whether I have enough cash. Finally, with a cutoff of 2, the strategy might go weeks without doing anything at all.</p>
+  <figure class="chart">
+    <figcaption>
+      <span class="ct">Implied vs realized volatility, MSFT</span>
+      <span class="legend"><span><i style="background:var(--c-iv)"></i>Implied (1-week, ATM)</span><span><i style="background:var(--c-rv)"></i>Realized (21-day)</span></span>
+    </figcaption>
+    <div class="canvas"><canvas id="volChart" aria-label="Line chart of MSFT one-week implied volatility and 21-day realized volatility over time"></canvas></div>
+  </figure>
+
+  <figure class="chart">
+    <figcaption>
+      <span class="ct">Z-score of the spread (IV − RV)</span>
+      <span class="legend"><span><i style="background:var(--c-iv)"></i>Z-score</span><span><i class="dash"></i>±2 trade cutoffs</span></span>
+    </figcaption>
+    <div class="canvas"><canvas id="zChart" aria-label="Line chart of the z-score of the implied minus realized volatility spread, with dashed lines at plus and minus 2"></canvas></div>
+  </figure>
+  <p class="note">Both charts read <code>data/vol_history.csv</code>, which the nightly run updates, so they stay current on their own.</p>
 
 </main>
 
 <footer>
   <div class="wrap">
     Hanna Boudara · Fintech 535 ·
-    <a href="https://github.com/hannaboud/website/blob/main/.github/workflows/nightly-orders.yml">Workflow</a> ·
     <a href="open_orders.json">Tonight's open_orders.json</a> ·
     <a href="/">Home</a>
   </div>
 </footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+(async function () {
+  let rows;
+  try {
+    const text = await fetch('data/vol_history.csv?t=' + Date.now()).then(r => r.text());
+    const [head, ...lines] = text.trim().split('\n');
+    const cols = head.split(',');
+    rows = lines.map(l => Object.fromEntries(l.split(',').map((v, i) => [cols[i], v])));
+  } catch (e) { return; }
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const num = v => (v === '' || v == null ? null : +v);
+  const vol = rows.filter(r => num(r.rv) != null);
+  const zr = rows.filter(r => num(r.z) != null);
+  const fmtDate = d => new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const charts = [];
+
+  function base(yFmt, yOpts) {
+    return {
+      responsive: true, maintainAspectRatio: false, animation: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: css('--paper'), titleColor: css('--ink'), bodyColor: css('--ink-2'),
+          borderColor: css('--rule'), borderWidth: 1, padding: 10, boxPadding: 4,
+          titleFont: { family: 'Inter', weight: '600' }, bodyFont: { family: 'Inter' },
+          filter: i => !i.dataset.ref,
+          callbacks: { label: c => ` ${c.dataset.label}: ${yFmt(c.parsed.y)}` },
+        },
+      },
+      scales: {
+        x: { grid: { display: false }, border: { color: css('--rule') },
+             ticks: { color: css('--ink-3'), font: { family: 'Inter', size: 11 }, maxTicksLimit: 6, maxRotation: 0 } },
+        y: Object.assign({ grid: { color: css('--rule') }, border: { display: false },
+             ticks: { color: css('--ink-3'), font: { family: 'Inter', size: 11 }, callback: yFmt, maxTicksLimit: 6 } }, yOpts || {}),
+      },
+      elements: { point: { radius: 0, hoverRadius: 5, hoverBorderWidth: 2, hoverBorderColor: css('--paper') },
+                  line: { borderWidth: 2, tension: 0.25 } },
+    };
+  }
+
+  function draw() {
+    charts.forEach(c => c.destroy()); charts.length = 0;
+    const pct = v => (v * 100).toFixed(0) + '%';
+    charts.push(new Chart(document.getElementById('volChart'), {
+      type: 'line',
+      data: { labels: vol.map(r => fmtDate(r.date)), datasets: [
+        { label: 'Implied', data: vol.map(r => num(r.iv)), borderColor: css('--c-iv'), backgroundColor: css('--c-iv') },
+        { label: 'Realized', data: vol.map(r => num(r.rv)), borderColor: css('--c-rv'), backgroundColor: css('--c-rv') },
+      ] },
+      options: base(pct),
+    }));
+    const zf = v => (v > 0 ? '+' : '') + (+v).toFixed(1);
+    const ref = (y) => ({ label: 'cutoff', ref: true, data: zr.map(() => y), borderColor: css('--ink-3'),
+                          borderWidth: 1, borderDash: [4, 3], pointHoverRadius: 0 });
+    charts.push(new Chart(document.getElementById('zChart'), {
+      type: 'line',
+      data: { labels: zr.map(r => fmtDate(r.date)), datasets: [
+        { label: 'Z-score', data: zr.map(r => num(r.z)), borderColor: css('--c-iv'), backgroundColor: css('--c-iv') },
+        ref(2), ref(-2),
+      ] },
+      options: base(zf, { suggestedMin: -2.5, suggestedMax: 2.5 }),
+    }));
+  }
+  draw();
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', draw);
+})();
+</script>
 </body>
 </html>
