@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nightly Volatility Algorithm — Hanna Boudara</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Inter:wght@500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f7f4ee;
+  --ink: #1d1c1a;
+  --ink-2: #4a4741;
+  --ink-3: #8a857b;
+  --rule: #e2ddd2;
+  --accent: #b5482b;
+  --code-bg: #efeae0;
+  --serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #1a1916; --ink: #ece8df; --ink-2: #bdb7aa; --ink-3: #8a857b;
+    --rule: #33302a; --accent: #e07a5c; --code-bg: #24221e;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--paper); color: var(--ink);
+  font-family: var(--serif); font-size: 1.16rem; line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 680px; margin: 0 auto; padding: 0 20px; }
+header.top {
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--sans); font-size: .82rem; letter-spacing: .04em;
+}
+header.top .wrap { display: flex; justify-content: space-between; padding-top: 18px; padding-bottom: 18px; }
+header.top a { color: var(--ink-3); text-decoration: none; }
+header.top a:hover { color: var(--ink); }
+.title { padding: 72px 0 40px; border-bottom: 1px solid var(--rule); margin-bottom: 8px; }
+.eyebrow {
+  font-family: var(--sans); font-size: .78rem; font-weight: 600; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--accent);
+}
+h1 { font-size: clamp(2.2rem, 6vw, 3.2rem); line-height: 1.1; font-weight: 600; margin: 14px 0 18px; letter-spacing: -.01em; }
+.dek { font-size: 1.3rem; font-style: italic; color: var(--ink-2); line-height: 1.5; }
+.byline { font-family: var(--sans); font-size: .82rem; color: var(--ink-3); margin-top: 22px; }
+h2 {
+  font-family: var(--sans); font-size: .82rem; font-weight: 600; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--ink-3); margin: 56px 0 14px;
+}
+p { margin: 0 0 1.1em; color: var(--ink); }
+ul { margin: 0 0 1.2em 1.2em; }
+li { margin: .35em 0; padding-left: .2em; }
+li::marker { color: var(--accent); }
+strong { font-weight: 600; }
+code {
+  font-family: var(--mono); font-size: .82em; background: var(--code-bg);
+  padding: 1px 5px; border-radius: 4px;
+}
+pre {
+  font-family: var(--mono); font-size: .8rem; line-height: 1.6; background: var(--code-bg);
+  padding: 18px 20px; border-radius: 6px; overflow-x: auto; margin: 0 0 1.2em;
+}
+blockquote.rule {
+  margin: 1.6em 0; padding: 18px 22px; border-left: 3px solid var(--accent);
+  background: var(--code-bg); border-radius: 0 6px 6px 0;
+}
+blockquote.rule p { margin: 0 0 .5em; }
+blockquote.rule p:last-child { margin: 0; }
+.figures {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--rule);
+  border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; margin: 1.4em 0 1.4em;
+}
+.figures div { background: var(--paper); padding: 14px 12px; text-align: center; }
+.figures .k { font-family: var(--sans); font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.figures .v { font-size: 1.5rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+a { color: var(--accent); }
+footer { border-top: 1px solid var(--rule); margin-top: 72px; padding: 28px 0 60px; font-family: var(--sans); font-size: .82rem; color: var(--ink-3); }
+footer a { color: var(--ink-3); }
+@media (max-width: 560px) {
+  body { font-size: 1.08rem; }
+  .figures { grid-template-columns: repeat(2, 1fr); }
+  .title { padding-top: 48px; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a href="/">Hanna Boudara</a>
+    <a href="https://github.com/hannaboud/website/blob/main/vol_orders.py">Code on GitHub</a>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="title">
+    <p class="eyebrow">Fintech 535 · Closing the loop</p>
+    <h1>My Nightly Volatility Algorithm</h1>
+    <p class="dek">Every night at 10pm, it asks one question about Microsoft: are options expensive or cheap right now?</p>
+    <p class="byline">Hanna Boudara · November 2026</p>
+  </div>
+
+  <h2>What I built</h2>
+  <p>For this assignment I built a trading algorithm that runs on its own every night at 10pm. It looks at Microsoft and asks one question: are options on MSFT expensive or cheap right now? If the answer is "very," it trades. If not, it does nothing. Either way, it writes its decision to a file called <code>open_orders.json</code>, and our course system, Sanji, picks it up from there.</p>
+  <p>In class we said an algorithm is just a function that takes inputs and spits out open orders. Mine takes in Microsoft's prices, option data from LSEG, and my current positions, and turns them into tomorrow's orders.</p>
+
+  <h2>Why volatility?</h2>
+  <p>Last homework I backtested the wheel, and I didn't want to just do the same thing again. Volatility trading felt like a natural next step.</p>
+  <p>The basic idea is that the options market is always making a guess about how much a stock will move. That guess is implied volatility. Then the stock actually moves however it moves, and that's realized volatility. The two don't usually match. In fact, implied vol tends to come in a bit higher than what actually happens, which is why people talk about a "variance risk premium" (Carr &amp; Wu, 2009). But that's not always the case, and sometimes options are actually cheap. So I wanted an algorithm that could go both ways.</p>
+  <p>Microsoft is the stock the course server tracks for my repo.</p>
+
+  <h2>How it decides</h2>
+  <p>Every night, the algorithm works out two numbers.</p>
+  <p>The first is <strong>implied volatility</strong>. I look at the MSFT options expiring about a week out, pick the strike closest to the current price, and take the average implied vol of the call and the put. That's the market's forecast for the coming week.</p>
+  <p>The second is <strong>realized volatility</strong>, which is how much MSFT has actually been moving. I take the last 21 daily returns, compute their standard deviation, and annualize it.</p>
+  <p>Then I subtract one from the other. If IV is a lot higher than RV, options look expensive. If it's a lot lower, they look cheap. The problem is that "a lot" depends on the period: a gap that looks huge in a calm month might be totally normal in a crazy one. So instead of using the raw gap, I compare it with its own last three months (63 trading days) using a z-score. That tells me how unusual today's gap really is.</p>
+  <blockquote class="rule">
+    <p><strong>If z is above +2</strong>, options are unusually expensive, so I <strong>sell</strong> a straddle.</p>
+    <p><strong>If z is below −2</strong>, they're unusually cheap, so I <strong>buy</strong> one.</p>
+    <p><strong>Otherwise</strong>, I sit out.</p>
+  </blockquote>
+  <p>I picked 2 because it's the standard cutoff for mean-reversion trades. It's the same threshold Gatev, Goetzmann and Rouwenhorst used in their well-known pairs-trading paper (2006).</p>
+
+  <h2>How the trades work</h2>
+  <p>A straddle is just a call and a put at the same strike with the same expiry. Buying one is a bet that the stock will move a lot, in either direction. Selling one is a bet that it'll stay calm. Once you hedge out the direction, what's left is pretty much a bet on realized vol versus implied vol, which is exactly what my signal is measuring.</p>
+  <p>I only open new trades on Fridays, and each one expires the next Friday, so every trade lasts a week. I trade 100 contracts on each leg at the at-the-money strike, using a limit order at the mid. Once a trade is on, I hold it until expiry.</p>
+  <p>Every day in between, the algorithm hedges. It works out how much my options would gain or lose if MSFT moved a dollar (their delta) and buys or sells enough shares to cancel that out. When the straddle expires, there's nothing left to hedge, so any shares I'm still holding get closed.</p>
+  <p>Here's what a sell signal actually looks like in Sanji's order language:</p>
+<pre>{"id": "msft-straddle-call-2026-11-27", "for": "2026-11-27", "order_type": "lmt",
+ "action": "SHT", "qty": 100, "underlying": 272093, "contract": "call",
+ "expiry": "5DTE+", "strike": "atm", "ref": "open", "lmt_prc": "mid"}</pre>
+  <p>There's a matching one for the put. For a buy signal, <code>SHT</code> just becomes <code>BUY</code>.</p>
+
+  <h2>How it runs on its own</h2>
+  <p>I set this up the same way as Professor Vestal's nightly refresh. Every night at 10pm, a GitHub Action wakes up and logs in to LSEG with my credentials, which are stored as GitHub secrets. It then runs two scripts. The first, <a href="https://github.com/hannaboud/website/blob/main/vol_signal.py"><code>vol_signal.py</code></a>, adds the newest day to my volatility history. The second, <a href="https://github.com/hannaboud/website/blob/main/vol_orders.py"><code>vol_orders.py</code></a>, reads the latest signal and my positions and writes <code>open_orders.json</code>. Then it commits everything back to my repo.</p>
+  <p>For stock prices I use the course server's <code>price_history.json</code>, so my algorithm works off the same data Sanji does. That file only goes back to September 22, though, which isn't enough for a three-month z-score. So I filled in the earlier dates with closing prices from LSEG. I double-checked that the two sources agree, and they both have MSFT at $508.29 on November 18.</p>
+
+  <h2>Where things stand</h2>
+  <div class="figures">
+    <div><div class="k">Implied vol</div><div class="v">34.6%</div></div>
+    <div><div class="k">Realized vol</div><div class="v">36.9%</div></div>
+    <div><div class="k">Spread</div><div class="v">−2.3</div></div>
+    <div><div class="k">Z-score</div><div class="v">−0.32</div></div>
+  </div>
+  <p>As of November 19, MSFT's one-week implied vol was 34.6% and its realized vol was 36.9%. So options were actually a little cheap, but only slightly: the z-score was −0.32, nowhere near −2. Over the last couple of months the z-score has stayed between about −0.5 and +1.8, so the algorithm hasn't traded yet. That's on purpose. It's only supposed to act when things get really out of line.</p>
+
+  <h2>What I'd still like to improve</h2>
+  <p>There are a few limits I ran into. Sanji doesn't support delta-based strikes yet, so I use at-the-money strikes and calculate deltas myself. The positions file format hasn't been published yet, so my script reads it loosely for now. The order spec also doesn't say what happens to a long option at expiry, which I'd want to know before buying straddles. And the size is real: 100 short straddles is about $5 million of Microsoft exposure, so a big move could hurt, and Sanji doesn't check whether I have enough cash. Finally, with a cutoff of 2, the strategy might go weeks without doing anything at all.</p>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    Hanna Boudara · Fintech 535 ·
+    <a href="https://github.com/hannaboud/website/blob/main/.github/workflows/nightly-orders.yml">Workflow</a> ·
+    <a href="open_orders.json">Tonight's open_orders.json</a> ·
+    <a href="/">Home</a>
+  </div>
+</footer>
+
+</body>
+</html>
